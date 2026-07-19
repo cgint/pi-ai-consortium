@@ -16,14 +16,9 @@ import type {
   ContextEvent,
   TurnStartEvent,
 } from "@earendil-works/pi-coding-agent";
-import {
-  createAgentSession,
-  SessionManager,
-  DefaultResourceLoader,
-  SettingsManager,
-} from "@earendil-works/pi-coding-agent";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import { ConsortiumCore, type ModelCallFn } from "./src/core.js";
+import { callModelWithAuth } from "./src/model.js";
 import type { ConsortiumConfig, TurnState, DeliberationResult } from "./src/types.js";
 
 // Default configuration (models inherited from ctx.model at runtime).
@@ -186,6 +181,7 @@ export default function (pi: ExtensionAPI): void {
           reason: "NO_CONTRIBUTION",
           probe_count: result.probes.length,
         });
+        ctx.ui.setStatus("consortium", "⏭ skipped (nothing to add)");
         return;
       }
 
@@ -326,9 +322,7 @@ async function runDeliberation(
     throw new Error("No active model available from ctx.model");
   }
 
-  // Capture modelRegistry/cwd upfront — ctx becomes stale after createAgentSession()
   const modelRegistry = ctx.modelRegistry;
-  const cwd = ctx.cwd;
 
   // Build runtime config with inherited model
   const config: ConsortiumConfig = {
@@ -372,13 +366,12 @@ async function runDeliberation(
     });
 
     try {
-      const result = await callModelWithSession(
+      const result = await callModelWithAuth(
         provider,
         modelId,
         system,
         user,
         modelRegistry,
-        cwd,
         signal,
       );
 
@@ -411,7 +404,7 @@ async function runDeliberation(
   return core.deliberate(userContext, ctx.signal);
 }
 
-/** Invoke a model using createAgentSession(). */
+/** Resolve provider + modelId from a modelKey string. */
 function resolveModelKey(
   modelKey: string,
   config: ConsortiumConfig,
@@ -431,70 +424,3 @@ function resolveModelKey(
   throw new Error(`Unknown modelKey: "${modelKey}"`);
 }
 
-/** Invoke a model using createAgentSession(). */
-async function callModelWithSession(
-  provider: string,
-  modelId: string,
-  systemPrompt: string,
-  userPrompt: string,
-  modelRegistry: any,
-  cwd: string,
-  signal?: AbortSignal,
-): Promise<string> {
-  const model = modelRegistry.find(provider, modelId);
-  if (!model) {
-    throw new Error(`Model not found: ${provider}/${modelId}`);
-  }
-
-  const loader = new DefaultResourceLoader({
-    cwd,
-    agentDir: "",
-    systemPrompt: systemPrompt,
-    noExtensions: true,
-    noSkills: true,
-    noPromptTemplates: true,
-    noThemes: true,
-    noContextFiles: true,
-  });
-  await loader.reload();
-
-  const settingsManager = SettingsManager.inMemory({
-    compaction: { enabled: false },
-    retry: { enabled: false },
-  });
-
-  const { session } = await createAgentSession({
-    model,
-    sessionManager: SessionManager.inMemory(),
-    modelRegistry,
-    resourceLoader: loader,
-    settingsManager,
-    noTools: "all",
-    thinkingLevel: "off",
-  });
-
-  const onAbort = () => session.abort();
-  if (signal) {
-    if (signal.aborted) {
-      session.abort();
-    } else {
-      signal.addEventListener("abort", onAbort, { once: true });
-    }
-  }
-
-  let resultText = "";
-  session.subscribe((event) => {
-    if (event.type === "message_update" && event.assistantMessageEvent.type === "text_delta") {
-      resultText += event.assistantMessageEvent.delta;
-    }
-  });
-
-  try {
-    await session.prompt(userPrompt);
-    await session.agent.waitForIdle();
-    return resultText;
-  } finally {
-    signal?.removeEventListener("abort", onAbort);
-    session.dispose();
-  }
-}
