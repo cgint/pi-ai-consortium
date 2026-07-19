@@ -1,0 +1,39 @@
+{
+  "name": "pi-ai-consortium",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Deliberation layer for pi-coding-agent: multiple models probe before the agent answers.",
+  "keywords": [
+    "pi-package",
+    "pi",
+    "coding-agent",
+    "extension"
+  ],
+  "license": "MIT",
+  "files": [
+    "index.ts",
+    "src",
+    "tool-descriptions",
+    "README.md",
+    "LICENSE"
+  ],
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": ">=0.74.0",
+    "@earendil-works/pi-tui": "*",
+    "@sinclair/typebox": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "^0.74.0",
+    "@types/node": "^22.0.0",
+    "vitest": "^3.0.0"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
