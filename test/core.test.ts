@@ -23,6 +23,7 @@ const baseConfig: ConsortiumConfig = {
   synthesisTemperature: 0.3,
   probeTimeoutMs: 5000,
   totalTimeoutMs: 10000,
+  executionMode: "serial",
 };
 
 describe("ConsortiumCore", () => {
@@ -76,9 +77,18 @@ describe("ConsortiumCore", () => {
 
   it("respects per-probe timeout", async () => {
     const callFn: ModelCallFn = async (_modelKey, _system, _user, _mt, _temp, signal) => {
-      // Simulate slow response
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      if (signal?.aborted) throw new Error("Aborted");
+      // Sleep 2s, but abort immediately if signal fires
+      await new Promise<void>((_, reject) => {
+        const sleepTimer = setTimeout(() => reject(new Error("Slow")), 2000);
+        signal?.addEventListener(
+          "abort",
+          () => {
+            clearTimeout(sleepTimer);
+            reject(new Error("Aborted"));
+          },
+          { once: true },
+        );
+      });
       return "WARN Slow response";
     };
     const config: ConsortiumConfig = {
@@ -152,5 +162,66 @@ describe("ConsortiumCore", () => {
     expect(result.probes[0].text).toBe("NO_CONTRIBUTION");
     expect(result.probes[1].text).toBe("WARN This could break under load.");
     expect(result.synthesis).toBe("Synthesized: Load warning noted.");
+  });
+
+  it("executes probes serially when executionMode is serial", async () => {
+    const order: string[] = [];
+    const callFn: ModelCallFn = async (modelKey) => {
+      order.push(`${modelKey}-start`);
+      await new Promise((r) => setTimeout(r, 50));
+      order.push(`${modelKey}-end`);
+      return "WARN OK";
+    };
+    const core = new ConsortiumCore({ ...baseConfig, executionMode: "serial" }, callFn);
+    await core.deliberate("Test");
+
+    // Serial: probe:0 completes before probe:1 starts
+    expect(order).toEqual([
+      "probe:0-start",
+      "probe:0-end",
+      "probe:1-start",
+      "probe:1-end",
+      "synthesis-start",
+      "synthesis-end",
+    ]);
+  });
+
+  it("executes probes in parallel when executionMode is parallel", async () => {
+    const order: string[] = [];
+    const callFn: ModelCallFn = async (modelKey) => {
+      order.push(`${modelKey}-start`);
+      await new Promise((r) => setTimeout(r, 50));
+      order.push(`${modelKey}-end`);
+      return "WARN OK";
+    };
+    const core = new ConsortiumCore({ ...baseConfig, executionMode: "parallel" }, callFn);
+    await core.deliberate("Test");
+
+    // Parallel: both probes start before either ends
+    expect(order[0]).toBe("probe:0-start");
+    expect(order[1]).toBe("probe:1-start");
+    // Both ends come after both starts
+    expect(order.findIndex((o) => o === "probe:0-end")).toBeGreaterThan(1);
+    expect(order.findIndex((o) => o === "probe:1-end")).toBeGreaterThan(1);
+  });
+
+  it("defaults to serial when executionMode is undefined", async () => {
+    const order: string[] = [];
+    const callFn: ModelCallFn = async (modelKey) => {
+      order.push(`${modelKey}-start`);
+      await new Promise((r) => setTimeout(r, 30));
+      order.push(`${modelKey}-end`);
+      return "WARN OK";
+    };
+    const config = { ...baseConfig };
+    delete (config as any).executionMode;
+    const core = new ConsortiumCore(config, callFn);
+    await core.deliberate("Test");
+
+    // Should behave serially (probe:0 completes before probe:1 starts)
+    expect(order[0]).toBe("probe:0-start");
+    expect(order[1]).toBe("probe:0-end");
+    expect(order[2]).toBe("probe:1-start");
+    expect(order[3]).toBe("probe:1-end");
   });
 });

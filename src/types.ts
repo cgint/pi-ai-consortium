@@ -40,6 +40,10 @@ export interface ConsortiumConfig {
   probeTimeoutMs: number;
   /** Total timeout for entire deliberation (ms). */
   totalTimeoutMs: number;
+  /** How probes are executed: "parallel" (all at once) or "serial" (one after another).
+   * Serial benefits from KV-cache prefix reuse on local GPU servers.
+   * @default "serial" */
+  executionMode: "parallel" | "serial";
 }
 
 /** State tracked per turn. */

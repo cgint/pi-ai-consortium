@@ -47,6 +47,7 @@ const DEFAULT_CONFIG: Omit<ConsortiumConfig, "probes" | "synthesis"> & {
   probes: Array<Omit<ConsortiumConfig["probes"][number], "provider" | "modelId">>;
   synthesis: Omit<ConsortiumConfig["synthesis"], "provider" | "modelId">;
 } = {
+  executionMode: (process.env.CONSORTIUM_EXECUTION_MODE as "parallel" | "serial" | undefined) ?? "serial",
   probes: [
     {
       role: "clarifier",
