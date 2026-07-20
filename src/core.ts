@@ -53,9 +53,6 @@ export class ConsortiumCore {
     const errors: string[] = [];
     const probeTotal = this.config.probes.length;
 
-    // Report deliberation start
-    onProgress?.("deliberation_start", 0, probeTotal);
-
     // Phase 1: Divergence — parallel probes
     const probeResults = await this.runProbes(userContext, masterController.signal, errors, onProgress, probeTotal);
 
@@ -129,7 +126,6 @@ export class ConsortiumCore {
           this.config.probeTemperature,
           probeController.signal,
         );
-        // Guard: probe must start with NO_CONTRIBUTION or a severity tag.
         const validated = validateProbeOutput(result);
         return { role: probe.role, text: validated };
       } catch (err) {
@@ -140,7 +136,7 @@ export class ConsortiumCore {
         clearTimeout(timeoutId);
         signal.removeEventListener("abort", onMasterAbort);
         completed++;
-        onProgress?.("probe", completed, probeTotal ?? this.config.probes.length);
+        onProgress?.("probe", completed, probeTotal ?? this.config.probes.length, probe.role);
       }
     });
 
@@ -184,7 +180,7 @@ export class ConsortiumCore {
       } finally {
         clearTimeout(timeoutId);
         signal.removeEventListener("abort", onMasterAbort);
-        onProgress?.("probe", i + 1, total);
+        onProgress?.("probe", i + 1, total, probe.role);
       }
     }
     return results;

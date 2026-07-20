@@ -1,7 +1,7 @@
 // Consortium types — pure interfaces, no runtime dependencies.
 
 /** Progress callback invoked during deliberation phases. */
-export type ProgressCallback = (phase: string, current: number, total: number) => void;
+export type ProgressCallback = (phase: string, current: number, total: number, role?: string) => void;
 
 /** Configuration for a single probe role. */
 export interface ProbeConfig {

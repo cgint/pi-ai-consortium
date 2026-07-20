@@ -19,7 +19,7 @@ LLM history + new input
   │  Probe 2      │                 │   probe out-  │
   │  (contrarian)  │ ───────────────► │   puts and    │
   │  Probe 3      │                 │   decides     │
-  │  (architect)   │                 │   injection)  │
+  │  (architect)   │ ───────────────► │   injection)  │
   │  Probe 4      │ ───────────────► │              │
   │  (navigator)   │                 │              │
   │  Probe 5      │                 │              │
@@ -31,10 +31,10 @@ LLM history + new input
                                     → agent LLM call
 ```
 
-5 built-in probe roles:
+5 built-in probe roles (alphabetical):
+- **Architect** — evaluates structural soundness and design choices
 - **Clarifier** — identifies ambiguities and missing information
 - **Contrarian** — challenges assumptions and flags risks
-- **Architect** — evaluates structural soundness and design choices
 - **Navigator** — suggests what to read or investigate next
 - **Responder** — assesses whether there's enough information to act
 
@@ -50,13 +50,19 @@ LLM history + new input
 The consortium reports live progress in the Pi status bar during deliberation:
 
 ```
-consortium: 1/5 probing… → 2/5 probing… → … → synthesizing… → ✓ complete
+consortium: 1/5 architect… → 2/5 clarifier… → … → synthesizing… → ✓ complete
 ```
 
-After deliberation, a notification line appears in the TUI chat (similar to `pi-self-reflect` checkpoints):
+After deliberation, a notification line appears in the TUI chat showing each probe's output and the synthesis:
 
 ```
 ◇ Consortium deliberation — 3/5 probes contributed
+  architect: NO_CONTRIBUTION
+  clarifier (WARN): Agent is drifting into file organization instead of fixing the bug.
+  contrarian (BLOCK): Current approach will break existing tests.
+  navigator: NO_CONTRIBUTION
+  responder: NO_CONTRIBUTION
+  synthesis: Run tests before committing — current approach risks breaking existing test suite.
 ```
 
 If all probes return `NO_CONTRIBUTION`, the status bar shows `⏭ skipped (nothing to add)`.
@@ -64,12 +70,17 @@ If all probes return `NO_CONTRIBUTION`, the status bar shows `⏭ skipped (nothi
 ## Project structure (extension code)
 
 ```
-index.ts           — extension entry point, Pi hooks, TUI status/notification
+index.ts           — extension entry point (Pi hooks, ~170 lines)
 src/
+  config.ts        — DEFAULT_CONFIG, PROBE_SYSTEM_PROMPT, probe definitions
+  context.ts       — buildUserContext, buildUserContextFromMessages
   core.ts          — ConsortiumCore: probe orchestration, synthesis, validation
+  model.ts         — model invocation with auth forwarding
   types.ts         — ProbeConfig, TurnState, DeliberationResult, ProgressCallback
+  ui.ts            — TUI formatting, ConsortiumLogger, progress callback factory
 test/
   core.test.ts     — unit tests with mock model calls
+  model.test.ts    — model auth tests
   progress.test.ts — progress callback tests (serial, parallel, error resilience)
 ```
 
