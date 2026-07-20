@@ -45,15 +45,32 @@ LLM history + new input
 - **Per-turn JSONL logging.** Every deliberation is logged immutably under `.pi/consortium/`. Timestamped filenames, append-only, never rotated, never deleted.
 - **Blocking on `context` event.** Runs synchronously before each LLM call (including tool-call loops).
 
+## TUI visibility
+
+The consortium reports live progress in the Pi status bar during deliberation:
+
+```
+consortium: 1/5 probing… → 2/5 probing… → … → synthesizing… → ✓ complete
+```
+
+After deliberation, a notification line appears in the TUI chat (similar to `pi-self-reflect` checkpoints):
+
+```
+◇ Consortium deliberation — 3/5 probes contributed
+```
+
+If all probes return `NO_CONTRIBUTION`, the status bar shows `⏭ skipped (nothing to add)`.
+
 ## Project structure (extension code)
 
 ```
-index.ts           — extension entry point, Pi hooks
+index.ts           — extension entry point, Pi hooks, TUI status/notification
 src/
   core.ts          — ConsortiumCore: probe orchestration, synthesis, validation
-  types.ts         — ProbeConfig, TurnState, DeliberationResult interfaces
+  types.ts         — ProbeConfig, TurnState, DeliberationResult, ProgressCallback
 test/
   core.test.ts     — unit tests with mock model calls
+  progress.test.ts — progress callback tests (serial, parallel, error resilience)
 ```
 
 ## Quick start (development)

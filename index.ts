@@ -19,7 +19,7 @@ import type {
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import { ConsortiumCore, type ModelCallFn } from "./src/core.js";
 import { callModelWithAuth } from "./src/model.js";
-import type { ConsortiumConfig, TurnState, DeliberationResult } from "./src/types.js";
+import type { ConsortiumConfig, TurnState, DeliberationResult, ProgressCallback } from "./src/types.js";
 
 // Default configuration (models inherited from ctx.model at runtime).
 //
@@ -158,6 +158,36 @@ class ConsortiumLogger {
   }
 }
 
+/** Format a visible TUI message from deliberation result. */
+function formatVisibleMessage(result: DeliberationResult): string {
+  const probeCount = result.probes.length;
+  const contributions = result.probes.filter((p) => !p.text.trim().startsWith("NO_CONTRIBUTION")).length;
+  const errors = result.errors?.length ?? 0;
+
+  const parts: string[] = [];
+  parts.push(`◇ Consortium deliberation — ${contributions}/${probeCount} probes contributed`);
+  if (errors > 0) {
+    parts.push(`${errors} error(s)`);
+  }
+  return parts.join(" · ");
+}
+
+/** Build progress status text for the status bar. */
+function formatProgressText(phase: string, current: number, total: number): string {
+  switch (phase) {
+    case "deliberation_start":
+      return `consortium: deliberating (${total} probes)…`;
+    case "probe":
+      return `consortium: ${current}/${total} probing…`;
+    case "synthesis":
+      return "consortium: synthesizing…";
+    case "complete":
+      return "consortium: ✓ complete";
+    default:
+      return `consortium: ${phase}`;
+  }
+}
+
 export default function (pi: ExtensionAPI): void {
   let turnState: TurnState = { deliberation: null };
   let logger: ConsortiumLogger | null = null;
@@ -199,8 +229,15 @@ export default function (pi: ExtensionAPI): void {
       logger = new ConsortiumLogger(ctx.cwd, ctx.sessionManager.getSessionId());
     }
 
+    // Progress callback for status bar updates
+    const onProgress: ProgressCallback = (phase, current, total) => {
+      if (ctx.hasUI) {
+        ctx.ui.setStatus("consortium", formatProgressText(phase, current, total));
+      }
+    };
+
     // Start and await deliberation (blocks this LLM call)
-    turnState.deliberation = runDeliberation(DEFAULT_CONFIG, userContext, ctx, logger);
+    turnState.deliberation = runDeliberation(DEFAULT_CONFIG, userContext, ctx, logger, onProgress);
 
     try {
       const result = await turnState.deliberation;
@@ -257,6 +294,13 @@ export default function (pi: ExtensionAPI): void {
         // Non-fatal: consortium JSONL is the durable record.
       }
 
+      // Visible TUI notification (gray line in chat, like self-reflect checkpoints)
+      if (ctx.hasUI) {
+        const visible = formatVisibleMessage(result);
+        ctx.ui.notify(visible, result.errors?.length ? "warning" : "info");
+      }
+
+      // Final status bar
       if (result.errors) {
         ctx.ui.setStatus("consortium", `⚠ Deliberation had ${result.errors.length} error(s)`);
       } else {
@@ -347,6 +391,7 @@ async function runDeliberation(
   userContext: string,
   ctx: ExtensionContext,
   logger: ConsortiumLogger,
+  onProgress?: ProgressCallback,
 ): Promise<DeliberationResult> {
   // Resolve model from active agent model
   const activeModel = ctx.model;
@@ -433,7 +478,7 @@ async function runDeliberation(
   };
 
   const core = new ConsortiumCore(config, callModel);
-  return core.deliberate(userContext, ctx.signal);
+  return core.deliberate(userContext, ctx.signal, onProgress);
 }
 
 /** Resolve provider + modelId from a modelKey string. */
@@ -455,4 +500,3 @@ function resolveModelKey(
   }
   throw new Error(`Unknown modelKey: "${modelKey}"`);
 }
-

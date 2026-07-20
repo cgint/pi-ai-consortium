@@ -1,7 +1,7 @@
 // ConsortiumCore — pure logic, no Pi dependency.
 // Orchestrates divergence (parallel probes) and convergence (synthesis).
 
-import type { ConsortiumConfig, DeliberationResult, ProbeResult } from "./types.js";
+import type { ConsortiumConfig, DeliberationResult, ProbeResult, ProgressCallback } from "./types.js";
 
 /** Injectable model call function (mockable for tests). */
 export type ModelCallFn = (
@@ -35,6 +35,7 @@ export class ConsortiumCore {
   async deliberate(
     userContext: string,
     externalSignal?: AbortSignal,
+    onProgress?: ProgressCallback,
   ): Promise<DeliberationResult> {
     if (externalSignal?.aborted) {
       throw new Error("Deliberation aborted");
@@ -50,15 +51,20 @@ export class ConsortiumCore {
     }
 
     const errors: string[] = [];
+    const probeTotal = this.config.probes.length;
+
+    // Report deliberation start
+    onProgress?.("deliberation_start", 0, probeTotal);
 
     // Phase 1: Divergence — parallel probes
-    const probeResults = await this.runProbes(userContext, masterController.signal, errors);
+    const probeResults = await this.runProbes(userContext, masterController.signal, errors, onProgress, probeTotal);
 
     // Skip synthesis if all probes had nothing to contribute
     const allNoContribution = probeResults.every(
       (p) => p.text.trim().startsWith("NO_CONTRIBUTION"),
     );
     if (allNoContribution) {
+      onProgress?.("complete", 0, 0);
       return {
         probes: probeResults,
         synthesis: "NO_CONTRIBUTION",
@@ -67,9 +73,11 @@ export class ConsortiumCore {
     }
 
     // Phase 2: Convergence — synthesis
+    onProgress?.("synthesis", 0, 1);
     const synthesisUser = this.formatProbeInputs(probeResults);
     const synthesis = await this.runSynthesis(synthesisUser, masterController.signal, errors);
 
+    onProgress?.("complete", 0, 0);
     return {
       probes: probeResults,
       synthesis,
@@ -81,21 +89,27 @@ export class ConsortiumCore {
     userContext: string,
     signal: AbortSignal,
     errors: string[],
+    onProgress?: ProgressCallback,
+    probeTotal?: number,
   ): Promise<ProbeResult[]> {
     const mode = this.config.executionMode ?? "serial";
 
     if (mode === "serial") {
-      return this.runProbesSerial(userContext, signal, errors);
+      return this.runProbesSerial(userContext, signal, errors, onProgress, probeTotal);
     }
 
-    return this.runProbesParallel(userContext, signal, errors);
+    return this.runProbesParallel(userContext, signal, errors, onProgress, probeTotal);
   }
 
   private async runProbesParallel(
     userContext: string,
     signal: AbortSignal,
     errors: string[],
+    onProgress?: ProgressCallback,
+    probeTotal?: number,
   ): Promise<ProbeResult[]> {
+    let completed = 0;
+
     const probePromises = this.config.probes.map(async (probe, i) => {
       const probeController = new AbortController();
       const onMasterAbort = () => probeController.abort();
@@ -116,8 +130,6 @@ export class ConsortiumCore {
           probeController.signal,
         );
         // Guard: probe must start with NO_CONTRIBUTION or a severity tag.
-        // If the model ignored instructions and answered the user's question,
-        // coerce to NO_CONTRIBUTION so it never reaches synthesis.
         const validated = validateProbeOutput(result);
         return { role: probe.role, text: validated };
       } catch (err) {
@@ -127,6 +139,8 @@ export class ConsortiumCore {
       } finally {
         clearTimeout(timeoutId);
         signal.removeEventListener("abort", onMasterAbort);
+        completed++;
+        onProgress?.("probe", completed, probeTotal ?? this.config.probes.length);
       }
     });
 
@@ -137,8 +151,11 @@ export class ConsortiumCore {
     userContext: string,
     signal: AbortSignal,
     errors: string[],
+    onProgress?: ProgressCallback,
+    probeTotal?: number,
   ): Promise<ProbeResult[]> {
     const results: ProbeResult[] = [];
+    const total = probeTotal ?? this.config.probes.length;
     for (const [i, probe] of this.config.probes.entries()) {
       const probeController = new AbortController();
       const onMasterAbort = () => probeController.abort();
@@ -167,6 +184,7 @@ export class ConsortiumCore {
       } finally {
         clearTimeout(timeoutId);
         signal.removeEventListener("abort", onMasterAbort);
+        onProgress?.("probe", i + 1, total);
       }
     }
     return results;
