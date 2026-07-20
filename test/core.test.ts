@@ -13,8 +13,8 @@ function createMockCallFn(responses: Record<string, string>): ModelCallFn {
 
 const baseConfig: ConsortiumConfig = {
   probes: [
-    { role: "clarifier", provider: "openai", modelId: "gpt-4o-mini", systemPrompt: "Clarify" },
-    { role: "contrarian", provider: "openai", modelId: "gpt-4o-mini", systemPrompt: "Challenge" },
+    { role: "clarifier", provider: "openai", modelId: "gpt-4o-mini", systemPrompt: "Clarify", roleLens: "## Lens: clarify" },
+    { role: "contrarian", provider: "openai", modelId: "gpt-4o-mini", systemPrompt: "Challenge", roleLens: "## Lens: challenge" },
   ],
   synthesis: { provider: "openai", modelId: "gpt-4o-mini", systemPrompt: "Synthesize" },
   maxProbeTokens: 256,
@@ -223,5 +223,38 @@ describe("ConsortiumCore", () => {
     expect(order[1]).toBe("probe:0-end");
     expect(order[2]).toBe("probe:1-start");
     expect(order[3]).toBe("probe:1-end");
+  });
+
+  it("appends roleLens to user context per probe", async () => {
+    const receivedUsers: string[] = [];
+    const callFn: ModelCallFn = async (_modelKey, _system, user) => {
+      receivedUsers.push(user);
+      return "WARN OK";
+    };
+    const core = new ConsortiumCore(baseConfig, callFn);
+    await core.deliberate("Test context");
+
+    // Each probe gets userContext + separator + its own roleLens
+    expect(receivedUsers[0]).toContain("Test context");
+    expect(receivedUsers[0]).toContain("## Lens: clarify");
+    expect(receivedUsers[1]).toContain("Test context");
+    expect(receivedUsers[1]).toContain("## Lens: challenge");
+    // Role lens appears at the tail, after the shared context
+    expect(receivedUsers[0]).toMatch(/Test context[\s\-]+## Lens: clarify/);
+  });
+
+  it("works without roleLens (backward compat)", async () => {
+    const callFn = createMockCallFn({
+      "probe:0": "WARN OK",
+      "probe:1": "WARN OK",
+      synthesis: "Synthesized.",
+    });
+    const config: ConsortiumConfig = {
+      ...baseConfig,
+      probes: baseConfig.probes.map((p) => ({ ...p, roleLens: "" })),
+    };
+    const core = new ConsortiumCore(config, callFn);
+    const result = await core.deliberate("Test");
+    expect(result.synthesis).toBe("Synthesized.");
   });
 });

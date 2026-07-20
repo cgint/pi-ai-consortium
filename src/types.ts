@@ -4,8 +4,12 @@
 export interface ProbeConfig {
   /** Role name (displayed in logs). */
   role: string;
-  /** System prompt for this probe. */
+  /** System prompt for this probe. Shared across all probes for KV-prefix cache reuse. */
   systemPrompt: string;
+  /** Role-specific lens appended to the user message tail.
+   * Contains the gate criteria and severity definitions unique to this role.
+   * Placed at the tail so it does not break the shared prefix cache. */
+  roleLens: string;
   /** Model provider (e.g., "openai"). */
   provider: string;
   /** Model ID (e.g., "gpt-5.4-mini"). */

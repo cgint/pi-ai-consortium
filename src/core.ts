@@ -104,10 +104,13 @@ export class ConsortiumCore {
       const timeoutId = setTimeout(() => probeController.abort(), this.config.probeTimeoutMs);
 
       try {
+        const probeUser = probe.roleLens
+          ? `${userContext}\n\n---\n\n${probe.roleLens}`
+          : userContext;
         const result = await this.callModel(
           `probe:${i}`,
           probe.systemPrompt,
-          userContext,
+          probeUser,
           this.config.maxProbeTokens,
           this.config.probeTemperature,
           probeController.signal,
@@ -144,10 +147,13 @@ export class ConsortiumCore {
       const timeoutId = setTimeout(() => probeController.abort(), this.config.probeTimeoutMs);
 
       try {
+        const probeUser = probe.roleLens
+          ? `${userContext}\n\n---\n\n${probe.roleLens}`
+          : userContext;
         const result = await this.callModel(
           `probe:${i}`,
           probe.systemPrompt,
-          userContext,
+          probeUser,
           this.config.maxProbeTokens,
           this.config.probeTemperature,
           probeController.signal,

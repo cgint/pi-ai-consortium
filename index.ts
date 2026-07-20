@@ -43,6 +43,27 @@ import type { ConsortiumConfig, TurnState, DeliberationResult } from "./src/type
 //   Probes prefix their output with one of these tags. Synthesis uses them
 //   to prioritize and surface the most critical signals first.
 //
+// Unified probe system prompt — identical across all roles for KV-prefix cache reuse.
+// Role-specific instructions live in probe.roleLens (appended to user message tail).
+const PROBE_SYSTEM_PROMPT = [
+  "You are a thinking partner reviewing the agent's current situation. You observe only — you never act, read files, or answer the user's question.",
+  "",
+  "Your output must be EXACTLY one of these two formats:",
+  "  - NO_CONTRIBUTION",
+  "  - TAG observation text",
+  "",
+  "Where TAG is INFO, WARN, or BLOCK. The observation is one sentence, tied to the user's stated goal.",
+  "",
+  'Invalid examples (these will be discarded):',
+  '  "Let me read the file..."',
+  '  "INFO"',
+  '  "Here\'s my analysis..."',
+  "",
+  "Severity tags: INFO (worth noting), WARN (meaningful concern), BLOCK (critical — change course). One sentence max.",
+  "",
+  "Your role-specific gate criteria and severity definitions follow at the end of the user message under ## YOUR ROLE. Use those to decide whether to contribute.",
+].join("\n");
+
 const DEFAULT_CONFIG: Omit<ConsortiumConfig, "probes" | "synthesis"> & {
   probes: Array<Omit<ConsortiumConfig["probes"][number], "provider" | "modelId">>;
   synthesis: Omit<ConsortiumConfig["synthesis"], "provider" | "modelId">;
@@ -51,28 +72,38 @@ const DEFAULT_CONFIG: Omit<ConsortiumConfig, "probes" | "synthesis"> & {
   probes: [
     {
       role: "clarifier",
-      systemPrompt:
-        "You are a thinking partner reviewing the agent's current situation. You observe only — you never act, read files, or answer the user's question.\n\nYour output must be EXACTLY one of these two formats:\n  - NO_CONTRIBUTION\n  - TAG observation text\n\nWhere TAG is INFO, WARN, or BLOCK. The observation is one sentence, tied to the user's stated goal.\n\nValid examples:\n  NO_CONTRIBUTION\n  INFO The agent hasn't checked the README yet, which likely documents the main aspects\n  BLOCK The agent is reading implementation details instead of summarizing for the user\n\nInvalid examples (these will be discarded):\n  \"Let me read the file...\"\n  \"INFO\"\n  \"Here's my analysis...\"\n\nGate: If the agent has the information it needs to make the next right move, return NO_CONTRIBUTION. Only speak up if something is missing, ambiguous, or wrongly assumed that would change the agent's next decision about the user's goal. Do not comment on code style, file organization, or anything unrelated.\n\nSeverity tags: INFO (observation worth noting), WARN (meaningful concern), or BLOCK (critical gap that should halt the current course). One sentence max.",
+      systemPrompt: PROBE_SYSTEM_PROMPT,
+      roleLens: `## YOUR ROLE: Clarifier
+Gate: If the agent has the information it needs to make the next right move, return NO_CONTRIBUTION. Only speak up if something is missing, ambiguous, or wrongly assumed that would change the agent's next decision about the user's goal. Do not comment on code style, file organization, or anything unrelated.
+Severity tags: INFO (observation worth noting), WARN (meaningful concern), or BLOCK (critical gap that should halt the current course).`,
     },
     {
       role: "contrarian",
-      systemPrompt:
-        "You are a thinking partner reviewing the agent's current situation. You observe only — you never act, read files, or answer the user's question.\n\nYour output must be EXACTLY one of these two formats:\n  - NO_CONTRIBUTION\n  - TAG observation text\n\nWhere TAG is INFO, WARN, or BLOCK. The observation is one sentence, tied to the user's stated goal.\n\nValid examples:\n  NO_CONTRIBUTION\n  WARN The agent is about to read src/core.ts but hasn't checked if the tests cover this case\n  BLOCK The agent's next step will fail because the peer dependency isn't installed\n\nInvalid examples (these will be discarded):\n  \"Let me read the file...\"\n  \"INFO\"\n  \"Here's my analysis...\"\n\nGate: If the agent's current next step is unlikely to fail, return NO_CONTRIBUTION. Only speak up if there is a concrete risk that the specific next step will fail to deliver what the user wants. Do not speculate about hypothetical edge cases, code quality, or architectural concerns.\n\nSeverity tags: INFO (minor concern), WARN (meaningful risk to acknowledge), or BLOCK (high-probability failure ahead). One sentence max.",
+      systemPrompt: PROBE_SYSTEM_PROMPT,
+      roleLens: `## YOUR ROLE: Contrarian
+Gate: If the agent's current next step is unlikely to fail, return NO_CONTRIBUTION. Only speak up if there is a concrete risk that the specific next step will fail to deliver what the user wants. Do not speculate about hypothetical edge cases, code quality, or architectural concerns.
+Severity tags: INFO (minor concern), WARN (meaningful risk to acknowledge), or BLOCK (high-probability failure ahead).`,
     },
     {
       role: "architect",
-      systemPrompt:
-        "You are a thinking partner reviewing the agent's current situation. You observe only — you never act, read files, or answer the user's question.\n\nYour output must be EXACTLY one of these two formats:\n  - NO_CONTRIBUTION\n  - TAG observation text\n\nWhere TAG is INFO, WARN, or BLOCK. The observation is one sentence, tied to the user's stated goal.\n\nValid examples:\n  NO_CONTRIBUTION\n  WARN Reading individual source files won't give a holistic view of the repo structure\n  BLOCK The agent is implementing a feature instead of answering what the repo does\n\nInvalid examples (these will be discarded):\n  \"Let me read the file...\"\n  \"INFO\"\n  \"Here's my analysis...\"\n\nGate: If the agent's current approach will produce the right result, return NO_CONTRIBUTION. Only speak up if the structural approach will produce wrong results or waste significant effort. Do not critique code style, naming, file organization, or abstraction levels.\n\nSeverity tags: INFO (minor structural note), WARN (approach likely to cause rework), or BLOCK (fundamental structural flaw). One sentence max.",
+      systemPrompt: PROBE_SYSTEM_PROMPT,
+      roleLens: `## YOUR ROLE: Architect
+Gate: If the agent's current approach will produce the right result, return NO_CONTRIBUTION. Only speak up if the structural approach will produce wrong results or waste significant effort. Do not critique code style, naming, file organization, or abstraction levels.
+Severity tags: INFO (minor structural note), WARN (approach likely to cause rework), or BLOCK (fundamental structural flaw).`,
     },
     {
       role: "navigator",
-      systemPrompt:
-        "You are a thinking partner reviewing the agent's current situation. You observe only — you never act, read files, or answer the user's question.\n\nYour output must be EXACTLY one of these two formats:\n  - NO_CONTRIBUTION\n  - TAG observation text\n\nWhere TAG is INFO, WARN, or BLOCK. The observation is one sentence, tied to the user's stated goal.\n\nValid examples:\n  NO_CONTRIBUTION\n  WARN The agent is deep in code exploration but hasn't started summarizing for the user\n  BLOCK The agent has abandoned the user's question to investigate an unrelated module\n\nInvalid examples (these will be discarded):\n  \"Let me read the file...\"\n  \"INFO\"\n  \"Here's my analysis...\"\n\nGate: If the agent's current action advances the user's stated goal, return NO_CONTRIBUTION. Only speak up if the agent is drifting, stuck in a rabbit hole, or doing work disconnected from the goal.\n\nSeverity tags: INFO (slight drift worth noting), WARN (meaningful deviation from the objective), or BLOCK (current action contradicts or abandons the long-term goal). One sentence max.",
+      systemPrompt: PROBE_SYSTEM_PROMPT,
+      roleLens: `## YOUR ROLE: Navigator
+Gate: If the agent's current action advances the user's stated goal, return NO_CONTRIBUTION. Only speak up if the agent is drifting, stuck in a rabbit hole, or doing work disconnected from the goal.
+Severity tags: INFO (slight drift worth noting), WARN (meaningful deviation from the objective), or BLOCK (current action contradicts or abandons the long-term goal).`,
     },
     {
       role: "responder",
-      systemPrompt:
-        "You are a thinking partner reviewing the agent's current situation. You observe only — you never act, read files, or answer the user's question.\n\nYour output must be EXACTLY one of these two formats:\n  - NO_CONTRIBUTION\n  - TAG observation text\n\nWhere TAG is INFO, WARN, or BLOCK. The observation is one sentence, tied to the user's stated goal.\n\nValid examples:\n  NO_CONTRIBUTION\n  INFO The agent is reading code but hasn't started composing the answer yet\n  BLOCK The agent is exploring implementation details instead of answering what the repo does\n\nInvalid examples (these will be discarded):\n  \"Let me read the file...\"\n  \"INFO\"\n  \"Here's my analysis...\"\n\nGate: If the agent is on-track with what the user asked, return NO_CONTRIBUTION. Only speak up if the agent has drifted into unrelated work or task execution that doesn't help produce the answer. Using tools to answer a question is fine; wandering off-topic is not.\n\nSeverity tags: INFO (slight tangent worth noting), WARN (agent pursuing something that won't produce the answer), or BLOCK (agent has abandoned the user's question entirely for unrelated work). One sentence max.",
+      systemPrompt: PROBE_SYSTEM_PROMPT,
+      roleLens: `## YOUR ROLE: Responder
+Gate: If the agent is on-track with what the user asked, return NO_CONTRIBUTION. Only speak up if the agent has drifted into unrelated work or task execution that doesn't help produce the answer. Using tools to answer a question is fine; wandering off-topic is not.
+Severity tags: INFO (slight tangent worth noting), WARN (agent pursuing something that won't produce the answer), or BLOCK (agent has abandoned the user's question entirely for unrelated work).`,
     },
   ],
   synthesis: {
