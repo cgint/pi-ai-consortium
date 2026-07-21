@@ -84,7 +84,7 @@ export default function (pi: ExtensionAPI): void {
       };
 
       const messages = [...event.messages];
-      messages.splice(0, 0, syntheticMessage);
+      messages.push(syntheticMessage);
       turnState.deliberation = null;
 
       logger?.log({
