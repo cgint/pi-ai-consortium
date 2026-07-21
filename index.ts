@@ -21,10 +21,64 @@ import { DEFAULT_CONFIG } from "./src/config.js";
 import { buildUserContext, buildUserContextFromMessages } from "./src/context.js";
 import { ConsortiumLogger, createProgressCallback, formatVisibleMessage } from "./src/ui.js";
 import type { ConsortiumConfig, TurnState, DeliberationResult } from "./src/types.js";
+import { join, dirname } from "node:path";
+import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
+import { existsSync } from "node:fs";
 
 export default function (pi: ExtensionAPI): void {
+  let enabled = true;
   let turnState: TurnState = { deliberation: null };
   let logger: ConsortiumLogger | null = null;
+
+  // Queue writes sequentially to prevent race conditions between rapid toggles.
+  let persistPending: Promise<void> = Promise.resolve();
+
+  async function persistEnabled(cwd: string, value: boolean): Promise<void> {
+    // Chain writes sequentially so they never race.
+    persistPending = persistPending.then(async () => {
+      try {
+        const dir = join(cwd, ".pi");
+        try {
+          await mkdir(dir, { recursive: true });
+        } catch {
+          // Directory exists or mkdir failed — best effort.
+        }
+        const p = join(dir, "settings.json");
+        const tmp = p + ".tmp";
+        let s: Record<string, unknown> = {};
+        if (existsSync(p)) {
+          try {
+            const raw = await readFile(p, "utf-8");
+            s = JSON.parse(raw);
+          } catch {
+            // Corrupted file — overwrite.
+          }
+        }
+        s.consortium = value;
+        await writeFile(tmp, JSON.stringify(s, null, 2) + "\n");
+        await rename(tmp, p); // Atomic on POSIX.
+      } catch {
+        // Best-effort persistence.
+      }
+    });
+    // Wait for this write to complete so the command handler doesn't proceed
+    // while a stale read is in flight.
+    await persistPending;
+  }
+
+  pi.on("session_start", async (_event, ctx) => {
+    try {
+      const p = join(ctx.cwd, ".pi", "settings.json");
+      if (!existsSync(p)) return;
+      const raw = await readFile(p, "utf-8");
+      const s = JSON.parse(raw);
+      if (s.consortium !== undefined) {
+        enabled = !!s.consortium;
+      }
+    } catch {
+      // Default to enabled — fail open for safety.
+    }
+  });
 
   pi.on("turn_start", (_event: TurnStartEvent) => {
     // Only reset if no in-flight deliberation (turn_start fires after input but before context)
@@ -47,6 +101,9 @@ export default function (pi: ExtensionAPI): void {
 
   // On first LLM call of the turn, await deliberation and inject.
   pi.on("context", async (event: ContextEvent, ctx: ExtensionContext) => {
+    if (!enabled) {
+      return;
+    }
     if (turnState.deliberation) {
       return;
     }
@@ -128,6 +185,31 @@ export default function (pi: ExtensionAPI): void {
       turnState.deliberation = null;
       return;
     }
+  });
+
+  pi.registerCommand("ai-consortium", {
+    description: "Show consortium deliberation status (on/off)",
+    handler: async (_args, ctx) => {
+      ctx.ui.notify(`Consortium: ${enabled ? "enabled" : "disabled"}`, "info");
+    },
+  });
+
+  pi.registerCommand("ai-consortium-on", {
+    description: "Enable consortium deliberation",
+    handler: async (_args, ctx) => {
+      enabled = true;
+      await persistEnabled(ctx.cwd, true);
+      ctx.ui.notify("Consortium enabled", "info");
+    },
+  });
+
+  pi.registerCommand("ai-consortium-off", {
+    description: "Disable consortium deliberation",
+    handler: async (_args, ctx) => {
+      enabled = false;
+      await persistEnabled(ctx.cwd, false);
+      ctx.ui.notify("Consortium disabled", "info");
+    },
   });
 }
 

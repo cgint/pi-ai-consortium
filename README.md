@@ -38,6 +38,16 @@ LLM history + new input
 - **Navigator** — suggests what to read or investigate next
 - **Responder** — assesses whether there's enough information to act
 
+## Slash commands
+
+| Command | Behavior |
+|---------|----------|
+| `/ai-consortium` | Show current status (enabled/disabled) |
+| `/ai-consortium-on` | Enable deliberation |
+| `/ai-consortium-off` | Disable deliberation |
+
+State persists in `.pi/settings.json` under the `consortium` key and survives reloads. Defaults to **enabled**.
+
 ## Key design
 
 - **Internal deliberation, not delegation.** Probes analyze; they don't spawn work. The final decision belongs to the synthesis stage.

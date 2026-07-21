@@ -36,6 +36,7 @@ beforeEach(async () => {
   const pi = {
     on: vi.fn((event: string, handler: Function) => handlers.set(event, handler)),
     appendEntry: vi.fn(),
+    registerCommand: vi.fn(),
   };
 
   const { default: register } = await import("../index.ts");
