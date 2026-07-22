@@ -4,6 +4,43 @@ import type { InputEvent, ExtensionContext } from "@earendil-works/pi-coding-age
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { ExtractedContext } from "./types.js";
 
+/** Cleanly format an AgentMessage content block into readable text for context and probe payloads. */
+export function formatAgentMessageContent(m: AgentMessage, maxChars = 1500): string {
+  let content = "";
+  if ("command" in m && "output" in m && typeof m.output === "string") {
+    const cmd = (m as any).command;
+    const out = (m as any).output.length > maxChars ? (m as any).output.slice(0, maxChars) + "... [truncated]" : (m as any).output;
+    content = `> ${cmd}\n${out}`;
+  } else if ("content" in m) {
+    const msg = m as { content: unknown };
+    if (typeof msg.content === "string") {
+      content = msg.content;
+    } else if (Array.isArray(msg.content)) {
+      const parts = msg.content.map((c: any) => {
+        if (!c || typeof c !== "object") return String(c);
+        if (c.type === "text" && typeof c.text === "string") return c.text;
+        if (c.type === "image") return `[image: ${c.mimeType || "image"}]`;
+        if (c.type === "tool_use") return `[tool_use: ${c.name || "unknown"}]`;
+        if (c.type === "tool_result") {
+          const res = typeof c.content === "string" ? c.content : JSON.stringify(c.content);
+          return `[tool_result]: ${res}`;
+        }
+        return JSON.stringify(c);
+      });
+      content = parts.join("\n");
+    } else if (msg.content !== undefined && msg.content !== null) {
+      content = String(msg.content);
+    }
+  } else {
+    content = `[${String(m.role).toUpperCase()} message]`;
+  }
+
+  if (content.length > maxChars) {
+    content = content.slice(0, maxChars) + "... [truncated]";
+  }
+  return content;
+}
+
 /** Build user context string from input event + extension context. */
 export function buildUserContext(event: InputEvent, _ctx: ExtensionContext): string {
   let context = event.text;
@@ -28,37 +65,7 @@ export function buildUserContextFromMessages(messages: AgentMessage[]): string |
   const recent = messages;
   const lines = recent.map((m) => {
     const role = String(m.role).toUpperCase();
-    let content: string;
-
-    if ("command" in m && "output" in m && typeof m.output === "string") {
-      // BashExecutionMessage
-      const cmd = m.command;
-      const out = m.output.length > 1200 ? m.output.slice(0, 1200) + "... [truncated]" : m.output;
-      content = `> ${cmd}\n${out}`;
-    } else if ("content" in m) {
-      const msg = m as { content: string | Array<{ type: string }> };
-      if (typeof msg.content === "string") {
-        content = msg.content;
-      } else if (Array.isArray(msg.content)) {
-        const texts = msg.content
-          .filter((c: any) => c.type === "text")
-          .map((c: any) => c.text);
-        const images = msg.content
-          .filter((c: any) => c.type === "image")
-          .map((c: any) => `[image: ${c.mimeType}]`);
-        content = [...texts, ...images].join("\n");
-      } else {
-        content = String(msg.content);
-      }
-    } else {
-      // Unknown custom message type
-      content = `[${role} message]`;
-    }
-
-    // Truncate very long messages
-    if (content.length > 1500) {
-      content = content.slice(0, 1500) + "... [truncated]";
-    }
+    const content = formatAgentMessageContent(m, 1500);
     return `[${role}] ${content}`;
   });
 
@@ -87,17 +94,7 @@ export function buildProbeInputXml(
   const historyText = messages
     .map((m) => {
       const role = String(m.role).toUpperCase();
-      let content = "";
-      if ("command" in m && "output" in m && typeof m.output === "string") {
-        const cmd = (m as any).command;
-        const out = (m as any).output.length > 1200 ? (m as any).output.slice(0, 1200) + "... [truncated]" : (m as any).output;
-        content = `> ${cmd}\n${out}`;
-      } else if ("content" in m) {
-        content = typeof (m as any).content === "string" ? (m as any).content : JSON.stringify((m as any).content);
-      }
-      if (content.length > 1500) {
-        content = content.slice(0, 1500) + "... [truncated]";
-      }
+      const content = formatAgentMessageContent(m, 1500);
       return `[${role}] ${content}`;
     })
     .join("\n\n");

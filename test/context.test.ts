@@ -56,6 +56,25 @@ describe("src/context.ts", () => {
     expect(xml).toContain("<missing_details>Clarify model provider override</missing_details>");
   });
 
+  it("formatAgentMessageContent formats array content blocks cleanly", () => {
+    const messageWithBlocks: AgentMessage = {
+      role: "assistant",
+      content: [
+        { type: "text", text: "Analyzing code structure." },
+        { type: "tool_use", name: "read" },
+        { type: "tool_result", content: "file content sample" },
+        { type: "image", mimeType: "image/png" },
+      ],
+      timestamp: Date.now(),
+    } as any;
+
+    const formatted = buildUserContextFromMessages([messageWithBlocks]);
+    expect(formatted).toContain("Analyzing code structure.");
+    expect(formatted).toContain("[tool_use: read]");
+    expect(formatted).toContain("[tool_result]: file content sample");
+    expect(formatted).toContain("[image: image/png]");
+  });
+
   it("buildUserContextFromMessages remains available for backward compatibility", () => {
     const legacy = buildUserContextFromMessages(sampleMessages);
     expect(legacy).not.toBeNull();
