@@ -3,19 +3,24 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
-import type { DeliberationResult, ProgressCallback } from "./types.js";
+import type { DeliberationResult, ExtractedContext, ProgressCallback } from "./types.js";
 import { CANONICAL_PROBE_ORDER } from "./config.js";
 
-/** JSONL logger for consortium actions. */
+/** JSONL & sidecar Markdown logger for consortium actions. */
 export class ConsortiumLogger {
   private logPath: string;
+  private mdPath: string;
   private fd: number | null = null;
+  private mdFd: number | null = null;
+  private turnCount = 0;
 
   constructor(cwd: string, sessionId: string) {
     const dir = path.join(cwd, ".pi", "consortium");
     fs.mkdirSync(dir, { recursive: true });
     const ts = new Date().toISOString().replace(/[:.]/g, "-");
-    this.logPath = path.join(dir, `${ts}_${sessionId}.jsonl`);
+    const baseName = `${ts}_${sessionId}`;
+    this.logPath = path.join(dir, `${baseName}.jsonl`);
+    this.mdPath = path.join(dir, `${baseName}.md`);
   }
 
   private getFd(): number {
@@ -23,6 +28,16 @@ export class ConsortiumLogger {
       this.fd = fs.openSync(this.logPath, "a");
     }
     return this.fd;
+  }
+
+  private getMdFd(): number {
+    if (this.mdFd === null) {
+      this.mdFd = fs.openSync(this.mdPath, "a");
+      if (fs.statSync(this.mdPath).size === 0) {
+        fs.writeSync(this.mdFd, "# Consortium Extracted Context Log\n\n");
+      }
+    }
+    return this.mdFd;
   }
 
   log(entry: Record<string, unknown>): void {
@@ -34,6 +49,30 @@ export class ConsortiumLogger {
     }
   }
 
+  /** Write a clean human-readable Markdown section to the sidecar .md log file. */
+  logExtraction(context: ExtractedContext): void {
+    this.turnCount++;
+    const ts = new Date().toISOString();
+    const missing = context.missingDetails ? `\n- **Missing Details:** ${context.missingDetails}` : "";
+    const section = [
+      `## Turn ${this.turnCount} (${ts})`,
+      `* **Intent & Motive:** ${context.userIntentAndMotive}`,
+      `* **Active Constraints & Guards:** ${context.activeConstraintsAndGuards}`,
+      `* **Verified Facts Inventory:** ${context.verifiedFactsInventory}`,
+      `* **Evidence Freshness Delta:** ${context.evidenceFreshnessDelta}`,
+      `* **Clarity Score:** \`${context.clarityAndAmbiguityScore}\`${missing}`,
+      ``,
+      `---`,
+      ``,
+    ].join("\n");
+
+    try {
+      fs.writeSync(this.getMdFd(), section);
+    } catch {
+      // Non-fatal
+    }
+  }
+
   close(): void {
     if (this.fd !== null) {
       try {
@@ -42,6 +81,14 @@ export class ConsortiumLogger {
         /* ignore */
       }
       this.fd = null;
+    }
+    if (this.mdFd !== null) {
+      try {
+        fs.closeSync(this.mdFd);
+      } catch {
+        /* ignore */
+      }
+      this.mdFd = null;
     }
   }
 }

@@ -127,6 +127,9 @@ export default function (pi: ExtensionAPI): void {
       if (result.synthesis.trim().startsWith("NO_CONTRIBUTION")) {
         turnState.deliberation = null;
         lastExtractedContext = result.extractedContext ?? null;
+        if (result.extractedContext) {
+          logger?.logExtraction(result.extractedContext);
+        }
         logger?.log({
           type: "injection_skipped",
           reason: "NO_CONTRIBUTION",
@@ -147,6 +150,9 @@ export default function (pi: ExtensionAPI): void {
       messages.push(syntheticMessage);
       turnState.deliberation = null;
       lastExtractedContext = result.extractedContext ?? null;
+      if (result.extractedContext) {
+        logger?.logExtraction(result.extractedContext);
+      }
 
       logger?.log({
         type: "injection_complete",
