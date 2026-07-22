@@ -96,6 +96,8 @@ export class ConsortiumLogger {
 /** Build progress status text for the status bar. */
 export function formatProgressText(phase: string, current: number, total: number, role?: string): string {
   switch (phase) {
+    case "extraction":
+      return "consortium: extracting goals, intent…";
     case "probe":
       return role
         ? `consortium: ${current}/${total} ${role}…`

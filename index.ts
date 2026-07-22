@@ -175,7 +175,7 @@ export default function (pi: ExtensionAPI): void {
           extractedContext: result.extractedContext,
         });
         if (ctx.hasUI) {
-          ctx.ui.setStatus("consortium", `consortium: ⏭ skipped (${result.governorReason || "governor gate"})`);
+          ctx.ui.setStatus("consortium", "consortium: ⏭ skipped");
           ctx.ui.notify(formatVisibleMessage(result), "info");
         }
         return;

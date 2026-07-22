@@ -3,7 +3,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { ConsortiumCore, type ModelCallFn } from "../src/core.js";
 import type { ConsortiumConfig } from "../src/types.js";
-import { formatVisibleMessage } from "../src/ui.js";
+import { formatProgressText, formatVisibleMessage } from "../src/ui.js";
 
 const baseConfig: ConsortiumConfig = {
   probes: [
@@ -142,5 +142,27 @@ describe("formatVisibleMessage", () => {
     expect(msg).toContain("clarifier: NO_CONTRIBUTION");
     expect(msg).toContain("contrarian (WARN): Verify lockfile integrity");
     expect(msg).toContain("synthesis: WARN Verify lockfile before push");
+  });
+});
+
+describe("formatProgressText", () => {
+  it("formats extraction phase status text", () => {
+    expect(formatProgressText("extraction", 0, 1)).toBe("consortium: extracting goals, intent…");
+  });
+
+  it("formats probe phase status text with role", () => {
+    expect(formatProgressText("probe", 1, 3, "architect")).toBe("consortium: 1/3 architect…");
+  });
+
+  it("formats probe phase status text without role", () => {
+    expect(formatProgressText("probe", 2, 3)).toBe("consortium: 2/3 probing…");
+  });
+
+  it("formats synthesis phase status text", () => {
+    expect(formatProgressText("synthesis", 0, 1)).toBe("consortium: synthesizing…");
+  });
+
+  it("formats complete phase status text", () => {
+    expect(formatProgressText("complete", 0, 0)).toBe("consortium: ✓ complete");
   });
 });
