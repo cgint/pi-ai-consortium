@@ -64,7 +64,7 @@ describe("consortium enabled/disabled toggle", () => {
       modelRegistry: {},
       signal: new AbortController().signal,
       hasUI: true,
-      ui: { setStatus: vi.fn(), notify: vi.fn() },
+      ui: { setStatus: vi.fn(), notify: vi.fn(), setWidget: vi.fn() },
     };
 
     // Disable consortium

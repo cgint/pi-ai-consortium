@@ -8,7 +8,7 @@
  *   3. complete(model, context, { apiKey, headers, signal })
  */
 
-import { complete } from "@earendil-works/pi-ai";
+import { streamSimple } from "@earendil-works/pi-ai/compat";
 import type { Context } from "@earendil-works/pi-ai";
 
 /**
@@ -94,11 +94,13 @@ export async function callModelWithAuth(
     tools: [],
   };
 
-  const result = await complete(model as any, context, {
+  const eventStream = streamSimple(model as any, context, {
     apiKey,
     headers: auth.headers,
     signal,
   } as any);
+
+  const result = await eventStream.result();
 
   // Extract text from the AssistantMessage response
   return textFromMessage(result);

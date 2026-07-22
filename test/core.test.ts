@@ -27,6 +27,34 @@ const baseConfig: ConsortiumConfig = {
 };
 
 describe("ConsortiumCore", () => {
+  it("skips probe execution when governor decides deliberation is not needed", async () => {
+    let probeExecuted = false;
+    const callFn: ModelCallFn = async (modelKey) => {
+      if (modelKey === "extraction") {
+        return JSON.stringify({
+          userIntentAndMotive: "Test",
+          activeConstraintsAndGuards: "None",
+          verifiedFactsInventory: "Facts",
+          evidenceFreshnessDelta: "Fresh",
+          clarityAndAmbiguityScore: "CLEAR",
+          deliberationNeeded: false,
+          deliberationReason: "Routine status query",
+        });
+      }
+      probeExecuted = true;
+      return "WARN Probe output";
+    };
+
+    const core = new ConsortiumCore({ ...baseConfig, governorMode: "smart_extractor" }, callFn);
+    const messages = [{ role: "user" as const, content: "What is the current status?", timestamp: Date.now() }];
+    const result = await core.deliberate(messages);
+
+    expect(result.skippedByGovernor).toBe(true);
+    expect(result.governorReason).toBe("Routine status query");
+    expect(result.probes).toHaveLength(0);
+    expect(probeExecuted).toBe(false);
+  });
+
   it("runs full deliberation cycle (diverge → converge)", async () => {
     const callFn = createMockCallFn({
       "probe:0": "WARN Hidden assumptions about auth strategy.",

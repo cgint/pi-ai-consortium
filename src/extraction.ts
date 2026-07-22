@@ -6,7 +6,7 @@ import type { ModelCallFn } from "./core.js";
 
 export const EXTRACTION_SYSTEM_PROMPT = [
   "You are a fast context extraction engine for a software development agent.",
-  "Analyze the conversation history and extract exactly 5 structured context vectors into JSON.",
+  "Analyze the conversation history and extract structured context vectors into JSON.",
   "",
   "Return JSON matching this schema exactly:",
   "{",
@@ -15,8 +15,13 @@ export const EXTRACTION_SYSTEM_PROMPT = [
   '  "verifiedFactsInventory": "Confirmed facts, file mtimes, test logs, trace findings",',
   '  "evidenceFreshnessDelta": "Modified code vs timestamp of last test or visual proof",',
   '  "clarityAndAmbiguityScore": "CLEAR" or "AMBIGUOUS",',
-  '  "missingDetails": "Specific missing details if AMBIGUOUS (optional)"',
+  '  "missingDetails": "Specific missing details if AMBIGUOUS (optional)",',
+  '  "deliberationNeeded": true or false,',
+  '  "deliberationReason": "Short reason explaining why full probe deliberation is or is not needed (e.g. unverified code edit, ambiguous requirement, or routine conversational query)"',
   "}",
+  "",
+  "Set deliberationNeeded to true if code/files were modified without test verification, if requirements are AMBIGUOUS, if tools failed, or if the user asked a complex architectural question.",
+  "Set deliberationNeeded to false if the user input is a simple acknowledgment, status check, routine question, or clear step in progress with fresh evidence.",
   "",
   "Output raw JSON ONLY. No conversational prefix or markdown wrapper.",
 ].join("\n");
@@ -37,6 +42,8 @@ export function getDefaultExtractedContext(messages?: AgentMessage[]): Extracted
     verifiedFactsInventory: "Session history available in transcript",
     evidenceFreshnessDelta: "Freshness unknown — recent history should be inspected",
     clarityAndAmbiguityScore: "CLEAR",
+    deliberationNeeded: true,
+    deliberationReason: "Default fallback context — full audit enabled by default",
   };
 }
 
@@ -84,6 +91,8 @@ export async function extractContextFromMessages(
       evidenceFreshnessDelta: String(parsed.evidenceFreshnessDelta || "No delta recorded"),
       clarityAndAmbiguityScore: parsed.clarityAndAmbiguityScore === "AMBIGUOUS" ? "AMBIGUOUS" : "CLEAR",
       missingDetails: parsed.missingDetails ? String(parsed.missingDetails) : undefined,
+      deliberationNeeded: typeof parsed.deliberationNeeded === "boolean" ? parsed.deliberationNeeded : true,
+      deliberationReason: parsed.deliberationReason ? String(parsed.deliberationReason) : undefined,
     };
   } catch {
     return getDefaultExtractedContext(messages);

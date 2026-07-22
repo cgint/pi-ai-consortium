@@ -28,12 +28,20 @@
     "@sinclair/typebox": "*"
   },
   "devDependencies": {
-    "@earendil-works/pi-coding-agent": "^0.74.0",
+    "@earendil-works/pi-agent-core": "^0.81.1",
+    "@earendil-works/pi-ai": "^0.81.1",
+    "@earendil-works/pi-coding-agent": "^0.81.1",
     "@types/node": "^22.0.0",
+    "typescript": "^5.7.3",
     "vitest": "^3.0.0"
   },
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "precommit": "npm run typecheck && npm run test && npm audit --omit=dev --audit-level=moderate"
+  },
+  "overrides": {
+    "protobufjs": "^7.6.5"
   }
 }

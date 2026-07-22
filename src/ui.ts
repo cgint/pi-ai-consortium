@@ -109,6 +109,46 @@ export function formatProgressText(phase: string, current: number, total: number
   }
 }
 
+/** Format deliberation result or skip reason into widget lines for persistent TUI display. */
+export function formatWidgetLines(result: DeliberationResult): string[] {
+  const lines: string[] = [];
+  if (result.skippedByGovernor) {
+    lines.push(`◇ Consortium deliberation — skipped (${result.governorReason || "governor gate"})`);
+    return lines;
+  }
+  if (result.synthesis.trim().startsWith("NO_CONTRIBUTION")) {
+    lines.push(`◇ Consortium deliberation — 0/${result.probes.length} probes contributed (nothing to add)`);
+    return lines;
+  }
+  const contributions = result.probes.filter((p) => !p.text.trim().startsWith("NO_CONTRIBUTION")).length;
+  lines.push(`◇ Consortium deliberation — ${contributions}/${result.probes.length} probes contributed`);
+
+  const probeMap = new Map(result.probes.map((p) => [p.role, p]));
+  for (const role of CANONICAL_PROBE_ORDER) {
+    const probe = probeMap.get(role);
+    if (!probe) continue;
+    if (probe.text.trim().startsWith("NO_CONTRIBUTION")) {
+      lines.push(`  ${role}: NO_CONTRIBUTION`);
+    } else {
+      const text = probe.text.trim();
+      const tagMatch = /^(INFO|WARN|BLOCK)\s+(.*)/.exec(text);
+      if (tagMatch) {
+        const [, tag, body] = tagMatch;
+        lines.push(`  ${role} (${tag}): ${body}`);
+      } else {
+        lines.push(`  ${role}: ${text}`);
+      }
+    }
+  }
+
+  const synthPreview = result.synthesis.length > 200
+    ? result.synthesis.slice(0, 200) + "…"
+    : result.synthesis;
+  lines.push(`  synthesis: ${synthPreview}`);
+
+  return lines;
+}
+
 /** Format a visible TUI notification — probe details + synthesis. */
 export function formatVisibleMessage(result: DeliberationResult): string {
   const lines: string[] = [];

@@ -5,6 +5,7 @@ import type { ConsortiumConfig, DeliberationResult, ProbeResult, ProgressCallbac
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import { extractContextFromMessages, getDefaultExtractedContext } from "./extraction.js";
 import { buildProbeInputXml } from "./context.js";
+import { shouldDeliberate } from "./governor.js";
 
 /** Injectable model call function (mockable for tests). */
 export type ModelCallFn = (
@@ -39,6 +40,7 @@ export class ConsortiumCore {
     input: string | AgentMessage[],
     externalSignal?: AbortSignal,
     onProgress?: ProgressCallback,
+    turnsSinceLastAudit: number = 0,
   ): Promise<DeliberationResult> {
     if (externalSignal?.aborted) {
       throw new Error("Deliberation aborted");
@@ -72,6 +74,20 @@ export class ConsortiumCore {
       userContext = buildProbeInputXml(input, extractedContext);
     } else {
       userContext = input;
+    }
+
+    // Phase 0.5: Governor Gate
+    const governorDecision = shouldDeliberate(this.config, extractedContext, turnsSinceLastAudit);
+    if (!governorDecision.shouldDeliberate) {
+      onProgress?.("complete", 0, 0);
+      return {
+        probes: [],
+        synthesis: "NO_CONTRIBUTION",
+        extractedContext,
+        skippedByGovernor: true,
+        governorReason: governorDecision.reason,
+        errors: errors.length > 0 ? errors : undefined,
+      };
     }
 
     // Phase 1: Divergence — parallel or serial probes

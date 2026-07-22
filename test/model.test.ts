@@ -3,10 +3,10 @@
 
 import { describe, expect, it, vi } from "vitest";
 
-// Mock complete at module level
-const mockComplete = vi.fn();
-vi.mock("@earendil-works/pi-ai", () => ({
-  complete: mockComplete,
+// Mock streamSimple at module level
+const mockStreamSimple = vi.fn();
+vi.mock("@earendil-works/pi-ai/compat", () => ({
+  streamSimple: mockStreamSimple,
 }));
 
 // The function under test — import will fail until src/model.ts exists
@@ -22,9 +22,11 @@ describe("callModelWithAuth", () => {
         headers: { "X-Custom": "h1" },
       }),
     };
-    mockComplete.mockResolvedValue({
-      role: "assistant",
-      content: [{ type: "text", text: "WARN probe ok" }],
+    mockStreamSimple.mockReturnValue({
+      result: vi.fn().mockResolvedValue({
+        role: "assistant",
+        content: [{ type: "text", text: "WARN probe ok" }],
+      }),
     } as any);
 
     const result = await callModelWithAuth(

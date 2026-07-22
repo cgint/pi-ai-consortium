@@ -19,7 +19,7 @@ import { ConsortiumCore, type ModelCallFn } from "./src/core.js";
 import { callModelWithAuth } from "./src/model.js";
 import { DEFAULT_CONFIG } from "./src/config.js";
 import { buildUserContext, buildUserContextFromMessages } from "./src/context.js";
-import { ConsortiumLogger, createProgressCallback, formatVisibleMessage } from "./src/ui.js";
+import { ConsortiumLogger, createProgressCallback, formatVisibleMessage, formatWidgetLines } from "./src/ui.js";
 import type { ConsortiumConfig, TurnState, DeliberationResult, GovernorMode } from "./src/types.js";
 import { join, dirname } from "node:path";
 import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
@@ -132,6 +132,7 @@ export default function (pi: ExtensionAPI): void {
     if (!enabled) {
       if (ctx.hasUI) {
         ctx.ui.setStatus("consortium", "consortium: disabled");
+        ctx.ui.setWidget("consortium-context", undefined);
       }
       return;
     }
@@ -176,6 +177,7 @@ export default function (pi: ExtensionAPI): void {
         });
         if (ctx.hasUI) {
           ctx.ui.setStatus("consortium", `consortium: ⏭ skipped (${result.governorReason || "governor gate"})`);
+          ctx.ui.setWidget("consortium-context", formatWidgetLines(result), { placement: "belowEditor" });
         }
         return;
       }
@@ -197,6 +199,7 @@ export default function (pi: ExtensionAPI): void {
         });
         if (ctx.hasUI) {
           ctx.ui.setStatus("consortium", "consortium: ✓ complete (nothing to add)");
+          ctx.ui.setWidget("consortium-context", formatWidgetLines(result), { placement: "belowEditor" });
         }
         return;
       }
@@ -247,10 +250,12 @@ export default function (pi: ExtensionAPI): void {
       if (result.errors) {
         if (ctx.hasUI) {
           ctx.ui.setStatus("consortium", `consortium: ⚠ ${result.errors.length} error(s)`);
+          ctx.ui.setWidget("consortium-context", formatWidgetLines(result), { placement: "belowEditor" });
         }
       } else {
         if (ctx.hasUI) {
           ctx.ui.setStatus("consortium", "consortium: ✓ complete");
+          ctx.ui.setWidget("consortium-context", formatWidgetLines(result), { placement: "belowEditor" });
         }
       }
 
@@ -299,6 +304,7 @@ export default function (pi: ExtensionAPI): void {
       await persistSettings(ctx.cwd, { enabled: false });
       if (ctx.hasUI) {
         ctx.ui.setStatus("consortium", "consortium: disabled");
+        ctx.ui.setWidget("consortium-context", undefined);
       }
       ctx.ui.notify("Consortium disabled", "info");
     },

@@ -29,9 +29,10 @@ export const PROBE_SYSTEM_PROMPT = [
 /** Canonical probe order — alphabetical for deterministic display. */
 export const CANONICAL_PROBE_ORDER = ["architect", "clarifier", "contrarian", "navigator", "responder"];
 
-export const DEFAULT_CONFIG: Omit<ConsortiumConfig, "probes" | "synthesis"> & {
+export const DEFAULT_CONFIG: Omit<ConsortiumConfig, "probes" | "synthesis" | "extraction"> & {
   probes: Array<Omit<ConsortiumConfig["probes"][number], "provider" | "modelId">>;
   synthesis: Omit<ConsortiumConfig["synthesis"], "provider" | "modelId">;
+  extraction?: Omit<NonNullable<ConsortiumConfig["extraction"]>, "provider" | "modelId">;
 } = {
   executionMode: (process.env.CONSORTIUM_EXECUTION_MODE as "parallel" | "serial" | undefined) ?? "serial",
   probes: [
@@ -84,4 +85,7 @@ Severity tags: INFO (truncated tool output noted), WARN (tool call failed or ret
   synthesisTemperature: 0.3,
   probeTimeoutMs: 30_000,
   totalTimeoutMs: 60_000,
+  governorMode: "smart_extractor",
+  maxTurnGap: 20,
+  periodicInterval: 3,
 };
