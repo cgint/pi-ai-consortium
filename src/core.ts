@@ -1,7 +1,10 @@
 // ConsortiumCore — pure logic, no Pi dependency.
 // Orchestrates divergence (parallel probes) and convergence (synthesis).
 
-import type { ConsortiumConfig, DeliberationResult, ProbeResult, ProgressCallback } from "./types.js";
+import type { ConsortiumConfig, DeliberationResult, ProbeResult, ProgressCallback, ExtractedContext } from "./types.js";
+import type { AgentMessage } from "@earendil-works/pi-agent-core";
+import { extractContextFromMessages, getDefaultExtractedContext } from "./extraction.js";
+import { buildProbeInputXml } from "./context.js";
 
 /** Injectable model call function (mockable for tests). */
 export type ModelCallFn = (
@@ -33,7 +36,7 @@ export class ConsortiumCore {
   ) {}
 
   async deliberate(
-    userContext: string,
+    input: string | AgentMessage[],
     externalSignal?: AbortSignal,
     onProgress?: ProgressCallback,
   ): Promise<DeliberationResult> {
@@ -53,7 +56,25 @@ export class ConsortiumCore {
     const errors: string[] = [];
     const probeTotal = this.config.probes.length;
 
-    // Phase 1: Divergence — parallel probes
+    let userContext: string;
+    let extractedContext: ExtractedContext | undefined;
+
+    if (Array.isArray(input)) {
+      // Phase 0: Extraction pass
+      onProgress?.("extraction", 0, 1);
+      try {
+        extractedContext = await extractContextFromMessages(input, this.callModel, masterController.signal);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        errors.push(`Extraction: ${msg}`);
+        extractedContext = getDefaultExtractedContext(input);
+      }
+      userContext = buildProbeInputXml(input, extractedContext);
+    } else {
+      userContext = input;
+    }
+
+    // Phase 1: Divergence — parallel or serial probes
     const probeResults = await this.runProbes(userContext, masterController.signal, errors, onProgress, probeTotal);
 
     // Skip synthesis if all probes had nothing to contribute
@@ -65,6 +86,7 @@ export class ConsortiumCore {
       return {
         probes: probeResults,
         synthesis: "NO_CONTRIBUTION",
+        extractedContext,
         errors: errors.length > 0 ? errors : undefined,
       };
     }
@@ -78,6 +100,7 @@ export class ConsortiumCore {
     return {
       probes: probeResults,
       synthesis,
+      extractedContext,
       errors: errors.length > 0 ? errors : undefined,
     };
   }

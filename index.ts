@@ -28,6 +28,7 @@ import { existsSync } from "node:fs";
 export default function (pi: ExtensionAPI): void {
   let enabled = true;
   let turnState: TurnState = { deliberation: null };
+  let lastExtractedContext: DeliberationResult["extractedContext"] | null = null;
   let logger: ConsortiumLogger | null = null;
 
   // Queue writes sequentially to prevent race conditions between rapid toggles.
@@ -118,17 +119,19 @@ export default function (pi: ExtensionAPI): void {
     }
 
     const onProgress = createProgressCallback(ctx);
-    turnState.deliberation = runDeliberation(DEFAULT_CONFIG, userContext, ctx, logger, onProgress);
+    turnState.deliberation = runDeliberation(DEFAULT_CONFIG, event.messages, ctx, logger, onProgress);
 
     try {
       const result = await turnState.deliberation;
 
       if (result.synthesis.trim().startsWith("NO_CONTRIBUTION")) {
         turnState.deliberation = null;
+        lastExtractedContext = result.extractedContext ?? null;
         logger?.log({
           type: "injection_skipped",
           reason: "NO_CONTRIBUTION",
           probe_count: result.probes.length,
+          extractedContext: result.extractedContext,
         });
         ctx.ui.setStatus("consortium", "⏭ skipped (nothing to add)");
         return;
@@ -143,6 +146,7 @@ export default function (pi: ExtensionAPI): void {
       const messages = [...event.messages];
       messages.push(syntheticMessage);
       turnState.deliberation = null;
+      lastExtractedContext = result.extractedContext ?? null;
 
       logger?.log({
         type: "injection_complete",
@@ -151,6 +155,7 @@ export default function (pi: ExtensionAPI): void {
         errors: result.errors,
         probes: result.probes,
         synthesis: result.synthesis,
+        extractedContext: result.extractedContext,
       });
 
       // Persist in session JSONL
@@ -160,6 +165,7 @@ export default function (pi: ExtensionAPI): void {
           kind: "deliberation",
           synthesis: result.synthesis,
           probe_count: result.probes.length,
+          extractedContext: result.extractedContext,
           errors: result.errors,
         });
       } catch {
@@ -211,12 +217,32 @@ export default function (pi: ExtensionAPI): void {
       ctx.ui.notify("Consortium disabled", "info");
     },
   });
+
+  pi.registerCommand("ai-consortium-context", {
+    description: "Inspect the last turn's 5 extracted context vectors",
+    handler: async (_args, ctx) => {
+      if (!lastExtractedContext) {
+        ctx.ui.notify("No extracted context available yet for this session.", "info");
+        return;
+      }
+      const summary = [
+        `◇ Extracted Context Vectors:`,
+        `  • Intent & Motive: ${lastExtractedContext.userIntentAndMotive}`,
+        `  • Constraints & Guards: ${lastExtractedContext.activeConstraintsAndGuards}`,
+        `  • Verified Facts: ${lastExtractedContext.verifiedFactsInventory}`,
+        `  • Evidence Freshness: ${lastExtractedContext.evidenceFreshnessDelta}`,
+        `  • Clarity Score: ${lastExtractedContext.clarityAndAmbiguityScore}${lastExtractedContext.missingDetails ? ` (${lastExtractedContext.missingDetails})` : ""}`,
+      ].join("\n");
+
+      ctx.ui.notify(summary, "info");
+    },
+  });
 }
 
 /** Run the full deliberation cycle. */
 async function runDeliberation(
   baseConfig: typeof DEFAULT_CONFIG,
-  userContext: string,
+  input: string | AgentMessage[],
   ctx: ExtensionContext,
   logger: ConsortiumLogger,
   onProgress?: (phase: string, current: number, total: number, role?: string) => void,
@@ -240,6 +266,13 @@ async function runDeliberation(
       provider: activeModel.provider,
       modelId: activeModel.id,
     },
+    extraction: baseConfig.extraction
+      ? {
+          ...baseConfig.extraction,
+          provider: activeModel.provider,
+          modelId: activeModel.id,
+        }
+      : undefined,
   };
 
   logger.log({
@@ -275,7 +308,7 @@ async function runDeliberation(
   };
 
   const core = new ConsortiumCore(config, callModel);
-  return core.deliberate(userContext, ctx.signal, onProgress);
+  return core.deliberate(input, ctx.signal, onProgress);
 }
 
 /** Resolve provider + modelId from a modelKey string. */
@@ -284,6 +317,12 @@ function resolveModelKey(
   config: ConsortiumConfig,
 ): { provider: string; modelId: string } {
   if (modelKey === "synthesis") {
+    return { provider: config.synthesis.provider, modelId: config.synthesis.modelId };
+  }
+  if (modelKey === "extraction") {
+    if (config.extraction) {
+      return { provider: config.extraction.provider, modelId: config.extraction.modelId };
+    }
     return { provider: config.synthesis.provider, modelId: config.synthesis.modelId };
   }
   const match = modelKey.match(/^probe:(\d+)$/);

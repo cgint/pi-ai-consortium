@@ -257,4 +257,36 @@ describe("ConsortiumCore", () => {
     const result = await core.deliberate("Test");
     expect(result.synthesis).toBe("Synthesized.");
   });
+
+  it("runs extraction pass and passes XML payload to probes when messages array is provided", async () => {
+    const receivedUsers: Record<string, string> = {};
+    const mockExtractionJson = JSON.stringify({
+      userIntentAndMotive: "Test extraction integration",
+      activeConstraintsAndGuards: "read-only",
+      verifiedFactsInventory: "facts clean",
+      evidenceFreshnessDelta: "no delta",
+      clarityAndAmbiguityScore: "CLEAR",
+    });
+
+    const callFn: ModelCallFn = async (modelKey, _system, user) => {
+      receivedUsers[modelKey] = user;
+      if (modelKey === "extraction") {
+        return mockExtractionJson;
+      }
+      return "WARN Reality check passed.";
+    };
+
+    const core = new ConsortiumCore(baseConfig, callFn);
+    const messages = [
+      { role: "user" as const, content: "Test extraction integration", timestamp: Date.now() },
+    ];
+
+    const result = await core.deliberate(messages);
+
+    expect(receivedUsers["extraction"]).toBeDefined();
+    expect(receivedUsers["probe:0"]).toContain("<probe_input_payload>");
+    expect(receivedUsers["probe:0"]).toContain("<user_intent_motive>Test extraction integration</user_intent_motive>");
+    expect(result.extractedContext).toBeDefined();
+    expect(result.extractedContext?.userIntentAndMotive).toBe("Test extraction integration");
+  });
 });

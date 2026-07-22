@@ -3,7 +3,7 @@ node_modules/
 dist/
 
 # Local pi artifacts
-.pi/consortium/
+.pi/
 .scan-results/
 
 # Raw runtime artifacts
