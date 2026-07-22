@@ -109,78 +109,59 @@ export function formatProgressText(phase: string, current: number, total: number
   }
 }
 
-/** Format deliberation result or skip reason into widget lines for persistent TUI display. */
-export function formatWidgetLines(result: DeliberationResult): string[] {
-  const lines: string[] = [];
-  if (result.skippedByGovernor) {
-    lines.push(`◇ Consortium deliberation — skipped (${result.governorReason || "governor gate"})`);
-    return lines;
-  }
-  if (result.synthesis.trim().startsWith("NO_CONTRIBUTION")) {
-    lines.push(`◇ Consortium deliberation — 0/${result.probes.length} probes contributed (nothing to add)`);
-    return lines;
-  }
-  const contributions = result.probes.filter((p) => !p.text.trim().startsWith("NO_CONTRIBUTION")).length;
-  lines.push(`◇ Consortium deliberation — ${contributions}/${result.probes.length} probes contributed`);
-
-  const probeMap = new Map(result.probes.map((p) => [p.role, p]));
-  for (const role of CANONICAL_PROBE_ORDER) {
-    const probe = probeMap.get(role);
-    if (!probe) continue;
-    if (probe.text.trim().startsWith("NO_CONTRIBUTION")) {
-      lines.push(`  ${role}: NO_CONTRIBUTION`);
-    } else {
-      const text = probe.text.trim();
-      const tagMatch = /^(INFO|WARN|BLOCK)\s+(.*)/.exec(text);
-      if (tagMatch) {
-        const [, tag, body] = tagMatch;
-        lines.push(`  ${role} (${tag}): ${body}`);
-      } else {
-        lines.push(`  ${role}: ${text}`);
-      }
-    }
-  }
-
-  const synthPreview = result.synthesis.length > 200
-    ? result.synthesis.slice(0, 200) + "…"
-    : result.synthesis;
-  lines.push(`  synthesis: ${synthPreview}`);
-
-  return lines;
-}
-
-/** Format a visible TUI notification — probe details + synthesis. */
+/** Format a visible TUI notification — extracted context, skip info, probe details + synthesis. */
 export function formatVisibleMessage(result: DeliberationResult): string {
   const lines: string[] = [];
 
   // Header
-  const contributions = result.probes.filter((p) => !p.text.trim().startsWith("NO_CONTRIBUTION")).length;
-  lines.push(`◇ Consortium deliberation — ${contributions}/${result.probes.length} probes contributed`);
-
-  // Probe outputs in canonical (alphabetical) order
-  const probeMap = new Map(result.probes.map((p) => [p.role, p]));
-  for (const role of CANONICAL_PROBE_ORDER) {
-    const probe = probeMap.get(role);
-    if (!probe) continue;
-    if (probe.text.trim().startsWith("NO_CONTRIBUTION")) {
-      lines.push(`  ${role}: NO_CONTRIBUTION`);
-    } else {
-      const text = probe.text.trim();
-      const tagMatch = /^(INFO|WARN|BLOCK)\s+(.*)/.exec(text);
-      if (tagMatch) {
-        const [, tag, body] = tagMatch;
-        lines.push(`  ${role} (${tag}): ${body}`);
-      } else {
-        lines.push(`  ${role}: ${text}`);
-      }
-    }
+  if (result.skippedByGovernor) {
+    lines.push(`◇ Consortium deliberation — skipped (${result.governorReason || "governor gate"})`);
+  } else if (result.synthesis.trim().startsWith("NO_CONTRIBUTION")) {
+    lines.push(`◇ Consortium deliberation — 0/${result.probes.length} probes contributed (nothing to add)`);
+  } else {
+    const contributions = result.probes.filter((p) => !p.text.trim().startsWith("NO_CONTRIBUTION")).length;
+    lines.push(`◇ Consortium deliberation — ${contributions}/${result.probes.length} probes contributed`);
   }
 
-  // Synthesis
-  const synthPreview = result.synthesis.length > 200
-    ? result.synthesis.slice(0, 200) + "…"
-    : result.synthesis;
-  lines.push(`  synthesis: ${synthPreview}`);
+  // Extracted Context
+  if (result.extractedContext) {
+    const ec = result.extractedContext;
+    lines.push(`  Extracted Context:`);
+    lines.push(`   • Intent & Motive: ${ec.userIntentAndMotive}`);
+    lines.push(`   • Active Constraints & Guards: ${ec.activeConstraintsAndGuards}`);
+    lines.push(`   • Verified Facts Inventory: ${ec.verifiedFactsInventory}`);
+    lines.push(`   • Evidence Freshness Delta: ${ec.evidenceFreshnessDelta}`);
+    const clarity = ec.missingDetails ? `${ec.clarityAndAmbiguityScore} (${ec.missingDetails})` : ec.clarityAndAmbiguityScore;
+    lines.push(`   • Clarity Score: ${clarity}`);
+  }
+
+  // Probe outputs (only if probes ran)
+  if (result.probes.length > 0) {
+    lines.push(`  Probes:`);
+    const probeMap = new Map(result.probes.map((p) => [p.role, p]));
+    for (const role of CANONICAL_PROBE_ORDER) {
+      const probe = probeMap.get(role);
+      if (!probe) continue;
+      if (probe.text.trim().startsWith("NO_CONTRIBUTION")) {
+        lines.push(`   ${role}: NO_CONTRIBUTION`);
+      } else {
+        const text = probe.text.trim();
+        const tagMatch = /^(INFO|WARN|BLOCK)\s+(.*)/.exec(text);
+        if (tagMatch) {
+          const [, tag, body] = tagMatch;
+          lines.push(`   ${role} (${tag}): ${body}`);
+        } else {
+          lines.push(`   ${role}: ${text}`);
+        }
+      }
+    }
+
+    // Synthesis
+    const synthPreview = result.synthesis.length > 200
+      ? result.synthesis.slice(0, 200) + "…"
+      : result.synthesis;
+    lines.push(`  synthesis: ${synthPreview}`);
+  }
 
   // Errors
   if (result.errors?.length) {

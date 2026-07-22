@@ -3,6 +3,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { ConsortiumCore, type ModelCallFn } from "../src/core.js";
 import type { ConsortiumConfig } from "../src/types.js";
+import { formatVisibleMessage } from "../src/ui.js";
 
 const baseConfig: ConsortiumConfig = {
   probes: [
@@ -88,5 +89,58 @@ describe("ConsortiumCore progress callback", () => {
     // Synthesis is skipped when all NO_CONTRIBUTION
     expect(onProgress).not.toHaveBeenCalledWith("synthesis", 0, 1);
     expect(onProgress).toHaveBeenCalledWith("complete", 0, 0);
+  });
+});
+
+describe("formatVisibleMessage", () => {
+  it("formats governor skip message with extracted context vectors", () => {
+    const msg = formatVisibleMessage({
+      probes: [],
+      synthesis: "NO_CONTRIBUTION",
+      skippedByGovernor: true,
+      governorReason: "Routine status report",
+      extractedContext: {
+        userIntentAndMotive: "Check git status",
+        activeConstraintsAndGuards: "Read-only mode",
+        verifiedFactsInventory: "Clean working tree",
+        evidenceFreshnessDelta: "Fresh",
+        clarityAndAmbiguityScore: "CLEAR",
+      },
+    });
+
+    expect(msg).toContain("◇ Consortium deliberation — skipped (Routine status report)");
+    expect(msg).toContain("Extracted Context:");
+    expect(msg).toContain("• Intent & Motive: Check git status");
+    expect(msg).toContain("• Active Constraints & Guards: Read-only mode");
+    expect(msg).toContain("• Verified Facts Inventory: Clean working tree");
+    expect(msg).toContain("• Evidence Freshness Delta: Fresh");
+    expect(msg).toContain("• Clarity Score: CLEAR");
+  });
+
+  it("formats full deliberation message with extracted context, probes, and synthesis", () => {
+    const msg = formatVisibleMessage({
+      probes: [
+        { role: "clarifier", text: "NO_CONTRIBUTION" },
+        { role: "contrarian", text: "WARN Verify lockfile integrity" },
+      ],
+      synthesis: "WARN Verify lockfile before push",
+      extractedContext: {
+        userIntentAndMotive: "Security audit fix",
+        activeConstraintsAndGuards: "No breaking changes",
+        verifiedFactsInventory: "Tests green",
+        evidenceFreshnessDelta: "Verified",
+        clarityAndAmbiguityScore: "AMBIGUOUS",
+        missingDetails: "Target environment version",
+      },
+    });
+
+    expect(msg).toContain("◇ Consortium deliberation — 1/2 probes contributed");
+    expect(msg).toContain("Extracted Context:");
+    expect(msg).toContain("• Intent & Motive: Security audit fix");
+    expect(msg).toContain("• Clarity Score: AMBIGUOUS (Target environment version)");
+    expect(msg).toContain("Probes:");
+    expect(msg).toContain("clarifier: NO_CONTRIBUTION");
+    expect(msg).toContain("contrarian (WARN): Verify lockfile integrity");
+    expect(msg).toContain("synthesis: WARN Verify lockfile before push");
   });
 });
