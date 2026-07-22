@@ -1,7 +1,7 @@
 // Tests for XML payload formatting and context builders in src/context.ts.
 
 import { describe, expect, it } from "vitest";
-import { buildProbeInputXml, buildUserContextFromMessages } from "../src/context.js";
+import { buildProbeInputXml, buildUserContextFromMessages, formatAgentMessageContent, truncateHeadTail } from "../src/context.js";
 import type { ExtractedContext } from "../src/types.js";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 
@@ -79,5 +79,40 @@ describe("src/context.ts", () => {
     const legacy = buildUserContextFromMessages(sampleMessages);
     expect(legacy).not.toBeNull();
     expect(legacy).toContain("Conversation context");
+  });
+
+  it("truncateHeadTail preserves both head and tail while capping total length", () => {
+    const headText = "HEAD_START: Initial setup log line.";
+    const tailText = "TAIL_END: Final exit code 1 build error.";
+    const middleText = "M".repeat(5000);
+    const fullText = `${headText}\n${middleText}\n${tailText}`;
+
+    const truncated = truncateHeadTail(fullText, 200);
+
+    expect(truncated).toContain("HEAD_START");
+    expect(truncated).toContain("TAIL_END");
+    expect(truncated).toContain("... [truncated");
+    expect(truncated.length).toBeLessThanOrEqual(250);
+  });
+
+  it("formatAgentMessageContent applies head+tail cap to massive tool_result content", () => {
+    const headMark = "TOOL_HEAD_OUTPUT_START";
+    const tailMark = "TOOL_TAIL_OUTPUT_END";
+    const hugeBody = "X".repeat(10000);
+    const hugeToolResult = `${headMark}\n${hugeBody}\n${tailMark}`;
+
+    const messageWithHugeResult: AgentMessage = {
+      role: "assistant",
+      content: [
+        { type: "tool_result", content: hugeToolResult },
+      ],
+      timestamp: Date.now(),
+    } as any;
+
+    const formatted = formatAgentMessageContent(messageWithHugeResult, 500);
+
+    expect(formatted).toContain("TOOL_HEAD_OUTPUT_START");
+    expect(formatted).toContain("TOOL_TAIL_OUTPUT_END");
+    expect(formatted).toContain("... [truncated");
   });
 });

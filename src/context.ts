@@ -4,12 +4,24 @@ import type { InputEvent, ExtensionContext } from "@earendil-works/pi-coding-age
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { ExtractedContext } from "./types.js";
 
+/** Helper to apply head+tail truncation to long content strings while preserving head and tail. */
+export function truncateHeadTail(text: string, maxChars = 2000): string {
+  if (text.length <= maxChars) return text;
+  const estimatedMarkerLen = 45;
+  const targetHalf = Math.floor((maxChars - estimatedMarkerLen) / 2);
+  const headLen = Math.max(50, targetHalf);
+  const tailLen = Math.max(50, targetHalf);
+  const cutCount = text.length - (headLen + tailLen);
+  if (cutCount <= 0) return text;
+  return `${text.slice(0, headLen)}\n... [truncated ${cutCount} characters] ...\n${text.slice(-tailLen)}`;
+}
+
 /** Cleanly format an AgentMessage content block into readable text for context and probe payloads. */
-export function formatAgentMessageContent(m: AgentMessage, maxChars = 1500): string {
+export function formatAgentMessageContent(m: AgentMessage, maxChars = 2000): string {
   let content = "";
   if ("command" in m && "output" in m && typeof m.output === "string") {
     const cmd = (m as any).command;
-    const out = (m as any).output.length > maxChars ? (m as any).output.slice(0, maxChars) + "... [truncated]" : (m as any).output;
+    const out = truncateHeadTail((m as any).output, maxChars);
     content = `> ${cmd}\n${out}`;
   } else if ("content" in m) {
     const msg = m as { content: unknown };
@@ -23,7 +35,7 @@ export function formatAgentMessageContent(m: AgentMessage, maxChars = 1500): str
         if (c.type === "tool_use") return `[tool_use: ${c.name || "unknown"}]`;
         if (c.type === "tool_result") {
           const res = typeof c.content === "string" ? c.content : JSON.stringify(c.content);
-          return `[tool_result]: ${res}`;
+          return `[tool_result]: ${truncateHeadTail(res, maxChars)}`;
         }
         return JSON.stringify(c);
       });
@@ -36,7 +48,7 @@ export function formatAgentMessageContent(m: AgentMessage, maxChars = 1500): str
   }
 
   if (content.length > maxChars) {
-    content = content.slice(0, maxChars) + "... [truncated]";
+    content = truncateHeadTail(content, maxChars);
   }
   return content;
 }
@@ -65,7 +77,7 @@ export function buildUserContextFromMessages(messages: AgentMessage[]): string |
   const recent = messages;
   const lines = recent.map((m) => {
     const role = String(m.role).toUpperCase();
-    const content = formatAgentMessageContent(m, 1500);
+    const content = formatAgentMessageContent(m, 2000);
     return `[${role}] ${content}`;
   });
 
@@ -94,7 +106,7 @@ export function buildProbeInputXml(
   const historyText = messages
     .map((m) => {
       const role = String(m.role).toUpperCase();
-      const content = formatAgentMessageContent(m, 1500);
+      const content = formatAgentMessageContent(m, 2000);
       return `[${role}] ${content}`;
     })
     .join("\n\n");
