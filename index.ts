@@ -20,13 +20,18 @@ import { callModelWithAuth } from "./src/model.js";
 import { DEFAULT_CONFIG } from "./src/config.js";
 import { buildUserContext, buildUserContextFromMessages } from "./src/context.js";
 import { ConsortiumLogger, createProgressCallback, formatVisibleMessage } from "./src/ui.js";
-import type { ConsortiumConfig, TurnState, DeliberationResult } from "./src/types.js";
+import type { ConsortiumConfig, TurnState, DeliberationResult, GovernorMode } from "./src/types.js";
 import { join, dirname } from "node:path";
 import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 
 export default function (pi: ExtensionAPI): void {
   let enabled = true;
+  let governorMode: GovernorMode = "smart_extractor";
+  let maxTurnGap = 20;
+  let periodicInterval = 3;
+  let turnsSinceLastAudit = 0;
+
   let turnState: TurnState = { deliberation: null };
   let lastExtractedContext: DeliberationResult["extractedContext"] | null = null;
   let logger: ConsortiumLogger | null = null;
@@ -34,15 +39,17 @@ export default function (pi: ExtensionAPI): void {
   // Queue writes sequentially to prevent race conditions between rapid toggles.
   let persistPending: Promise<void> = Promise.resolve();
 
-  async function persistEnabled(cwd: string, value: boolean): Promise<void> {
-    // Chain writes sequentially so they never race.
+  async function persistSettings(
+    cwd: string,
+    opts: { enabled?: boolean; governorMode?: GovernorMode; maxTurnGap?: number; periodicInterval?: number },
+  ): Promise<void> {
     persistPending = persistPending.then(async () => {
       try {
         const dir = join(cwd, ".pi");
         try {
           await mkdir(dir, { recursive: true });
         } catch {
-          // Directory exists or mkdir failed — best effort.
+          // Directory exists or mkdir failed.
         }
         const p = join(dir, "settings.json");
         const tmp = p + ".tmp";
@@ -55,15 +62,27 @@ export default function (pi: ExtensionAPI): void {
             // Corrupted file — overwrite.
           }
         }
-        s.consortium = value;
+
+        let existingConsortium: Record<string, unknown> = {};
+        if (typeof s.consortium === "object" && s.consortium !== null) {
+          existingConsortium = s.consortium as Record<string, unknown>;
+        } else if (typeof s.consortium === "boolean") {
+          existingConsortium = { enabled: s.consortium };
+        }
+
+        s.consortium = {
+          enabled: opts.enabled !== undefined ? opts.enabled : (existingConsortium.enabled ?? enabled),
+          governorMode: opts.governorMode !== undefined ? opts.governorMode : (existingConsortium.governorMode ?? governorMode),
+          maxTurnGap: opts.maxTurnGap !== undefined ? opts.maxTurnGap : (existingConsortium.maxTurnGap ?? maxTurnGap),
+          periodicInterval: opts.periodicInterval !== undefined ? opts.periodicInterval : (existingConsortium.periodicInterval ?? periodicInterval),
+        };
+
         await writeFile(tmp, JSON.stringify(s, null, 2) + "\n");
-        await rename(tmp, p); // Atomic on POSIX.
+        await rename(tmp, p);
       } catch {
         // Best-effort persistence.
       }
     });
-    // Wait for this write to complete so the command handler doesn't proceed
-    // while a stale read is in flight.
     await persistPending;
   }
 
@@ -73,8 +92,16 @@ export default function (pi: ExtensionAPI): void {
       if (!existsSync(p)) return;
       const raw = await readFile(p, "utf-8");
       const s = JSON.parse(raw);
-      if (s.consortium !== undefined) {
-        enabled = !!s.consortium;
+      if (typeof s.consortium === "boolean") {
+        enabled = s.consortium;
+      } else if (typeof s.consortium === "object" && s.consortium !== null) {
+        if (s.consortium.enabled !== undefined) enabled = !!s.consortium.enabled;
+        if (s.consortium.governorMode !== undefined) governorMode = s.consortium.governorMode as GovernorMode;
+        if (typeof s.consortium.maxTurnGap === "number") maxTurnGap = s.consortium.maxTurnGap;
+        if (typeof s.consortium.periodicInterval === "number") periodicInterval = s.consortium.periodicInterval;
+      }
+      if (!enabled && ctx.hasUI) {
+        ctx.ui.setStatus("consortium", "consortium: disabled");
       }
     } catch {
       // Default to enabled — fail open for safety.
@@ -103,6 +130,9 @@ export default function (pi: ExtensionAPI): void {
   // On first LLM call of the turn, await deliberation and inject.
   pi.on("context", async (event: ContextEvent, ctx: ExtensionContext) => {
     if (!enabled) {
+      if (ctx.hasUI) {
+        ctx.ui.setStatus("consortium", "consortium: disabled");
+      }
       return;
     }
     if (turnState.deliberation) {
@@ -119,10 +149,39 @@ export default function (pi: ExtensionAPI): void {
     }
 
     const onProgress = createProgressCallback(ctx);
-    turnState.deliberation = runDeliberation(DEFAULT_CONFIG, event.messages, ctx, logger, onProgress);
+    const runtimeConfig = {
+      ...DEFAULT_CONFIG,
+      governorMode,
+      maxTurnGap,
+      periodicInterval,
+    };
+
+    turnState.deliberation = runDeliberation(runtimeConfig, event.messages, ctx, logger, onProgress, turnsSinceLastAudit);
 
     try {
       const result = await turnState.deliberation;
+
+      if (result.skippedByGovernor) {
+        turnState.deliberation = null;
+        lastExtractedContext = result.extractedContext ?? null;
+        turnsSinceLastAudit++;
+        if (result.extractedContext) {
+          logger?.logExtraction(result.extractedContext);
+        }
+        logger?.log({
+          type: "injection_skipped",
+          reason: result.governorReason || "SKIPPED_BY_GOVERNOR",
+          probe_count: 0,
+          extractedContext: result.extractedContext,
+        });
+        if (ctx.hasUI) {
+          ctx.ui.setStatus("consortium", `consortium: ⏭ skipped (${result.governorReason || "governor gate"})`);
+        }
+        return;
+      }
+
+      // Full probe audit ran — reset turn counter gap
+      turnsSinceLastAudit = 0;
 
       if (result.synthesis.trim().startsWith("NO_CONTRIBUTION")) {
         turnState.deliberation = null;
@@ -136,7 +195,9 @@ export default function (pi: ExtensionAPI): void {
           probe_count: result.probes.length,
           extractedContext: result.extractedContext,
         });
-        ctx.ui.setStatus("consortium", "⏭ skipped (nothing to add)");
+        if (ctx.hasUI) {
+          ctx.ui.setStatus("consortium", "consortium: ✓ complete (nothing to add)");
+        }
         return;
       }
 
@@ -184,25 +245,38 @@ export default function (pi: ExtensionAPI): void {
       }
 
       if (result.errors) {
-        ctx.ui.setStatus("consortium", `⚠ Deliberation had ${result.errors.length} error(s)`);
+        if (ctx.hasUI) {
+          ctx.ui.setStatus("consortium", `consortium: ⚠ ${result.errors.length} error(s)`);
+        }
       } else {
-        ctx.ui.setStatus("consortium", "✓ Deliberation complete");
+        if (ctx.hasUI) {
+          ctx.ui.setStatus("consortium", "consortium: ✓ complete");
+        }
       }
 
       return { messages };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       logger?.log({ type: "deliberation_failed", error: msg });
-      ctx.ui.setStatus("consortium", `✖ Deliberation failed: ${msg}`);
+      if (ctx.hasUI) {
+        ctx.ui.setStatus("consortium", `consortium: ✖ failed: ${msg}`);
+      }
       turnState.deliberation = null;
       return;
     }
   });
 
   pi.registerCommand("ai-consortium", {
-    description: "Show consortium deliberation status (on/off)",
+    description: "Show consortium deliberation status and governor mode",
     handler: async (_args, ctx) => {
-      ctx.ui.notify(`Consortium: ${enabled ? "enabled" : "disabled"}`, "info");
+      const info = [
+        `Consortium: ${enabled ? "enabled" : "disabled"}`,
+        `Governor Mode: ${governorMode}`,
+        `Max Turn Gap (Safety Net): ${maxTurnGap}`,
+        `Periodic Interval: ${periodicInterval}`,
+        `Turns Since Last Full Audit: ${turnsSinceLastAudit}`,
+      ].join("\n");
+      ctx.ui.notify(info, "info");
     },
   });
 
@@ -210,7 +284,10 @@ export default function (pi: ExtensionAPI): void {
     description: "Enable consortium deliberation",
     handler: async (_args, ctx) => {
       enabled = true;
-      await persistEnabled(ctx.cwd, true);
+      await persistSettings(ctx.cwd, { enabled: true });
+      if (ctx.hasUI) {
+        ctx.ui.setStatus("consortium", undefined);
+      }
       ctx.ui.notify("Consortium enabled", "info");
     },
   });
@@ -219,8 +296,34 @@ export default function (pi: ExtensionAPI): void {
     description: "Disable consortium deliberation",
     handler: async (_args, ctx) => {
       enabled = false;
-      await persistEnabled(ctx.cwd, false);
+      await persistSettings(ctx.cwd, { enabled: false });
+      if (ctx.hasUI) {
+        ctx.ui.setStatus("consortium", "consortium: disabled");
+      }
       ctx.ui.notify("Consortium disabled", "info");
+    },
+  });
+
+  pi.registerCommand("ai-consortium-cadence", {
+    description: "Set governor cadence mode: smart_extractor | always | periodic [N] | manual",
+    handler: async (args, ctx) => {
+      const parts = args.trim().split(/\s+/);
+      const mode = parts[0]?.toLowerCase() as GovernorMode | undefined;
+
+      if (!mode || !["smart_extractor", "always", "periodic", "manual"].includes(mode)) {
+        ctx.ui.notify("Usage: /ai-consortium-cadence <smart_extractor | always | periodic [N] | manual>", "warning");
+        return;
+      }
+
+      governorMode = mode;
+      let newInterval = periodicInterval;
+      if (mode === "periodic" && parts[1] && !isNaN(parseInt(parts[1], 10))) {
+        newInterval = parseInt(parts[1], 10);
+        periodicInterval = newInterval;
+      }
+
+      await persistSettings(ctx.cwd, { governorMode, periodicInterval: newInterval });
+      ctx.ui.notify(`Governor mode set to: ${governorMode}${governorMode === "periodic" ? ` (${periodicInterval} turns)` : ""}`, "info");
     },
   });
 
@@ -252,6 +355,7 @@ async function runDeliberation(
   ctx: ExtensionContext,
   logger: ConsortiumLogger,
   onProgress?: (phase: string, current: number, total: number, role?: string) => void,
+  turnsSinceLastAudit: number = 0,
 ): Promise<DeliberationResult> {
   const activeModel = ctx.model;
   if (!activeModel) {
@@ -314,7 +418,7 @@ async function runDeliberation(
   };
 
   const core = new ConsortiumCore(config, callModel);
-  return core.deliberate(input, ctx.signal, onProgress);
+  return core.deliberate(input, ctx.signal, onProgress, turnsSinceLastAudit);
 }
 
 /** Resolve provider + modelId from a modelKey string. */

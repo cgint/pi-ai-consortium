@@ -51,11 +51,25 @@ LLM history + new input
 
 | Command | Behavior |
 |---------|----------|
-| `/ai-consortium` | Show current status (enabled/disabled) |
+| `/ai-consortium` | Show current status, governor mode, turn gap stats |
 | `/ai-consortium-on` | Enable deliberation |
 | `/ai-consortium-off` | Disable deliberation |
+| `/ai-consortium-cadence <mode>` | Set governor mode: `smart_extractor`, `always`, `periodic [N]`, `manual` |
+| `/ai-consortium-context` | Inspect last turn's 5 context vectors + governor signal |
 
-State persists in `.pi/settings.json` under the `consortium` key and survives reloads. Defaults to **enabled**.
+State persists in `.pi/settings.json` under the `consortium` key and survives reloads. Defaults to **enabled** with `smart_extractor` governor mode.
+
+## Governor & Cadence Control
+
+To prevent high token consumption and latency on simple or routine turns, `pi-ai-consortium` includes a **Deliberation Governor**:
+
+1. **`smart_extractor` (Default):** The fast Phase 0 Context Extraction pass inspects transcript history and outputs a `deliberationNeeded` signal. On routine turns (e.g. conversational acknowledgments, status checks), it skips the 5 probes and synthesis pass entirely, saving ~85% of token/API calls.
+2. **Max Turn Gap (Safety Net):** Every 20 turns (`maxTurnGap: 20`), the governor forces a full 5-probe deliberation pass regardless of the extraction signal to guarantee periodic safety auditing over long sessions.
+3. **Modes:**
+   - `smart_extractor`: Semantic extraction gate + 20-turn safety net.
+   - `always`: Full deliberation on every turn.
+   - `periodic N`: Deliberate every N turns.
+   - `manual`: Deliberate only when manually triggered.
 
 ## Key design
 
@@ -84,7 +98,7 @@ After deliberation, a notification line appears in the TUI chat showing each pro
   synthesis: Run tests before committing — current approach risks breaking existing test suite.
 ```
 
-If all probes return `NO_CONTRIBUTION`, the status bar shows `⏭ skipped (nothing to add)`.
+If all probes return `NO_CONTRIBUTION`, the status bar shows `consortium: ✓ complete (nothing to add)`.
 
 ## Project structure (extension code)
 

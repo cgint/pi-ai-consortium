@@ -63,7 +63,7 @@ describe("consortium enabled/disabled toggle", () => {
       model: { provider: "test", id: "model" },
       modelRegistry: {},
       signal: new AbortController().signal,
-      hasUI: false,
+      hasUI: true,
       ui: { setStatus: vi.fn(), notify: vi.fn() },
     };
 
@@ -71,12 +71,15 @@ describe("consortium enabled/disabled toggle", () => {
     const offHandler = commands.get("ai-consortium-off")!.handler;
     await offHandler("", ctx);
 
+    expect(ctx.ui.setStatus).toHaveBeenCalledWith("consortium", "consortium: disabled");
+
     // Context handler should return undefined (no modification)
     const result = await contextHandler({ messages: original }, ctx);
 
     expect(result).toBeUndefined();
     // Deliberation must NOT have been called
     expect(deliberate).not.toHaveBeenCalled();
+    expect(ctx.ui.setStatus).toHaveBeenCalledWith("consortium", "consortium: disabled");
   });
 
   it("proceeds with deliberation when enabled", async () => {
