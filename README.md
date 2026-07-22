@@ -2,8 +2,17 @@
 
 Multi-model deliberation engine for Pi coding agent. Part of the **Deliberate Agent** federation.
 
+> **North Star & Philosophy:** [`docs/philosophy-and-north-star.md`](docs/philosophy-and-north-star.md)  
 > **Charter:** [`../deliberate-agent/CHARTER.md`](../deliberate-agent/CHARTER.md)  
-> **Concept docs:** [`../concepts/pi-ai-consortium/`](../concepts/pi-ai-consortium/)
+> **Concept docs:** [`docs/preparation-prompt-concept.md`](docs/preparation-prompt-concept.md)
+
+## North Star: Beyond "Just the LLM Call"
+
+A single LLM call is fragile—vulnerable to **optimistic bias, sycophancy loops, action momentum, and stale evidence drift**. When an agent acts alone, it easily convinces itself that passing unit tests or review bot praise means the system works, leading to premature merges and broken live features.
+
+The Consortium transforms execution: **every step is more than "just an LLM call"—it is a multi-perspective deliberation engine**. Before the agent generates a response or executes a tool, independent probes interrogate the state from distinct angles (`Contrarian`, `Architect`, `Clarifier`, `Responder`, `Navigator`), catching stale evidence, sycophantic flattery, and action drift before code is touched.
+
+For full architectural principles, read the [North Star & Philosophy Document](docs/philosophy-and-north-star.md).
 
 ## What it does
 
