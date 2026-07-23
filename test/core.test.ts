@@ -27,6 +27,69 @@ const baseConfig: ConsortiumConfig = {
 };
 
 describe("ConsortiumCore", () => {
+  it("skips extraction and probe execution entirely in periodic mode when interval is not reached", async () => {
+    let extractionExecuted = false;
+    let probeExecuted = false;
+
+    const callFn: ModelCallFn = async (modelKey) => {
+      if (modelKey === "extraction") {
+        extractionExecuted = true;
+        return "{}";
+      }
+      probeExecuted = true;
+      return "WARN Probe output";
+    };
+
+    const core = new ConsortiumCore(
+      { ...baseConfig, governorMode: "periodic", periodicInterval: 10 },
+      callFn,
+    );
+    const messages = [{ role: "user" as const, content: "Hello", timestamp: Date.now() }];
+
+    // Turn gap 2 (interval is 10) -> skip extraction & probes completely
+    const result = await core.deliberate(messages, undefined, undefined, 2);
+
+    expect(result.skippedByGovernor).toBe(true);
+    expect(result.governorReason).toContain("Periodic turn interval (10) not reached (2/10)");
+    expect(result.extractedContext).toBeUndefined();
+    expect(extractionExecuted).toBe(false);
+    expect(probeExecuted).toBe(false);
+  });
+
+  it("runs extraction and probe execution in periodic mode when interval is reached", async () => {
+    let extractionExecuted = false;
+    let probeExecuted = false;
+
+    const callFn: ModelCallFn = async (modelKey) => {
+      if (modelKey === "extraction") {
+        extractionExecuted = true;
+        return JSON.stringify({
+          userIntentAndMotive: "Periodic trigger",
+          activeConstraintsAndGuards: "None",
+          verifiedFactsInventory: "Facts",
+          evidenceFreshnessDelta: "Fresh",
+          clarityAndAmbiguityScore: "CLEAR",
+        });
+      }
+      probeExecuted = true;
+      return "WARN Periodic audit findings";
+    };
+
+    const core = new ConsortiumCore(
+      { ...baseConfig, governorMode: "periodic", periodicInterval: 10 },
+      callFn,
+    );
+    const messages = [{ role: "user" as const, content: "Hello", timestamp: Date.now() }];
+
+    // Turn gap 10 (interval is 10) -> run extraction and probes
+    const result = await core.deliberate(messages, undefined, undefined, 10);
+
+    expect(result.skippedByGovernor).toBeUndefined();
+    expect(result.extractedContext?.userIntentAndMotive).toBe("Periodic trigger");
+    expect(extractionExecuted).toBe(true);
+    expect(probeExecuted).toBe(true);
+  });
+
   it("skips probe execution when governor decides deliberation is not needed", async () => {
     let probeExecuted = false;
     const callFn: ModelCallFn = async (modelKey) => {

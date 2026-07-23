@@ -58,6 +58,20 @@ export class ConsortiumCore {
     const errors: string[] = [];
     const probeTotal = this.config.probes.length;
 
+    // Phase 0.5 (Pre-check): Evaluate governor gate before extraction if context is not required (e.g. periodic or manual mode)
+    const preGovernorDecision = shouldDeliberate(this.config, undefined, turnsSinceLastAudit);
+    if (!preGovernorDecision.shouldDeliberate) {
+      onProgress?.("complete", 0, 0);
+      return {
+        probes: [],
+        synthesis: "NO_CONTRIBUTION",
+        extractedContext: undefined,
+        skippedByGovernor: true,
+        governorReason: preGovernorDecision.reason,
+        errors: errors.length > 0 ? errors : undefined,
+      };
+    }
+
     let userContext: string;
     let extractedContext: ExtractedContext | undefined;
 
@@ -76,7 +90,7 @@ export class ConsortiumCore {
       userContext = input;
     }
 
-    // Phase 0.5: Governor Gate
+    // Phase 0.5 (Post-extraction): Re-evaluate governor gate with extracted context (e.g. for smart_extractor mode)
     const governorDecision = shouldDeliberate(this.config, extractedContext, turnsSinceLastAudit);
     if (!governorDecision.shouldDeliberate) {
       onProgress?.("complete", 0, 0);
