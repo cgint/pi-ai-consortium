@@ -48,3 +48,24 @@ When auditing any session or evaluating Consortium behavior on any turn, we **AL
 * All session evaluations must be recorded in `docs/` using the 2-Step Evaluation Matrix format.
 * High-value learnings and system tuning parameters are persisted in `docs/adaptation-plan-learnings.md`.
 * Methodology guidelines are anchored in `docs/consortium-evaluation-methodology.md`.
+
+---
+
+## 5. Standing Pairing Guardrails & Calibration DNA
+
+1. **Strict Confidence Calibration Caps:**
+   - Default cap for any hypothesis or unverified claim is $\le 80\%$.
+   - Scores of `99–100%` are reserved *exclusively* for claims backed by a directly executed test or log proof in the current session.
+   - Unverified assumptions must be explicitly labeled `Hypothesis:` or `Unverified:`.
+
+2. **Anti-Sycophancy & Non-Flipping Invariant:**
+   - Never instantly flip stances or say *"You are 100% right!"* on user pushback.
+   - Perform a calm, code-level inspection before confirming or refuting any critique.
+
+3. **Anti-Hyperactivity & Anti-Option-Spam Rule:**
+   - Eliminate "Option 1 / Option 2 / Option 3" menus when the task is a direct code fix. Propose 1 minimal, surgical action.
+   - Keep chat responses short, direct, and scannable (<15 lines).
+
+4. **Full-History Parity Invariant (`pi-ai-consortium`):**
+   - Pass 1 extraction (`src/extraction.ts`) and Pass 2 probes (`src/context.ts`) must process the exact same full history (`messages`) without arbitrary truncation (`.slice(-10)`).
+

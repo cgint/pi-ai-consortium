@@ -111,6 +111,36 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     expect(ctx.userRequirements).toContain("New requirement");
   });
 
+  it("passes complete conversation history (>10 messages) to LLM without truncation", async () => {
+    let receivedUserPrompt = "";
+    const mockCallFn: ModelCallFn = async (_key, _system, user) => {
+      receivedUserPrompt = user;
+      return JSON.stringify({
+        userRequirements: ["Earliest Turn 1 Goal", "Latest Turn 15 Goal"],
+        deliverables: [],
+        revisedOrSupersededDirection: [],
+        userDecisions: [],
+        questionsAndInformationGaps: [],
+        controlBoundaries: [],
+        observedWork: [],
+        observedCriticalFacts: [],
+        relevantLearnings: [],
+        deliberationNeeded: true,
+      });
+    };
+
+    const messages: AgentMessage[] = Array.from({ length: 15 }, (_, i) => ({
+      role: i % 2 === 0 ? "user" : "assistant",
+      content: `Message ${i + 1}: Turn detail for item ${i + 1}`,
+      timestamp: Date.now() + i * 1000,
+    }));
+
+    await extractContextFromMessages(messages, mockCallFn);
+
+    expect(receivedUserPrompt).toContain("Message 1: Turn detail for item 1");
+    expect(receivedUserPrompt).toContain("Message 15: Turn detail for item 15");
+  });
+
   it("falls back gracefully to default 9-slot context on LLM call failure", async () => {
     const failingCallFn: ModelCallFn = async () => {
       throw new Error("API network failure");

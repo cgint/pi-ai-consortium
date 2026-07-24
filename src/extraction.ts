@@ -85,7 +85,6 @@ export async function extractContextFromMessages(
   }
 
   const formattedHistory = messages
-    .slice(-10)
     .map((m) => {
       const role = String(m.role).toUpperCase();
       let content = "";
