@@ -387,7 +387,7 @@ describe("ConsortiumCore", () => {
     const result = await core.deliberate(messages);
 
     expect(receivedUsers["extraction"]).toBeDefined();
-    expect(receivedUsers["probe:0"]).toContain("<probe_input_payload>");
+    expect(receivedUsers["probe:0"].startsWith("<historical_observed_past>")).toBe(true);
     expect(receivedUsers["probe:0"]).toContain("<durable_user_intent_and_constraints>");
     expect(receivedUsers["probe:0"]).toContain("<user_requirements>");
     expect(receivedUsers["probe:0"]).toContain("Test extraction integration");

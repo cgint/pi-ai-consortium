@@ -26,8 +26,8 @@ describe("src/context.ts", () => {
   it("builds XML probe payload with explicit tags for 9 strategic context vectors", () => {
     const xml = buildProbeInputXml(sampleMessages, sampleContext);
 
-    expect(xml).toContain("<probe_input_payload>");
-    expect(xml).toContain("</probe_input_payload>");
+    expect(xml.startsWith("<historical_observed_past>")).toBe(true);
+    expect(xml).toContain("</historical_observed_past>");
 
     expect(xml).toContain("<meta_directive>");
     expect(xml).toContain("AUDIT OBSERVED PAST REALITY ONLY");

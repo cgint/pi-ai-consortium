@@ -3,7 +3,7 @@
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { ExtractedContext } from "./types.js";
 import type { ModelCallFn } from "./core.js";
-import { formatHistoryMessages } from "./context.js";
+import { buildObservedPastXml } from "./context.js";
 
 export const EXTRACTION_SYSTEM_PROMPT = [
   "You are a high-level strategic context extraction engine for a software development agent.",
@@ -85,8 +85,7 @@ export async function extractContextFromMessages(
     return getDefaultExtractedContext(messages);
   }
 
-  const historyText = formatHistoryMessages(messages);
-  let userPrompt = `<historical_observed_past>\n${historyText}\n</historical_observed_past>`;
+  let userPrompt = buildObservedPastXml(messages);
 
   if (previousContext) {
     userPrompt = `${userPrompt}\n\n<previous_extracted_context_baseline>\n${JSON.stringify(previousContext, null, 2)}\n</previous_extracted_context_baseline>`;

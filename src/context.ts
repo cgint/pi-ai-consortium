@@ -109,6 +109,12 @@ function escapeXml(text: string): string {
     .replace(/>/g, "&gt;");
 }
 
+/** Build byte-for-byte identical historical past XML block shared across Pass 1 and Pass 2. */
+export function buildObservedPastXml(messages: AgentMessage[]): string {
+  const rawHistory = formatHistoryMessages(messages);
+  return `<historical_observed_past>\n${escapeXml(rawHistory)}\n</historical_observed_past>`;
+}
+
 /** Helper to format a string array into clean XML bullet points. */
 function formatXmlVector(tag: string, items: string[] | undefined): string {
   if (!items || items.length === 0) {
@@ -123,13 +129,9 @@ export function buildProbeInputXml(
   messages: AgentMessage[],
   extractedContext: ExtractedContext,
 ): string {
-  const historyText = formatHistoryMessages(messages);
+  const historyXml = buildObservedPastXml(messages);
 
-  return `<probe_input_payload>
-
-  <historical_observed_past>
-${escapeXml(historyText)}
-  </historical_observed_past>
+  return `${historyXml}
 
   <extracted_context_anchor>
     <current_system_timestamp>${new Date().toISOString()}</current_system_timestamp>
@@ -158,7 +160,5 @@ ${escapeXml(historyText)}
     2. Stale evidence (code edited after last test or screenshot proof).
     3. Unasked ambiguity requiring human clarification.
     If no concrete gap or risk exists in the observed past reality, return strictly: NO_CONTRIBUTION.
-  </meta_directive>
-
-</probe_input_payload>`;
+  </meta_directive>`;
 }
