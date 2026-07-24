@@ -105,7 +105,7 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
 
     const ctx = await extractContextFromMessages(messages, mockCallFn, previousContext);
 
-    expect(receivedUserPrompt).toContain("Previous Extracted Context Baseline:");
+    expect(receivedUserPrompt).toContain("<previous_extracted_context_baseline>");
     expect(receivedUserPrompt).toContain("Accumulated requirement");
     expect(ctx.userRequirements).toContain("Accumulated requirement");
     expect(ctx.userRequirements).toContain("New requirement");

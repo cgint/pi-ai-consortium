@@ -127,16 +127,6 @@ export function buildProbeInputXml(
 
   return `<probe_input_payload>
 
-  <meta_directive>
-    CRITICAL PROBE DIRECTIVE:
-    AUDIT OBSERVED PAST REALITY ONLY. Do NOT speculate on what the agent "might" or "should" do in the future.
-    Your sole task is to audit what HAS ALREADY HAPPENED for:
-    1. Unresolved contradictions between past turns or unaddressed goals.
-    2. Stale evidence (code edited after last test or screenshot proof).
-    3. Unasked ambiguity requiring human clarification.
-    If no concrete gap or risk exists in the observed past reality, return strictly: NO_CONTRIBUTION.
-  </meta_directive>
-
   <historical_observed_past>
 ${escapeXml(historyText)}
   </historical_observed_past>
@@ -159,6 +149,16 @@ ${escapeXml(historyText)}
       ${formatXmlVector("relevant_learnings", extractedContext.relevantLearnings)}
     </observed_execution_reality>
   </extracted_context_anchor>
+
+  <meta_directive>
+    CRITICAL PROBE DIRECTIVE:
+    AUDIT OBSERVED PAST REALITY ONLY. Do NOT speculate on what the agent "might" or "should" do in the future.
+    Your sole task is to audit what HAS ALREADY HAPPENED for:
+    1. Unresolved contradictions between past turns or unaddressed goals.
+    2. Stale evidence (code edited after last test or screenshot proof).
+    3. Unasked ambiguity requiring human clarification.
+    If no concrete gap or risk exists in the observed past reality, return strictly: NO_CONTRIBUTION.
+  </meta_directive>
 
 </probe_input_payload>`;
 }

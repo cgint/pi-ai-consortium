@@ -85,11 +85,11 @@ export async function extractContextFromMessages(
     return getDefaultExtractedContext(messages);
   }
 
-  const formattedHistory = formatHistoryMessages(messages);
+  const historyText = formatHistoryMessages(messages);
+  let userPrompt = `<historical_observed_past>\n${historyText}\n</historical_observed_past>`;
 
-  let userPrompt = `Conversation History:\n\n${formattedHistory}`;
   if (previousContext) {
-    userPrompt = `Previous Extracted Context Baseline:\n${JSON.stringify(previousContext, null, 2)}\n\n${userPrompt}`;
+    userPrompt = `${userPrompt}\n\n<previous_extracted_context_baseline>\n${JSON.stringify(previousContext, null, 2)}\n</previous_extracted_context_baseline>`;
   }
 
   try {

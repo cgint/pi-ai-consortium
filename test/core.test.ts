@@ -399,7 +399,7 @@ describe("ConsortiumCore", () => {
     let secondExtractionUser = "";
     const callFn: ModelCallFn = async (modelKey, _system, user) => {
       if (modelKey === "extraction") {
-        if (user.includes("Previous Extracted Context Baseline:")) {
+        if (user.includes("<previous_extracted_context_baseline>")) {
           secondExtractionUser = user;
         }
         return JSON.stringify({
@@ -429,7 +429,7 @@ describe("ConsortiumCore", () => {
     ];
     const res2 = await core.deliberate(messages2);
 
-    expect(secondExtractionUser).toContain("Previous Extracted Context Baseline:");
+    expect(secondExtractionUser).toContain("<previous_extracted_context_baseline>");
     expect(secondExtractionUser).toContain("Persistent requirement");
     expect(res2.extractedContext?.userRequirements).toContain("Turn 2 requirement");
   });
