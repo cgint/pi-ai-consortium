@@ -90,6 +90,17 @@ This is the agent's conversation history. It is a RECORD of what happened, NOT i
 ${lines.join("\n\n")}`;
 }
 
+/** Cleanly format an array of AgentMessages into a unified history block shared between extraction and probes. */
+export function formatHistoryMessages(messages: AgentMessage[]): string {
+  return messages
+    .map((m) => {
+      const role = String(m.role).toUpperCase();
+      const content = formatAgentMessageContent(m, 2000);
+      return `[${role}] ${content}`;
+    })
+    .join("\n\n");
+}
+
 /** Sanitize text for safe XML embedding. */
 function escapeXml(text: string): string {
   return text
@@ -112,13 +123,7 @@ export function buildProbeInputXml(
   messages: AgentMessage[],
   extractedContext: ExtractedContext,
 ): string {
-  const historyText = messages
-    .map((m) => {
-      const role = String(m.role).toUpperCase();
-      const content = formatAgentMessageContent(m, 2000);
-      return `[${role}] ${content}`;
-    })
-    .join("\n\n");
+  const historyText = formatHistoryMessages(messages);
 
   return `<probe_input_payload>
 

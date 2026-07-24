@@ -3,6 +3,7 @@
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { ExtractedContext } from "./types.js";
 import type { ModelCallFn } from "./core.js";
+import { formatHistoryMessages } from "./context.js";
 
 export const EXTRACTION_SYSTEM_PROMPT = [
   "You are a high-level strategic context extraction engine for a software development agent.",
@@ -84,18 +85,7 @@ export async function extractContextFromMessages(
     return getDefaultExtractedContext(messages);
   }
 
-  const formattedHistory = messages
-    .map((m) => {
-      const role = String(m.role).toUpperCase();
-      let content = "";
-      if ("command" in m && "output" in m && typeof m.output === "string") {
-        content = `> ${(m as any).command}\n${(m as any).output.slice(0, 500)}`;
-      } else if ("content" in m) {
-        content = typeof (m as any).content === "string" ? (m as any).content : JSON.stringify((m as any).content);
-      }
-      return `[${role}] ${content.slice(0, 1000)}`;
-    })
-    .join("\n\n");
+  const formattedHistory = formatHistoryMessages(messages);
 
   let userPrompt = `Conversation History:\n\n${formattedHistory}`;
   if (previousContext) {
