@@ -138,15 +138,21 @@ ${escapeXml(historyText)}
 
   <extracted_context_anchor>
     <current_system_timestamp>${new Date().toISOString()}</current_system_timestamp>
-    ${formatXmlVector("user_requirements", extractedContext.userRequirements)}
-    ${formatXmlVector("deliverables", extractedContext.deliverables)}
-    ${formatXmlVector("revised_or_superseded_direction", extractedContext.revisedOrSupersededDirection)}
-    ${formatXmlVector("user_decisions", extractedContext.userDecisions)}
-    ${formatXmlVector("questions_and_information_gaps", extractedContext.questionsAndInformationGaps)}
-    ${formatXmlVector("control_boundaries", extractedContext.controlBoundaries)}
-    ${formatXmlVector("observed_work", extractedContext.observedWork)}
-    ${formatXmlVector("observed_critical_facts", extractedContext.observedCriticalFacts)}
-    ${formatXmlVector("relevant_learnings", extractedContext.relevantLearnings)}
+    
+    <durable_user_intent_and_constraints>
+      ${formatXmlVector("user_requirements", extractedContext.userRequirements)}
+      ${formatXmlVector("deliverables", extractedContext.deliverables)}
+      ${formatXmlVector("revised_or_superseded_direction", extractedContext.revisedOrSupersededDirection)}
+      ${formatXmlVector("user_decisions", extractedContext.userDecisions)}
+      ${formatXmlVector("control_boundaries", extractedContext.controlBoundaries)}
+    </durable_user_intent_and_constraints>
+
+    <observed_execution_reality>
+      ${formatXmlVector("observed_work", extractedContext.observedWork)}
+      ${formatXmlVector("observed_critical_facts", extractedContext.observedCriticalFacts)}
+      ${formatXmlVector("questions_and_information_gaps", extractedContext.questionsAndInformationGaps)}
+      ${formatXmlVector("relevant_learnings", extractedContext.relevantLearnings)}
+    </observed_execution_reality>
   </extracted_context_anchor>
 
 </probe_input_payload>`;

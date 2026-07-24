@@ -64,6 +64,53 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     expect(ctx.deliberationNeeded).toBe(true);
   });
 
+  it("includes ACCUMULATION RULE in EXTRACTION_SYSTEM_PROMPT", () => {
+    expect(EXTRACTION_SYSTEM_PROMPT).toContain("ACCUMULATION RULE:");
+    expect(EXTRACTION_SYSTEM_PROMPT).toContain("PRESERVE and ACCUMULATE durable user intent");
+  });
+
+  it("passes Previous Extracted Context Baseline to LLM when previousContext is provided", async () => {
+    let receivedUserPrompt = "";
+    const mockCallFn: ModelCallFn = async (_key, _system, user) => {
+      receivedUserPrompt = user;
+      return JSON.stringify({
+        userRequirements: ["Accumulated requirement", "New requirement"],
+        deliverables: ["Deliverable 1"],
+        revisedOrSupersededDirection: [],
+        userDecisions: [],
+        questionsAndInformationGaps: [],
+        controlBoundaries: ["Control 1"],
+        observedWork: ["Work step 2"],
+        observedCriticalFacts: ["Fact 2"],
+        relevantLearnings: [],
+        deliberationNeeded: true,
+      });
+    };
+
+    const previousContext: ExtractedContext = {
+      userRequirements: ["Accumulated requirement"],
+      deliverables: [],
+      revisedOrSupersededDirection: [],
+      userDecisions: [],
+      questionsAndInformationGaps: [],
+      controlBoundaries: ["Control 1"],
+      observedWork: ["Work step 1"],
+      observedCriticalFacts: ["Fact 1"],
+      relevantLearnings: [],
+    };
+
+    const messages: AgentMessage[] = [
+      { role: "user", content: "Add a new requirement.", timestamp: Date.now() },
+    ];
+
+    const ctx = await extractContextFromMessages(messages, mockCallFn, previousContext);
+
+    expect(receivedUserPrompt).toContain("Previous Extracted Context Baseline:");
+    expect(receivedUserPrompt).toContain("Accumulated requirement");
+    expect(ctx.userRequirements).toContain("Accumulated requirement");
+    expect(ctx.userRequirements).toContain("New requirement");
+  });
+
   it("falls back gracefully to default 9-slot context on LLM call failure", async () => {
     const failingCallFn: ModelCallFn = async () => {
       throw new Error("API network failure");

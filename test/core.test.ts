@@ -388,9 +388,49 @@ describe("ConsortiumCore", () => {
 
     expect(receivedUsers["extraction"]).toBeDefined();
     expect(receivedUsers["probe:0"]).toContain("<probe_input_payload>");
+    expect(receivedUsers["probe:0"]).toContain("<durable_user_intent_and_constraints>");
     expect(receivedUsers["probe:0"]).toContain("<user_requirements>");
     expect(receivedUsers["probe:0"]).toContain("Test extraction integration");
     expect(result.extractedContext).toBeDefined();
     expect(result.extractedContext?.userRequirements[0]).toBe("Test extraction integration");
+  });
+
+  it("preserves lastExtractedContext and passes it as previousContext to subsequent extraction passes", async () => {
+    let secondExtractionUser = "";
+    const callFn: ModelCallFn = async (modelKey, _system, user) => {
+      if (modelKey === "extraction") {
+        if (user.includes("Previous Extracted Context Baseline:")) {
+          secondExtractionUser = user;
+        }
+        return JSON.stringify({
+          userRequirements: ["Persistent requirement", "Turn 2 requirement"],
+          deliverables: [],
+          revisedOrSupersededDirection: [],
+          userDecisions: [],
+          questionsAndInformationGaps: [],
+          controlBoundaries: ["read-only"],
+          observedWork: ["Turn 2 work"],
+          observedCriticalFacts: [],
+          relevantLearnings: [],
+        });
+      }
+      return "NO_CONTRIBUTION";
+    };
+
+    const core = new ConsortiumCore(baseConfig, callFn);
+    const messages1 = [{ role: "user" as const, content: "Turn 1 goal", timestamp: Date.now() }];
+    const res1 = await core.deliberate(messages1);
+    expect(res1.extractedContext).toBeDefined();
+
+    const messages2 = [
+      ...messages1,
+      { role: "assistant" as const, content: "Done turn 1", timestamp: Date.now() },
+      { role: "user" as const, content: "Turn 2 goal", timestamp: Date.now() },
+    ];
+    const res2 = await core.deliberate(messages2);
+
+    expect(secondExtractionUser).toContain("Previous Extracted Context Baseline:");
+    expect(secondExtractionUser).toContain("Persistent requirement");
+    expect(res2.extractedContext?.userRequirements).toContain("Turn 2 requirement");
   });
 });

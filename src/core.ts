@@ -31,6 +31,8 @@ function validateProbeOutput(text: string): string {
 }
 
 export class ConsortiumCore {
+  private lastExtractedContext?: ExtractedContext;
+
   constructor(
     private config: ConsortiumConfig,
     private callModel: ModelCallFn,
@@ -41,6 +43,7 @@ export class ConsortiumCore {
     externalSignal?: AbortSignal,
     onProgress?: ProgressCallback,
     turnsSinceLastAudit: number = 0,
+    previousContext?: ExtractedContext,
   ): Promise<DeliberationResult> {
     if (externalSignal?.aborted) {
       throw new Error("Deliberation aborted");
@@ -79,7 +82,9 @@ export class ConsortiumCore {
       // Phase 0: Extraction pass
       onProgress?.("extraction", 0, 1);
       try {
-        extractedContext = await extractContextFromMessages(input, this.callModel, masterController.signal);
+        const priorContext = previousContext ?? this.lastExtractedContext;
+        extractedContext = await extractContextFromMessages(input, this.callModel, priorContext, masterController.signal);
+        this.lastExtractedContext = extractedContext;
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         errors.push(`Extraction: ${msg}`);

@@ -39,15 +39,20 @@ describe("src/context.ts", () => {
 
     expect(xml).toContain("<extracted_context_anchor>");
     expect(xml).toContain("<current_system_timestamp>");
+    expect(xml).toContain("<durable_user_intent_and_constraints>");
     expect(xml).toContain("<user_requirements>\n      • Implement XML probe payload protocol.\n    </user_requirements>");
     expect(xml).toContain("<deliverables>\n      • Updated src/context.ts\n    </deliverables>");
     expect(xml).toContain("<revised_or_superseded_direction>\n      • Filter low-level tool errors\n    </revised_or_superseded_direction>");
     expect(xml).toContain("<user_decisions>\n      • Use 9 strategic context slots\n    </user_decisions>");
-    expect(xml).toContain("<questions_and_information_gaps>\n      • None — CLEAR\n    </questions_and_information_gaps>");
     expect(xml).toContain("<control_boundaries>\n      • Allowed paths: dev-external/pi-ai-consortium\n    </control_boundaries>");
+    expect(xml).toContain("</durable_user_intent_and_constraints>");
+
+    expect(xml).toContain("<observed_execution_reality>");
     expect(xml).toContain("<observed_work>\n      • Updated src/types.ts and src/extraction.ts\n    </observed_work>");
     expect(xml).toContain("<observed_critical_facts>\n      • Pass 1 Pass 2 Pass 3 pipeline active\n    </observed_critical_facts>");
+    expect(xml).toContain("<questions_and_information_gaps>\n      • None — CLEAR\n    </questions_and_information_gaps>");
     expect(xml).toContain("<relevant_learnings>\n      • Operational noise pollutes probe context\n    </relevant_learnings>");
+    expect(xml).toContain("</observed_execution_reality>");
     expect(xml).toContain("</extracted_context_anchor>");
   });
 

@@ -12,6 +12,10 @@ export const EXTRACTION_SYSTEM_PROMPT = [
   "- FILTER OUT low-level operational mechanics and execution friction (e.g. edit tool line-number mismatches, transient bash error codes, tool parameter syntax typos, or intermediate search loops).",
   "- EXTRACT STRICTLY high-level strategic intent, macro goals, explicit user decisions, control boundaries, and domain facts.",
   "",
+  "ACCUMULATION RULE:",
+  "- If a PREVIOUS EXTRACTED CONTEXT is provided, PRESERVE and ACCUMULATE durable user intent, deliverables, user decisions, superseded directions, and control boundaries unless explicitly revoked or updated by the user.",
+  "- Dynamically refresh observed work, critical facts, and information gaps based on recent evidence.",
+  "",
   "Return JSON matching this schema exactly:",
   "{",
   '  "userRequirements": ["Macro goals, acceptance criteria, quality expectations, and technical bounds"],',
@@ -73,6 +77,7 @@ function ensureStringArray(val: unknown, defaultVal: string[] = []): string[] {
 export async function extractContextFromMessages(
   messages: AgentMessage[],
   callModel: ModelCallFn,
+  previousContext?: ExtractedContext,
   signal?: AbortSignal,
 ): Promise<ExtractedContext> {
   if (messages.length === 0) {
@@ -93,11 +98,16 @@ export async function extractContextFromMessages(
     })
     .join("\n\n");
 
+  let userPrompt = `Conversation History:\n\n${formattedHistory}`;
+  if (previousContext) {
+    userPrompt = `Previous Extracted Context Baseline:\n${JSON.stringify(previousContext, null, 2)}\n\n${userPrompt}`;
+  }
+
   try {
     const raw = await callModel(
       "extraction",
       EXTRACTION_SYSTEM_PROMPT,
-      `Conversation History:\n\n${formattedHistory}`,
+      userPrompt,
       1024,
       0.2,
       signal,
