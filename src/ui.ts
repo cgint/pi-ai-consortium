@@ -6,6 +6,12 @@ import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import type { DeliberationResult, ExtractedContext, ProgressCallback } from "./types.js";
 import { CANONICAL_PROBE_ORDER } from "./config.js";
 
+/** Helper to format a string array for Markdown/TUI logs. */
+function formatArrayText(items: string[] | undefined): string {
+  if (!items || items.length === 0) return "[none]";
+  return items.join("; ");
+}
+
 /** JSONL & sidecar Markdown logger for consortium actions. */
 export class ConsortiumLogger {
   private logPath: string;
@@ -53,14 +59,17 @@ export class ConsortiumLogger {
   logExtraction(context: ExtractedContext): void {
     this.turnCount++;
     const ts = new Date().toISOString();
-    const missing = context.missingDetails ? `\n- **Missing Details:** ${context.missingDetails}` : "";
     const section = [
       `## Turn ${this.turnCount} (${ts})`,
-      `* **Intent & Motive:** ${context.userIntentAndMotive}`,
-      `* **Active Constraints & Guards:** ${context.activeConstraintsAndGuards}`,
-      `* **Verified Facts Inventory:** ${context.verifiedFactsInventory}`,
-      `* **Evidence Freshness Delta:** ${context.evidenceFreshnessDelta}`,
-      `* **Clarity Score:** \`${context.clarityAndAmbiguityScore}\`${missing}`,
+      `* **User Requirements:** ${formatArrayText(context.userRequirements)}`,
+      `* **Deliverables:** ${formatArrayText(context.deliverables)}`,
+      `* **Revised / Superseded:** ${formatArrayText(context.revisedOrSupersededDirection)}`,
+      `* **User Decisions:** ${formatArrayText(context.userDecisions)}`,
+      `* **Questions & Info Gaps:** ${formatArrayText(context.questionsAndInformationGaps)}`,
+      `* **Control Boundaries:** ${formatArrayText(context.controlBoundaries)}`,
+      `* **Observed Work:** ${formatArrayText(context.observedWork)}`,
+      `* **Observed Critical Facts:** ${formatArrayText(context.observedCriticalFacts)}`,
+      `* **Relevant Learnings:** ${formatArrayText(context.relevantLearnings)}`,
       ``,
       `---`,
       ``,
@@ -111,7 +120,7 @@ export function formatProgressText(phase: string, current: number, total: number
   }
 }
 
-/** Format a visible TUI notification — extracted context, skip info, probe details + synthesis. */
+/** Format a visible TUI notification — extracted 9 strategic vectors, skip info, probe details + synthesis. */
 export function formatVisibleMessage(result: DeliberationResult): string {
   const lines: string[] = [];
 
@@ -125,16 +134,19 @@ export function formatVisibleMessage(result: DeliberationResult): string {
     lines.push(`◇ Consortium deliberation — ${contributions}/${result.probes.length} probes contributed`);
   }
 
-  // Extracted Context
+  // Extracted 9 Strategic Context Vectors (Compact & High-Signal for TUI)
   if (result.extractedContext) {
     const ec = result.extractedContext;
-    lines.push(`  Extracted Context:`);
-    lines.push(`   • Intent & Motive: ${ec.userIntentAndMotive}`);
-    lines.push(`   • Active Constraints & Guards: ${ec.activeConstraintsAndGuards}`);
-    lines.push(`   • Verified Facts Inventory: ${ec.verifiedFactsInventory}`);
-    lines.push(`   • Evidence Freshness Delta: ${ec.evidenceFreshnessDelta}`);
-    const clarity = ec.missingDetails ? `${ec.clarityAndAmbiguityScore} (${ec.missingDetails})` : ec.clarityAndAmbiguityScore;
-    lines.push(`   • Clarity Score: ${clarity}`);
+    lines.push(`  Extracted Strategic Context:`);
+    lines.push(`   • Requirements: ${formatArrayText(ec.userRequirements)}`);
+    lines.push(`   • Deliverables: ${formatArrayText(ec.deliverables)}`);
+    lines.push(`   • Revised/Superseded: ${formatArrayText(ec.revisedOrSupersededDirection)}`);
+    lines.push(`   • Decisions: ${formatArrayText(ec.userDecisions)}`);
+    lines.push(`   • Questions & Gaps: ${formatArrayText(ec.questionsAndInformationGaps)}`);
+    lines.push(`   • Control Boundaries: ${formatArrayText(ec.controlBoundaries)}`);
+    lines.push(`   • Observed Work: ${formatArrayText(ec.observedWork)}`);
+    lines.push(`   • Critical Facts: ${formatArrayText(ec.observedCriticalFacts)}`);
+    lines.push(`   • Relevant Learnings: ${formatArrayText(ec.relevantLearnings)}`);
   }
 
   // Probe outputs (only if probes ran)

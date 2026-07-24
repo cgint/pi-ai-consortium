@@ -18,16 +18,19 @@ describe("ConsortiumLogger sidecar Markdown logging", () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it("creates sidecar .md log file alongside .jsonl and appends readable context vectors", () => {
+  it("creates sidecar .md log file alongside .jsonl and appends readable 9-slot strategic context", () => {
     const logger = new ConsortiumLogger(tmpDir, "session-123");
 
     const sampleContext: ExtractedContext = {
-      userIntentAndMotive: "Integrate JaneCarl UI components into newdesign pages.",
-      activeConstraintsAndGuards: "Maintain Bootstrap 5 JS modal compatibility.",
-      verifiedFactsInventory: "Directory listing verified; tasks 1.1-1.3 complete.",
-      evidenceFreshnessDelta: "Read janecarl-page.js offset 1850.",
-      clarityAndAmbiguityScore: "AMBIGUOUS",
-      missingDetails: "User has not specified which route to map.",
+      userRequirements: ["Integrate JaneCarl UI components into newdesign pages."],
+      deliverables: ["Updated routes.py"],
+      revisedOrSupersededDirection: ["Filter low-level edit errors"],
+      userDecisions: ["Maintain Bootstrap 5 JS modal compatibility."],
+      questionsAndInformationGaps: ["Clarify target route mapping"],
+      controlBoundaries: ["Allowed paths: dev-external/pi-ai-consortium"],
+      observedWork: ["Directory listing verified; tasks 1.1-1.3 complete."],
+      observedCriticalFacts: ["Read janecarl-page.js offset 1850."],
+      relevantLearnings: ["Operational mechanics pollute context"],
     };
 
     logger.logExtraction(sampleContext);
@@ -42,11 +45,14 @@ describe("ConsortiumLogger sidecar Markdown logging", () => {
     const mdContent = fs.readFileSync(path.join(logDir, mdFile!), "utf-8");
     expect(mdContent).toContain("# Consortium Extracted Context Log");
     expect(mdContent).toContain("## Turn 1");
-    expect(mdContent).toContain("* **Intent & Motive:** Integrate JaneCarl UI components into newdesign pages.");
-    expect(mdContent).toContain("* **Active Constraints & Guards:** Maintain Bootstrap 5 JS modal compatibility.");
-    expect(mdContent).toContain("* **Verified Facts Inventory:** Directory listing verified; tasks 1.1-1.3 complete.");
-    expect(mdContent).toContain("* **Evidence Freshness Delta:** Read janecarl-page.js offset 1850.");
-    expect(mdContent).toContain("* **Clarity Score:** `AMBIGUOUS`");
-    expect(mdContent).toContain("- **Missing Details:** User has not specified which route to map.");
+    expect(mdContent).toContain("* **User Requirements:** Integrate JaneCarl UI components into newdesign pages.");
+    expect(mdContent).toContain("* **Deliverables:** Updated routes.py");
+    expect(mdContent).toContain("* **Revised / Superseded:** Filter low-level edit errors");
+    expect(mdContent).toContain("* **User Decisions:** Maintain Bootstrap 5 JS modal compatibility.");
+    expect(mdContent).toContain("* **Questions & Info Gaps:** Clarify target route mapping");
+    expect(mdContent).toContain("* **Control Boundaries:** Allowed paths: dev-external/pi-ai-consortium");
+    expect(mdContent).toContain("* **Observed Work:** Directory listing verified; tasks 1.1-1.3 complete.");
+    expect(mdContent).toContain("* **Observed Critical Facts:** Read janecarl-page.js offset 1850.");
+    expect(mdContent).toContain("* **Relevant Learnings:** Operational mechanics pollute context");
   });
 });

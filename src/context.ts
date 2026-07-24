@@ -98,6 +98,15 @@ function escapeXml(text: string): string {
     .replace(/>/g, "&gt;");
 }
 
+/** Helper to format a string array into clean XML bullet points. */
+function formatXmlVector(tag: string, items: string[] | undefined): string {
+  if (!items || items.length === 0) {
+    return `<${tag}>[none]</${tag}>`;
+  }
+  const formatted = items.map((i) => `• ${escapeXml(i)}`).join("\n      ");
+  return `<${tag}>\n      ${formatted}\n    </${tag}>`;
+}
+
 /** Build explicitly tagged XML probe input payload containing history + extracted context vectors. */
 export function buildProbeInputXml(
   messages: AgentMessage[],
@@ -110,10 +119,6 @@ export function buildProbeInputXml(
       return `[${role}] ${content}`;
     })
     .join("\n\n");
-
-  const missingDetailsXml = extractedContext.missingDetails
-    ? `\n      <missing_details>${escapeXml(extractedContext.missingDetails)}</missing_details>`
-    : "";
 
   return `<probe_input_payload>
 
@@ -133,11 +138,15 @@ ${escapeXml(historyText)}
 
   <extracted_context_anchor>
     <current_system_timestamp>${new Date().toISOString()}</current_system_timestamp>
-    <user_intent_motive>${escapeXml(extractedContext.userIntentAndMotive)}</user_intent_motive>
-    <active_constraints_and_guards>${escapeXml(extractedContext.activeConstraintsAndGuards)}</active_constraints_and_guards>
-    <verified_facts_inventory>${escapeXml(extractedContext.verifiedFactsInventory)}</verified_facts_inventory>
-    <evidence_freshness_delta>${escapeXml(extractedContext.evidenceFreshnessDelta)}</evidence_freshness_delta>
-    <clarity_and_ambiguity_score>${extractedContext.clarityAndAmbiguityScore}</clarity_and_ambiguity_score>${missingDetailsXml}
+    ${formatXmlVector("user_requirements", extractedContext.userRequirements)}
+    ${formatXmlVector("deliverables", extractedContext.deliverables)}
+    ${formatXmlVector("revised_or_superseded_direction", extractedContext.revisedOrSupersededDirection)}
+    ${formatXmlVector("user_decisions", extractedContext.userDecisions)}
+    ${formatXmlVector("questions_and_information_gaps", extractedContext.questionsAndInformationGaps)}
+    ${formatXmlVector("control_boundaries", extractedContext.controlBoundaries)}
+    ${formatXmlVector("observed_work", extractedContext.observedWork)}
+    ${formatXmlVector("observed_critical_facts", extractedContext.observedCriticalFacts)}
+    ${formatXmlVector("relevant_learnings", extractedContext.relevantLearnings)}
   </extracted_context_anchor>
 
 </probe_input_payload>`;

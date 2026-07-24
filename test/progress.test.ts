@@ -100,21 +100,24 @@ describe("formatVisibleMessage", () => {
       skippedByGovernor: true,
       governorReason: "Routine status report",
       extractedContext: {
-        userIntentAndMotive: "Check git status",
-        activeConstraintsAndGuards: "Read-only mode",
-        verifiedFactsInventory: "Clean working tree",
-        evidenceFreshnessDelta: "Fresh",
-        clarityAndAmbiguityScore: "CLEAR",
+        userRequirements: ["Check git status"],
+        deliverables: [],
+        revisedOrSupersededDirection: [],
+        userDecisions: [],
+        questionsAndInformationGaps: [],
+        controlBoundaries: ["Read-only mode"],
+        observedWork: ["Clean working tree"],
+        observedCriticalFacts: ["Fresh"],
+        relevantLearnings: [],
       },
     });
 
     expect(msg).toContain("◇ Consortium deliberation — skipped (Routine status report)");
-    expect(msg).toContain("Extracted Context:");
-    expect(msg).toContain("• Intent & Motive: Check git status");
-    expect(msg).toContain("• Active Constraints & Guards: Read-only mode");
-    expect(msg).toContain("• Verified Facts Inventory: Clean working tree");
-    expect(msg).toContain("• Evidence Freshness Delta: Fresh");
-    expect(msg).toContain("• Clarity Score: CLEAR");
+    expect(msg).toContain("Extracted Strategic Context:");
+    expect(msg).toContain("• Requirements: Check git status");
+    expect(msg).toContain("• Control Boundaries: Read-only mode");
+    expect(msg).toContain("• Observed Work: Clean working tree");
+    expect(msg).toContain("• Critical Facts: Fresh");
   });
 
   it("formats full deliberation message with extracted context, probes, and synthesis", () => {
@@ -125,19 +128,22 @@ describe("formatVisibleMessage", () => {
       ],
       synthesis: "WARN Verify lockfile before push",
       extractedContext: {
-        userIntentAndMotive: "Security audit fix",
-        activeConstraintsAndGuards: "No breaking changes",
-        verifiedFactsInventory: "Tests green",
-        evidenceFreshnessDelta: "Verified",
-        clarityAndAmbiguityScore: "AMBIGUOUS",
-        missingDetails: "Target environment version",
+        userRequirements: ["Security audit fix"],
+        deliverables: ["Updated lockfile"],
+        revisedOrSupersededDirection: [],
+        userDecisions: ["No breaking changes"],
+        questionsAndInformationGaps: ["Target environment version"],
+        controlBoundaries: ["Standard guards"],
+        observedWork: ["Tests green"],
+        observedCriticalFacts: ["Verified"],
+        relevantLearnings: ["Lockfile audit required"],
       },
     });
 
     expect(msg).toContain("◇ Consortium deliberation — 1/2 probes contributed");
-    expect(msg).toContain("Extracted Context:");
-    expect(msg).toContain("• Intent & Motive: Security audit fix");
-    expect(msg).toContain("• Clarity Score: AMBIGUOUS (Target environment version)");
+    expect(msg).toContain("Extracted Strategic Context:");
+    expect(msg).toContain("• Requirements: Security audit fix");
+    expect(msg).toContain("• Questions & Gaps: Target environment version");
     expect(msg).toContain("Probes:");
     expect(msg).toContain("clarifier: NO_CONTRIBUTION");
     expect(msg).toContain("contrarian (WARN): Verify lockfile integrity");

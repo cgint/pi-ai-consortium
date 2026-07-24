@@ -40,29 +40,29 @@ export const DEFAULT_CONFIG: Omit<ConsortiumConfig, "probes" | "synthesis" | "ex
       role: "architect",
       systemPrompt: PROBE_SYSTEM_PROMPT,
       roleLens: `## YOUR ROLE: Architect
-Gate: Audit past changes against ACTIVE_CONSTRAINTS_AND_GUARDS. If existing files and code comply with active rules, return NO_CONTRIBUTION. Only speak up if an existing file or structural change violates an active constraint or guard.
-Severity tags: INFO (minor structural note), WARN (structural friction in existing code), or BLOCK (active constraint/guard violation in past artifacts).`,
+Gate: Audit past changes against control_boundaries and user_decisions. If existing files and code comply with active path limits, read-only rules, and agreed user decisions, return NO_CONTRIBUTION. Only speak up if an existing file or structural change violates an active control boundary or user decision.
+Severity tags: INFO (minor structural note), WARN (structural friction in existing code), or BLOCK (active control boundary or decision violation in past artifacts).`,
     },
     {
       role: "clarifier",
       systemPrompt: PROBE_SYSTEM_PROMPT,
       roleLens: `## YOUR ROLE: Clarifier
-Gate: Inspect CLARITY_AND_AMBIGUITY_SCORE. If marked CLEAR, return NO_CONTRIBUTION. Only speak up if marked AMBIGUOUS with explicit missing details that have not been asked.
+Gate: Inspect questions_and_information_gaps. If no explicit open questions or information gaps exist, return NO_CONTRIBUTION. Only speak up if unasked domain ambiguities or essential missing details require clarification before proceeding.
 Severity tags: INFO (minor clarification note), WARN (unasked essential requirement), or BLOCK (critical ambiguity preventing progress).`,
     },
     {
       role: "contrarian",
       systemPrompt: PROBE_SYSTEM_PROMPT,
       roleLens: `## YOUR ROLE: Contrarian
-Gate: Inspect EVIDENCE_FRESHNESS_DELTA. If code was modified without test verification or visual proof, flag stale evidence. If evidence is fresh or verified, return NO_CONTRIBUTION.
-Severity tags: INFO (minor evidence gap), WARN (modified code unverified by tests), or BLOCK (broken build/failing test ignored).`,
+Gate: Compare observed_work against observed_critical_facts. If code modifications are verified by test execution or visual proof in observed facts, return NO_CONTRIBUTION. Only speak up if observed work shows modified code that lacks test or execution verification.
+Severity tags: INFO (minor evidence gap), WARN (modified code unverified by tests in observed facts), or BLOCK (broken build or failing test ignored).`,
     },
     {
       role: "navigator",
       systemPrompt: PROBE_SYSTEM_PROMPT,
       roleLens: `## YOUR ROLE: Navigator
-Gate: Audit USER_INTENT_AND_MOTIVE against historical turns. If all stated user goals are actively being pursued or completed, return NO_CONTRIBUTION. Speak up only if an explicit user goal was completely ignored or dropped.
-Severity tags: INFO (slight goal omission), WARN (user requirement unfulfilled), or BLOCK (primary user objective abandoned).`,
+Gate: Audit user_requirements and deliverables against historical turns and revised_or_superseded_direction. If all active user requirements and deliverables are actively being pursued or completed, return NO_CONTRIBUTION. Speak up only if an active user requirement or deliverable was completely ignored or abandoned.
+Severity tags: INFO (slight goal omission), WARN (user requirement unfulfilled), or BLOCK (primary deliverable abandoned).`,
     },
     {
       role: "responder",

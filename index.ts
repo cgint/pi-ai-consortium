@@ -330,19 +330,24 @@ export default function (pi: ExtensionAPI): void {
   });
 
   pi.registerCommand("ai-consortium-context", {
-    description: "Inspect the last turn's 5 extracted context vectors",
+    description: "Inspect the last turn's 9 extracted strategic context vectors",
     handler: async (_args, ctx) => {
       if (!lastExtractedContext) {
         ctx.ui.notify("No extracted context available yet for this session.", "info");
         return;
       }
+      const fmt = (items?: string[]) => (!items || items.length === 0 ? "[none]" : items.join("; "));
       const summary = [
-        `◇ Extracted Context Vectors:`,
-        `  • Intent & Motive: ${lastExtractedContext.userIntentAndMotive}`,
-        `  • Constraints & Guards: ${lastExtractedContext.activeConstraintsAndGuards}`,
-        `  • Verified Facts: ${lastExtractedContext.verifiedFactsInventory}`,
-        `  • Evidence Freshness: ${lastExtractedContext.evidenceFreshnessDelta}`,
-        `  • Clarity Score: ${lastExtractedContext.clarityAndAmbiguityScore}${lastExtractedContext.missingDetails ? ` (${lastExtractedContext.missingDetails})` : ""}`,
+        `◇ Extracted 9 Strategic Context Vectors:`,
+        `  • User Requirements: ${fmt(lastExtractedContext.userRequirements)}`,
+        `  • Deliverables: ${fmt(lastExtractedContext.deliverables)}`,
+        `  • Revised / Superseded: ${fmt(lastExtractedContext.revisedOrSupersededDirection)}`,
+        `  • User Decisions: ${fmt(lastExtractedContext.userDecisions)}`,
+        `  • Questions & Info Gaps: ${fmt(lastExtractedContext.questionsAndInformationGaps)}`,
+        `  • Control Boundaries: ${fmt(lastExtractedContext.controlBoundaries)}`,
+        `  • Observed Work: ${fmt(lastExtractedContext.observedWork)}`,
+        `  • Observed Critical Facts: ${fmt(lastExtractedContext.observedCriticalFacts)}`,
+        `  • Relevant Learnings: ${fmt(lastExtractedContext.relevantLearnings)}`,
       ].join("\n");
 
       ctx.ui.notify(summary, "info");

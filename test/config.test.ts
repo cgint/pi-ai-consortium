@@ -14,27 +14,30 @@ describe("src/config.ts", () => {
     expect(PROBE_SYSTEM_PROMPT).toContain("NO_CONTRIBUTION");
   });
 
-  it("clarifier probe lens references CLARITY_AND_AMBIGUITY_SCORE", () => {
+  it("clarifier probe lens references questions_and_information_gaps", () => {
     const clarifier = DEFAULT_CONFIG.probes.find((p) => p.role === "clarifier");
     expect(clarifier).toBeDefined();
-    expect(clarifier?.roleLens).toContain("CLARITY_AND_AMBIGUITY_SCORE");
+    expect(clarifier?.roleLens).toContain("questions_and_information_gaps");
   });
 
-  it("contrarian probe lens references EVIDENCE_FRESHNESS_DELTA", () => {
+  it("contrarian probe lens references observed_work and observed_critical_facts", () => {
     const contrarian = DEFAULT_CONFIG.probes.find((p) => p.role === "contrarian");
     expect(contrarian).toBeDefined();
-    expect(contrarian?.roleLens).toContain("EVIDENCE_FRESHNESS_DELTA");
+    expect(contrarian?.roleLens).toContain("observed_work");
+    expect(contrarian?.roleLens).toContain("observed_critical_facts");
   });
 
-  it("navigator probe lens references USER_INTENT_AND_MOTIVE", () => {
+  it("navigator probe lens references user_requirements and deliverables", () => {
     const navigator = DEFAULT_CONFIG.probes.find((p) => p.role === "navigator");
     expect(navigator).toBeDefined();
-    expect(navigator?.roleLens).toContain("USER_INTENT_AND_MOTIVE");
+    expect(navigator?.roleLens).toContain("user_requirements");
+    expect(navigator?.roleLens).toContain("deliverables");
   });
 
-  it("architect probe lens references ACTIVE_CONSTRAINTS_AND_GUARDS", () => {
+  it("architect probe lens references control_boundaries and user_decisions", () => {
     const architect = DEFAULT_CONFIG.probes.find((p) => p.role === "architect");
     expect(architect).toBeDefined();
-    expect(architect?.roleLens).toContain("ACTIVE_CONSTRAINTS_AND_GUARDS");
+    expect(architect?.roleLens).toContain("control_boundaries");
+    expect(architect?.roleLens).toContain("user_decisions");
   });
 });

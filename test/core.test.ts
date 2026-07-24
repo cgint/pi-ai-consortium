@@ -64,11 +64,15 @@ describe("ConsortiumCore", () => {
       if (modelKey === "extraction") {
         extractionExecuted = true;
         return JSON.stringify({
-          userIntentAndMotive: "Periodic trigger",
-          activeConstraintsAndGuards: "None",
-          verifiedFactsInventory: "Facts",
-          evidenceFreshnessDelta: "Fresh",
-          clarityAndAmbiguityScore: "CLEAR",
+          userRequirements: ["Periodic trigger"],
+          deliverables: [],
+          revisedOrSupersededDirection: [],
+          userDecisions: [],
+          questionsAndInformationGaps: [],
+          controlBoundaries: ["None"],
+          observedWork: ["Facts"],
+          observedCriticalFacts: ["Fresh"],
+          relevantLearnings: [],
         });
       }
       probeExecuted = true;
@@ -85,7 +89,7 @@ describe("ConsortiumCore", () => {
     const result = await core.deliberate(messages, undefined, undefined, 10);
 
     expect(result.skippedByGovernor).toBeUndefined();
-    expect(result.extractedContext?.userIntentAndMotive).toBe("Periodic trigger");
+    expect(result.extractedContext?.userRequirements[0]).toBe("Periodic trigger");
     expect(extractionExecuted).toBe(true);
     expect(probeExecuted).toBe(true);
   });
@@ -95,11 +99,15 @@ describe("ConsortiumCore", () => {
     const callFn: ModelCallFn = async (modelKey) => {
       if (modelKey === "extraction") {
         return JSON.stringify({
-          userIntentAndMotive: "Test",
-          activeConstraintsAndGuards: "None",
-          verifiedFactsInventory: "Facts",
-          evidenceFreshnessDelta: "Fresh",
-          clarityAndAmbiguityScore: "CLEAR",
+          userRequirements: ["Test"],
+          deliverables: [],
+          revisedOrSupersededDirection: [],
+          userDecisions: [],
+          questionsAndInformationGaps: [],
+          controlBoundaries: ["None"],
+          observedWork: ["Facts"],
+          observedCriticalFacts: ["Fresh"],
+          relevantLearnings: [],
           deliberationNeeded: false,
           deliberationReason: "Routine status query",
         });
@@ -352,11 +360,15 @@ describe("ConsortiumCore", () => {
   it("runs extraction pass and passes XML payload to probes when messages array is provided", async () => {
     const receivedUsers: Record<string, string> = {};
     const mockExtractionJson = JSON.stringify({
-      userIntentAndMotive: "Test extraction integration",
-      activeConstraintsAndGuards: "read-only",
-      verifiedFactsInventory: "facts clean",
-      evidenceFreshnessDelta: "no delta",
-      clarityAndAmbiguityScore: "CLEAR",
+      userRequirements: ["Test extraction integration"],
+      deliverables: [],
+      revisedOrSupersededDirection: [],
+      userDecisions: [],
+      questionsAndInformationGaps: [],
+      controlBoundaries: ["read-only"],
+      observedWork: ["facts clean"],
+      observedCriticalFacts: ["no delta"],
+      relevantLearnings: [],
     });
 
     const callFn: ModelCallFn = async (modelKey, _system, user) => {
@@ -376,8 +388,9 @@ describe("ConsortiumCore", () => {
 
     expect(receivedUsers["extraction"]).toBeDefined();
     expect(receivedUsers["probe:0"]).toContain("<probe_input_payload>");
-    expect(receivedUsers["probe:0"]).toContain("<user_intent_motive>Test extraction integration</user_intent_motive>");
+    expect(receivedUsers["probe:0"]).toContain("<user_requirements>");
+    expect(receivedUsers["probe:0"]).toContain("Test extraction integration");
     expect(result.extractedContext).toBeDefined();
-    expect(result.extractedContext?.userIntentAndMotive).toBe("Test extraction integration");
+    expect(result.extractedContext?.userRequirements[0]).toBe("Test extraction integration");
   });
 });

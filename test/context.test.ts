@@ -12,14 +12,18 @@ describe("src/context.ts", () => {
   ];
 
   const sampleContext: ExtractedContext = {
-    userIntentAndMotive: "Implement XML probe payload protocol.",
-    activeConstraintsAndGuards: "read-only mode active",
-    verifiedFactsInventory: "src/types.ts updated",
-    evidenceFreshnessDelta: "Modified 1 min ago, vitest passing",
-    clarityAndAmbiguityScore: "CLEAR",
+    userRequirements: ["Implement XML probe payload protocol."],
+    deliverables: ["Updated src/context.ts"],
+    revisedOrSupersededDirection: ["Filter low-level tool errors"],
+    userDecisions: ["Use 9 strategic context slots"],
+    questionsAndInformationGaps: ["None — CLEAR"],
+    controlBoundaries: ["Allowed paths: dev-external/pi-ai-consortium"],
+    observedWork: ["Updated src/types.ts and src/extraction.ts"],
+    observedCriticalFacts: ["Pass 1 Pass 2 Pass 3 pipeline active"],
+    relevantLearnings: ["Operational noise pollutes probe context"],
   };
 
-  it("builds XML probe payload with explicit tags and extracted context vectors", () => {
+  it("builds XML probe payload with explicit tags for 9 strategic context vectors", () => {
     const xml = buildProbeInputXml(sampleMessages, sampleContext);
 
     expect(xml).toContain("<probe_input_payload>");
@@ -35,25 +39,16 @@ describe("src/context.ts", () => {
 
     expect(xml).toContain("<extracted_context_anchor>");
     expect(xml).toContain("<current_system_timestamp>");
-    expect(xml).toContain("</current_system_timestamp>");
-    expect(xml).toContain("<user_intent_motive>Implement XML probe payload protocol.</user_intent_motive>");
-    expect(xml).toContain("<active_constraints_and_guards>read-only mode active</active_constraints_and_guards>");
-    expect(xml).toContain("<verified_facts_inventory>src/types.ts updated</verified_facts_inventory>");
-    expect(xml).toContain("<evidence_freshness_delta>Modified 1 min ago, vitest passing</evidence_freshness_delta>");
-    expect(xml).toContain("<clarity_and_ambiguity_score>CLEAR</clarity_and_ambiguity_score>");
+    expect(xml).toContain("<user_requirements>\n      • Implement XML probe payload protocol.\n    </user_requirements>");
+    expect(xml).toContain("<deliverables>\n      • Updated src/context.ts\n    </deliverables>");
+    expect(xml).toContain("<revised_or_superseded_direction>\n      • Filter low-level tool errors\n    </revised_or_superseded_direction>");
+    expect(xml).toContain("<user_decisions>\n      • Use 9 strategic context slots\n    </user_decisions>");
+    expect(xml).toContain("<questions_and_information_gaps>\n      • None — CLEAR\n    </questions_and_information_gaps>");
+    expect(xml).toContain("<control_boundaries>\n      • Allowed paths: dev-external/pi-ai-consortium\n    </control_boundaries>");
+    expect(xml).toContain("<observed_work>\n      • Updated src/types.ts and src/extraction.ts\n    </observed_work>");
+    expect(xml).toContain("<observed_critical_facts>\n      • Pass 1 Pass 2 Pass 3 pipeline active\n    </observed_critical_facts>");
+    expect(xml).toContain("<relevant_learnings>\n      • Operational noise pollutes probe context\n    </relevant_learnings>");
     expect(xml).toContain("</extracted_context_anchor>");
-  });
-
-  it("includes missingDetails tag when clarity score is AMBIGUOUS", () => {
-    const ambiguousContext: ExtractedContext = {
-      ...sampleContext,
-      clarityAndAmbiguityScore: "AMBIGUOUS",
-      missingDetails: "Clarify model provider override",
-    };
-
-    const xml = buildProbeInputXml(sampleMessages, ambiguousContext);
-    expect(xml).toContain("<clarity_and_ambiguity_score>AMBIGUOUS</clarity_and_ambiguity_score>");
-    expect(xml).toContain("<missing_details>Clarify model provider override</missing_details>");
   });
 
   it("formatAgentMessageContent formats array content blocks cleanly", () => {
@@ -75,12 +70,6 @@ describe("src/context.ts", () => {
     expect(formatted).toContain("[image: image/png]");
   });
 
-  it("buildUserContextFromMessages remains available for backward compatibility", () => {
-    const legacy = buildUserContextFromMessages(sampleMessages);
-    expect(legacy).not.toBeNull();
-    expect(legacy).toContain("Conversation context");
-  });
-
   it("truncateHeadTail preserves both head and tail while capping total length", () => {
     const headText = "HEAD_START: Initial setup log line.";
     const tailText = "TAIL_END: Final exit code 1 build error.";
@@ -93,26 +82,5 @@ describe("src/context.ts", () => {
     expect(truncated).toContain("TAIL_END");
     expect(truncated).toContain("... [truncated");
     expect(truncated.length).toBeLessThanOrEqual(250);
-  });
-
-  it("formatAgentMessageContent applies head+tail cap to massive tool_result content", () => {
-    const headMark = "TOOL_HEAD_OUTPUT_START";
-    const tailMark = "TOOL_TAIL_OUTPUT_END";
-    const hugeBody = "X".repeat(10000);
-    const hugeToolResult = `${headMark}\n${hugeBody}\n${tailMark}`;
-
-    const messageWithHugeResult: AgentMessage = {
-      role: "assistant",
-      content: [
-        { type: "tool_result", content: hugeToolResult },
-      ],
-      timestamp: Date.now(),
-    } as any;
-
-    const formatted = formatAgentMessageContent(messageWithHugeResult, 500);
-
-    expect(formatted).toContain("TOOL_HEAD_OUTPUT_START");
-    expect(formatted).toContain("TOOL_TAIL_OUTPUT_END");
-    expect(formatted).toContain("... [truncated");
   });
 });

@@ -1,26 +1,33 @@
-// Context vector extraction module — distills session history into 5 structured context vectors.
+// Context vector extraction module — distills session history into 9 strategic context vectors.
 
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { ExtractedContext } from "./types.js";
 import type { ModelCallFn } from "./core.js";
 
 export const EXTRACTION_SYSTEM_PROMPT = [
-  "You are a fast context extraction engine for a software development agent.",
+  "You are a high-level strategic context extraction engine for a software development agent.",
   "Analyze the conversation history and extract structured context vectors into JSON.",
+  "",
+  "CRITICAL FILTER RULE (Strategic Intent vs. Operational Friction):",
+  "- FILTER OUT low-level operational mechanics and execution friction (e.g. edit tool line-number mismatches, transient bash error codes, tool parameter syntax typos, or intermediate search loops).",
+  "- EXTRACT STRICTLY high-level strategic intent, macro goals, explicit user decisions, control boundaries, and domain facts.",
   "",
   "Return JSON matching this schema exactly:",
   "{",
-  '  "userIntentAndMotive": "Core human goal & underlying motive",',
-  '  "activeConstraintsAndGuards": "Active flags, read-only mode, commit guards, or session rules",',
-  '  "verifiedFactsInventory": "Confirmed facts, file mtimes, test logs, trace findings",',
-  '  "evidenceFreshnessDelta": "Modified code vs timestamp of last test or visual proof",',
-  '  "clarityAndAmbiguityScore": "CLEAR" or "AMBIGUOUS",',
-  '  "missingDetails": "Specific missing details if AMBIGUOUS (optional)",',
+  '  "userRequirements": ["Macro goals, acceptance criteria, quality expectations, and technical bounds"],',
+  '  "deliverables": ["Explicit required architectural artifacts, files, documentation, or reports expected"],',
+  '  "revisedOrSupersededDirection": ["Directions, goals, or constraints that were canceled, updated, or superseded"],',
+  '  "userDecisions": ["Explicit user choices, approved trade-offs, architecture selections, or preferences"],',
+  '  "questionsAndInformationGaps": ["High-level domain ambiguities or unaddressed user questions requiring clarification"],',
+  '  "controlBoundaries": ["Active session rules, allowed path boundaries, read-only mode flags, and session guards"],',
+  '  "observedWork": ["High-level milestone progress achieved so far (do NOT list individual tool calls)"],',
+  '  "observedCriticalFacts": ["Verified domain truths, system behaviors, and test outcomes observed in logs"],',
+  '  "relevantLearnings": ["Systemic insights, structural architecture patterns, or project rules learned"],',
   '  "deliberationNeeded": true or false,',
-  '  "deliberationReason": "Short reason explaining why full probe deliberation is or is not needed (e.g. unverified code edit, ambiguous requirement, or routine conversational query)"',
+  '  "deliberationReason": "Short reason explaining why full probe deliberation is or is not needed"',
   "}",
   "",
-  "Set deliberationNeeded to true if code/files were modified without test verification, if requirements are AMBIGUOUS, if tools failed, or if the user asked a complex architectural question.",
+  "Set deliberationNeeded to true if code/files were modified without test verification, if requirements are AMBIGUOUS, if tools failed critically, or if the user asked a complex architectural question.",
   "Set deliberationNeeded to false if the user input is a simple acknowledgment, status check, routine question, or clear step in progress with fresh evidence.",
   "",
   "Output raw JSON ONLY. No conversational prefix or markdown wrapper.",
@@ -37,17 +44,32 @@ export function getDefaultExtractedContext(messages?: AgentMessage[]): Extracted
   }
 
   return {
-    userIntentAndMotive: initialGoal,
-    activeConstraintsAndGuards: "Standard session rules",
-    verifiedFactsInventory: "Session history available in transcript",
-    evidenceFreshnessDelta: "Freshness unknown — recent history should be inspected",
-    clarityAndAmbiguityScore: "CLEAR",
+    userRequirements: [initialGoal],
+    deliverables: [],
+    revisedOrSupersededDirection: [],
+    userDecisions: [],
+    questionsAndInformationGaps: [],
+    controlBoundaries: ["Standard session rules"],
+    observedWork: ["Session initialized"],
+    observedCriticalFacts: ["Session history available in transcript"],
+    relevantLearnings: [],
     deliberationNeeded: true,
     deliberationReason: "Default fallback context — full audit enabled by default",
   };
 }
 
-/** Extract 5 structured context vectors from recent messages using a fast LLM pass. */
+/** Helper to ensure a parsed JSON property is a valid string array. */
+function ensureStringArray(val: unknown, defaultVal: string[] = []): string[] {
+  if (Array.isArray(val)) {
+    return val.map((item) => String(item)).filter((s) => s.trim().length > 0);
+  }
+  if (typeof val === "string" && val.trim().length > 0) {
+    return [val.trim()];
+  }
+  return defaultVal;
+}
+
+/** Extract 9 strategic context vectors from recent messages using a fast LLM pass. */
 export async function extractContextFromMessages(
   messages: AgentMessage[],
   callModel: ModelCallFn,
@@ -76,21 +98,25 @@ export async function extractContextFromMessages(
       "extraction",
       EXTRACTION_SYSTEM_PROMPT,
       `Conversation History:\n\n${formattedHistory}`,
-      512,
+      1024,
       0.2,
       signal,
     );
 
     const jsonText = raw.replace(/^```(?:json)?\n?/i, "").replace(/\n?```$/i, "").trim();
     const parsed = JSON.parse(jsonText);
+    const defaults = getDefaultExtractedContext(messages);
 
     return {
-      userIntentAndMotive: String(parsed.userIntentAndMotive || getDefaultExtractedContext(messages).userIntentAndMotive),
-      activeConstraintsAndGuards: String(parsed.activeConstraintsAndGuards || "Standard session rules"),
-      verifiedFactsInventory: String(parsed.verifiedFactsInventory || "Session history available"),
-      evidenceFreshnessDelta: String(parsed.evidenceFreshnessDelta || "No delta recorded"),
-      clarityAndAmbiguityScore: parsed.clarityAndAmbiguityScore === "AMBIGUOUS" ? "AMBIGUOUS" : "CLEAR",
-      missingDetails: parsed.missingDetails ? String(parsed.missingDetails) : undefined,
+      userRequirements: ensureStringArray(parsed.userRequirements, defaults.userRequirements),
+      deliverables: ensureStringArray(parsed.deliverables, defaults.deliverables),
+      revisedOrSupersededDirection: ensureStringArray(parsed.revisedOrSupersededDirection, defaults.revisedOrSupersededDirection),
+      userDecisions: ensureStringArray(parsed.userDecisions, defaults.userDecisions),
+      questionsAndInformationGaps: ensureStringArray(parsed.questionsAndInformationGaps, defaults.questionsAndInformationGaps),
+      controlBoundaries: ensureStringArray(parsed.controlBoundaries, defaults.controlBoundaries),
+      observedWork: ensureStringArray(parsed.observedWork, defaults.observedWork),
+      observedCriticalFacts: ensureStringArray(parsed.observedCriticalFacts, defaults.observedCriticalFacts),
+      relevantLearnings: ensureStringArray(parsed.relevantLearnings, defaults.relevantLearnings),
       deliberationNeeded: typeof parsed.deliberationNeeded === "boolean" ? parsed.deliberationNeeded : true,
       deliberationReason: parsed.deliberationReason ? String(parsed.deliberationReason) : undefined,
     };

@@ -1,19 +1,25 @@
 // Consortium types — pure interfaces, no runtime dependencies.
 
-/** Structured context vectors extracted from session history. */
+/** High-level strategic context vectors extracted from session history. */
 export interface ExtractedContext {
-  /** Core user intent and underlying motive. */
-  userIntentAndMotive: string;
-  /** Active session rules, mode, and runtime guards. */
-  activeConstraintsAndGuards: string;
-  /** Inventory of verified facts, mtimes, test logs, and trace evidence. */
-  verifiedFactsInventory: string;
-  /** Freshness comparison: modified files vs last test suite or screenshot proof. */
-  evidenceFreshnessDelta: string;
-  /** Clarity assessment: status CLEAR or AMBIGUOUS with specific missing details. */
-  clarityAndAmbiguityScore: "CLEAR" | "AMBIGUOUS";
-  /** If clarity is AMBIGUOUS, specific missing details requiring clarification. */
-  missingDetails?: string;
+  /** 1. Macro goals, technical criteria, and quality expectations set by user. */
+  userRequirements: string[];
+  /** 2. Explicit required architectural artifacts, files, or reports expected. */
+  deliverables: string[];
+  /** 3. Directions, goals, or constraints that were canceled, updated, or superseded. */
+  revisedOrSupersededDirection: string[];
+  /** 4. Confirmed user decisions, approved trade-offs, and design preferences. */
+  userDecisions: string[];
+  /** 5. High-level domain ambiguities or unaddressed user questions requiring clarification. */
+  questionsAndInformationGaps: string[];
+  /** 6. Active session rules, allowed path boundaries, and mode flags. */
+  controlBoundaries: string[];
+  /** 7. Verified milestone progress achieved so far (high-level, not individual tool calls). */
+  observedWork: string[];
+  /** 8. Verified domain truths, system behaviors, and test outcomes observed in logs. */
+  observedCriticalFacts: string[];
+  /** 9. Systemic insights, structural architecture patterns, or project rules learned. */
+  relevantLearnings: string[];
   /** Signal from context extraction pass whether full probe deliberation is recommended. */
   deliberationNeeded?: boolean;
   /** Reason explaining why deliberation is needed or skipped. */
