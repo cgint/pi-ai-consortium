@@ -66,14 +66,21 @@ Operating loop:
 
 1. launch with `async: true`;
 2. keep the main session free for judgement, independent reads, and coordination;
-3. check/respond to `intercom` questions while children are active;
-4. do **not** call `subagent_wait` merely to idle until completion — return control
+3. **do not poll** `status`, `intercom pending`, transcripts, or output files;
+   Pi automatically notifies the main session on completion, attention, or a
+   child question;
+4. respond through `intercom` or steer only **after** such a notification — the
+   point of async is availability, not active surveillance;
+5. do **not** call `subagent_wait` merely to idle until completion — return control
    and let Pi wake the session, unless the current turn truly cannot finish
    without the result;
-5. after completion, read only the headline block and decision-bearing citations.
+6. after completion, read only the headline block and decision-bearing citations.
 
 This rule applies to single, parallel, and chained delegation. Async execution is
 not permission to abandon children; it is what makes live supervision possible.
+**Notification-driven does not mean inattentive:** answer immediately when Pi
+surfaces a child question or attention signal, but never probe merely to see if
+one exists.
 
 **Do not request `acceptance: "checked"` for a read-only analysis/review.**
 Verified 2026-07-25: the advisor completed a 144-line review and wrote its output,
