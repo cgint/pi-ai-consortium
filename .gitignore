@@ -4,6 +4,7 @@ dist/
 
 # Local pi artifacts
 .pi/consortium/
+.pi/goals/
 .pi/*.json
 .pi-subagents/
 .scan-results/
