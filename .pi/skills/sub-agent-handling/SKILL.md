@@ -246,17 +246,22 @@ empirically, not by more reading.
 ## Files in this skill
 
 - `templates/recon-brief.md` — paste-and-fill brief for a delegated recon run
-- `templates/recon-report.md` — the mandatory shape of the short inline return
+- `templates/recon-report.md` — the mandatory shape of the short recon return
+- `templates/implementation-brief.md` — authorization boundary, exact write scope,
+  numbered requirements, verification commands, and stop rules for one writer
+- `templates/implementation-report.md` — headline-first changed-files,
+  behavior, verification, contradiction, and residual-risk return
 
-Both are adapted from `~/dev/daily-workflow-helper/.pi/skills/scva-handoff-orchestrator/`.
+The recon templates are adapted from `~/dev/daily-workflow-helper/.pi/skills/scva-handoff-orchestrator/`.
 Not adopted from it: its `references/runner-usage.md` (documents shell scripts
 that do not exist here — this repo uses the `subagent` tool, which supplies
 artifact and session paths itself) and its `.d2`/`.svg` flow diagram (five boxes;
 see the ASCII flow above). Its `references/run-layout.md` is runner-specific, but
 its durability principle was kept — see "Durable run record".
 
-Still missing: an implementation-run brief and report. Add them when the first
-writing delegation happens, not before — an unused template is sediment.
+The implementation templates were added on 2026-07-25 at the first writing
+delegation, as planned; they are now backed by an actual use rather than
+speculative process design.
 
 ## Related
 
