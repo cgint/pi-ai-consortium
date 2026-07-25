@@ -1,0 +1,12 @@
+{
+  "map_id": "phase0-legacy",
+  "version": 1,
+  "applies_to": "The five Phase 0 preflight runs, whose fixture predated the neutral-marker rule.",
+  "note": "Substitutions are ordered and applied as literal replacements. Longest keys first to avoid partial overlap.",
+  "literals": {
+    "PREFLIGHT_MARKER=CONSORTIUM_PARCOUR_OK": "RELEASE_TAG=R-4417-OK",
+    "CONSORTIUM_PARCOUR_OK": "R-4417-OK",
+    "PREFLIGHT_MARKER": "RELEASE_TAG",
+    "task.txt": "RELEASE_NOTES.txt"
+  }
+}

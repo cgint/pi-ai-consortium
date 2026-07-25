@@ -1,0 +1,31 @@
+# Deny-list for scorer-facing bundles (plan §12.2).
+# Any match quarantines the bundle. Re-derive from raw evidence; never hand-patch.
+# Targets identifier VALUES, not generic prose, so normal agent text is not flagged.
+# Format: one Python regex per line. Blank lines and # comments ignored.
+
+# provider / model identity
+(?i)\bolla\b
+(?i)qwen[0-9]
+(?i)nvfp4
+(?i)openai-completions
+
+# system under test
+(?i)consortium
+(?i)pi-ai-consortium
+(?i)ai-consortium
+
+# experiment provenance
+(?i)parcour
+(?i)preflight
+(?i)PREFLIGHT_MARKER
+(?i)\bholdout\b
+(?i)\bdeliberation\b
+
+# host paths and repo location
+/Users/[A-Za-z0-9._-]+
+(?i)dev-external
+(?i)dev/concepts
+
+# session and run identifiers
+[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
+\b019f[0-9a-f]{4}\b
