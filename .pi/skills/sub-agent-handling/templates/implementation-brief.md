@@ -59,8 +59,14 @@ Run only the listed commands; record command + exit code + concise result.
 Put the exact headline block from `templates/implementation-report.md` at the
 VERY TOP, before implementation notes. Under it include:
 
-- requirement → changed file:line mapping;
+- every numbered requirement mapped to `PASS`, `FAIL`, or `UNDETERMINED`, with
+  changed file:line and covering test for each `PASS`;
 - files changed;
 - commands run and exit codes;
 - residual risks / runtime-only checks;
 - no more than 160 lines total.
+
+**Completion rule:** status `complete` is valid only when every numbered
+requirement is `PASS`. If any required behavior is deferred, absent, or only
+covered by callback/unit tests while production wiring is untested, report
+`partial` or `scope-blocked` even when every command is green.

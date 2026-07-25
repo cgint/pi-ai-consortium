@@ -241,6 +241,13 @@ run.
   non-computable because a counter field was absent while a countable event type
   existed). Spot-check the mechanism, not just the verdict — they fail
   independently.
+- **Green commands do not validate the brief.** Verified 2026-07-25: the first
+  writer reported `complete`, 74/74 tests, clean typecheck/precommit, and then
+  admitted in `RESIDUAL RISK` that required usage telemetry was always
+  `not_applicable`. Production never passed its callback, so zero telemetry was
+  emitted. Require numbered requirement→file:line→covering-test mapping; any
+  unmet or deferred requirement forces `partial`/`scope-blocked`. Independently
+  trace production wiring before accepting implementation.
 
 ## Open question
 
