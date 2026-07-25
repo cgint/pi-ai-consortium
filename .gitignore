@@ -5,6 +5,7 @@ dist/
 # Local pi artifacts
 .pi/
 .scan-results/
+.hidden-parcour/
 
 # Raw runtime artifacts
 *.jsonl
