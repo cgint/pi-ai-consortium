@@ -9,7 +9,7 @@
  */
 
 import { streamSimple } from "@earendil-works/pi-ai/compat";
-import type { Context } from "@earendil-works/pi-ai";
+import type { Context, Usage } from "@earendil-works/pi-ai";
 
 /**
  * Minimal model registry interface matching pi-coding-agent's ModelRegistry.
@@ -45,8 +45,15 @@ function textFromMessage(msg: { content: unknown }): string {
 
 /**
  * Call a model with auth forwarded from the parent context.
+ * Returns `{ text, usage }` where `usage` is the Pi `Usage` when `totalTokens > 0`,
+ * otherwise `null` (all-zero means unreported).
  * Throws on: model not found, auth failure, model call errors.
  */
+export interface CallModelResult {
+  text: string;
+  usage: Usage | null;
+}
+
 export async function callModelWithAuth(
   provider: string,
   modelId: string,
@@ -54,7 +61,7 @@ export async function callModelWithAuth(
   userPrompt: string,
   modelRegistry: ModelRegistry,
   signal?: AbortSignal,
-): Promise<string> {
+): Promise<CallModelResult> {
   const model = modelRegistry.find(provider, modelId);
   if (!model) {
     throw new Error(`Model not found: ${provider}/${modelId}`);
@@ -103,5 +110,10 @@ export async function callModelWithAuth(
   const result = await eventStream.result();
 
   // Extract text from the AssistantMessage response
-  return textFromMessage(result);
+  const text = textFromMessage(result);
+
+  // Retain usage if totalTokens > 0; all-zero means unreported → null
+  const usage = result.usage && result.usage.totalTokens > 0 ? result.usage : null;
+
+  return { text, usage };
 }

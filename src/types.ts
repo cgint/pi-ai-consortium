@@ -123,6 +123,36 @@ export interface ProbeResult {
   text: string;
 }
 
+/* ── Telemetry types ── */
+
+import type { Usage } from "@earendil-works/pi-ai";
+
+/**
+ * Usage accumulator state for a single deliberation.
+ * Tracks successful calls and collects Usage objects.
+ */
+export interface UsageAccumulator {
+  /** Number of successful model calls (resolved without throwing). */
+  successfulCalls: number;
+  /** Collected Usage objects (non-null only). */
+  usages: Usage[];
+  /** Add a successful call that reported usage. */
+  addReported(usage: Usage): void;
+  /** Add a successful call that did not report usage (all-zero or absent). */
+  addUnreported(): void;
+  /** Compute final status and optional aggregate. */
+  compute(): { status: "not_applicable" | "unreported" | "partial" | "complete"; aggregate?: Usage };
+}
+
+/** A single telemetry event emitted during deliberation. */
+export type TelemetryEvent =
+  | { type: "baseline_check"; baseline_available: boolean; baseline_supplied: boolean }
+  | { type: "probe_complete"; modelKey: string; duration_ms: number; output_length: number; usage_reported: boolean; usage?: Usage }
+  | { type: "deliberation_telemetry"; baseline_available: boolean; baseline_supplied: boolean | "not_applicable"; successful_calls: number; reported_calls: number; usage_status: "complete" | "partial" | "unreported" | "not_applicable"; aggregate_usage?: Usage };
+
+/** Optional telemetry callback. Exceptions must never affect deliberation. */
+export type TelemetryCallback = (event: TelemetryEvent) => void;
+
 /** Full deliberation result. */
 export interface DeliberationResult {
   /** Individual probe outputs. */

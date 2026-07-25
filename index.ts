@@ -20,7 +20,8 @@ import { callModelWithAuth } from "./src/model.js";
 import { DEFAULT_CONFIG } from "./src/config.js";
 import { buildUserContext, buildUserContextFromMessages } from "./src/context.js";
 import { ConsortiumLogger, createProgressCallback, formatVisibleMessage } from "./src/ui.js";
-import type { ConsortiumConfig, TurnState, DeliberationResult, GovernorMode } from "./src/types.js";
+import type { ConsortiumConfig, TurnState, DeliberationResult, GovernorMode, TelemetryEvent } from "./src/types.js";
+import { createUsageAccumulator, buildDeliberationTelemetry, safeLog } from "./src/telemetry.js";
 import { join, dirname } from "node:path";
 import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -156,7 +157,7 @@ export default function (pi: ExtensionAPI): void {
       periodicInterval,
     };
 
-    turnState.deliberation = runDeliberation(runtimeConfig, event.messages, ctx, logger, onProgress, turnsSinceLastAudit);
+    turnState.deliberation = runDeliberation(runtimeConfig, event.messages, ctx, logger, onProgress, turnsSinceLastAudit, lastExtractedContext !== null);
 
     try {
       const result = await turnState.deliberation;
@@ -356,13 +357,14 @@ export default function (pi: ExtensionAPI): void {
 }
 
 /** Run the full deliberation cycle. */
-async function runDeliberation(
+export async function runDeliberation(
   baseConfig: typeof DEFAULT_CONFIG,
   input: string | AgentMessage[],
   ctx: ExtensionContext,
   logger: ConsortiumLogger,
-  onProgress?: (phase: string, current: number, total: number, role?: string) => void,
-  turnsSinceLastAudit: number = 0,
+  onProgress: (phase: string, current: number, total: number, role?: string) => void,
+  turnsSinceLastAudit: number,
+  baselineAvailable: boolean,
 ): Promise<DeliberationResult> {
   const activeModel = ctx.model;
   if (!activeModel) {
@@ -398,6 +400,18 @@ async function runDeliberation(
     probe_count: config.probes.length,
   });
 
+  // ── Telemetry state (local to this runDeliberation call) ──
+  const acc = createUsageAccumulator();
+  let baselineSupplied: boolean | undefined;
+  const telemetryLog = (event: TelemetryEvent): void => {
+    logger.log(event);
+  };
+
+  const onBaselineCheck = (bs: boolean): void => {
+    baselineSupplied = bs;
+    safeLog(telemetryLog, { type: "baseline_check", baseline_available: baselineAvailable, baseline_supplied: bs });
+  };
+
   const callModel: ModelCallFn = async (modelKey, system, user, _maxTokens, _temperature, signal) => {
     const start = Date.now();
     const { provider, modelId } = resolveModelKey(modelKey, config);
@@ -414,8 +428,30 @@ async function runDeliberation(
     try {
       const result = await callModelWithAuth(provider, modelId, system, user, modelRegistry, signal);
       const duration = Date.now() - start;
-      logger.log({ type: "probe_complete", modelKey, duration_ms: duration, output_length: result.length, output: result });
-      return result;
+      const usageReported = result.usage !== null;
+
+      // Record usage in accumulator
+      if (result.usage !== null) {
+        acc.addReported(result.usage);
+      } else {
+        acc.addUnreported();
+      }
+
+      // Log probe_complete with usage_reported flag
+      const logEntry: Record<string, unknown> = {
+        type: "probe_complete",
+        modelKey,
+        duration_ms: duration,
+        output_length: result.text.length,
+        output: result.text,
+        usage_reported: usageReported,
+      };
+      if (result.usage !== null) {
+        logEntry.usage = result.usage;
+      }
+      logger.log(logEntry);
+
+      return result.text;
     } catch (err) {
       const duration = Date.now() - start;
       const msg = err instanceof Error ? err.message : String(err);
@@ -424,8 +460,14 @@ async function runDeliberation(
     }
   };
 
-  const core = new ConsortiumCore(config, callModel);
-  return core.deliberate(input, ctx.signal, onProgress, turnsSinceLastAudit);
+  const core = new ConsortiumCore(config, callModel, onBaselineCheck);
+  const result = await core.deliberate(input, ctx.signal, onProgress, turnsSinceLastAudit);
+
+  // ── Final deliberation_telemetry (after core completes) ──
+  const finalEvent = buildDeliberationTelemetry(baselineAvailable, baselineSupplied, acc);
+  safeLog(telemetryLog, finalEvent);
+
+  return result;
 }
 
 /** Resolve provider + modelId from a modelKey string. */

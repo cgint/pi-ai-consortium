@@ -36,6 +36,7 @@ export class ConsortiumCore {
   constructor(
     private config: ConsortiumConfig,
     private callModel: ModelCallFn,
+    private onBaselineCheck?: (baselineSupplied: boolean) => void,
   ) {}
 
   async deliberate(
@@ -83,6 +84,8 @@ export class ConsortiumCore {
       onProgress?.("extraction", 0, 1);
       try {
         const priorContext = previousContext ?? this.lastExtractedContext;
+        const baselineSupplied = priorContext !== undefined;
+        try { this.onBaselineCheck?.(baselineSupplied); } catch { /* isolated */ }
         extractedContext = await extractContextFromMessages(input, this.callModel, priorContext, masterController.signal);
         this.lastExtractedContext = extractedContext;
       } catch (err) {
@@ -270,4 +273,5 @@ export class ConsortiumCore {
       .map((p) => `## ${p.role.toUpperCase()} PROBE\n${p.text}`)
       .join("\n\n---\n\n");
   }
+
 }
