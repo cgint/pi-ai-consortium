@@ -5,7 +5,15 @@ dist/
 # Local pi artifacts
 .pi/
 .scan-results/
+
+# Behavioral parcour: templates are committed, run evidence is not.
+# Live run workspaces are ephemeral under /tmp and never appear here.
+.parcour-runs/
 .hidden-parcour/
 
 # Raw runtime artifacts
 *.jsonl
+
+# Parcour templates are committed starting states, so re-include any
+# fixture files the broad rules above would otherwise exclude.
+!.parcour-runs-templates/**

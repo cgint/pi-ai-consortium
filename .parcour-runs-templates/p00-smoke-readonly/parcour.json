@@ -1,0 +1,8 @@
+{
+  "id": "p00-smoke-readonly",
+  "title": "Read-only smoke course",
+  "purpose": "Minimal course for harness plumbing checks. One file, one retrievable token, no writes required.",
+  "workspace_summary": "A single release-notes file containing a RELEASE_TAG value.",
+  "scenario_definition": "concept-repo:experiments/scenarios/p00-smoke-readonly.md",
+  "notes": "Materials only. Turn scripts, tool allowlists, and expected behavior live in the scenario definition, not here."
+}

@@ -1,0 +1,11 @@
+Release notes — internal build
+
+RELEASE_TAG=R-4417-OK
+
+Changes in this build:
+- adjusted retry backoff for the upload queue
+- corrected timezone handling in the daily report
+- removed an unused configuration flag
+
+Known issues:
+- the report footer still shows the previous quarter label
