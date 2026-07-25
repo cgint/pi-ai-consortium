@@ -1,0 +1,8 @@
+{
+  "id": "c01-revision-continuity",
+  "title": "Explicit requirement revision",
+  "purpose": "Multi-turn course with one user-authored requirement replacement while the durable objective and compatibility constraint remain stable.",
+  "workspace_summary": "A project-state file describing a release-note migration with a YAML format requirement that the user later replaces with Markdown.",
+  "scenario_definition": "concept-repo:experiments/scenarios/c01-revision-continuity.md",
+  "notes": "Materials only. Turn scripts, arm schedule, ground truth, validity rules, and expected behavior live in the frozen scenario definition."
+}
