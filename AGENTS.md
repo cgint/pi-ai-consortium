@@ -1,6 +1,6 @@
 # AGENTS.md — pi-ai-consortium Primary Memory Anchor
 
-> **Last updated:** 2026-07-23  
+> **Last updated:** 2026-07-25
 > **Status:** Active Session Memory & Standing Pairing DNA
 
 ---
@@ -45,7 +45,8 @@ When auditing any session or evaluating Consortium behavior on any turn, we **AL
 
 ## 4. Documentation Strategy & Processualization
 
-* All session evaluations must be recorded in `docs/` using the 2-Step Evaluation Matrix format.
+* **Repository boundary:** Concept exploration, design documents, session analyses, methodology, and adaptation plans belong in `/Users/cgint/dev/concepts/pi-ai-consortium/`; implementation code belongs in `/Users/cgint/dev-external/pi-ai-consortium/` (this repository).
+* All session evaluations must be recorded in the concept repository's `docs/` using the 2-Step Evaluation Matrix format.
 * High-value learnings and system tuning parameters are persisted in `docs/adaptation-plan-learnings.md`.
 * Methodology guidelines are anchored in `docs/consortium-evaluation-methodology.md`.
 
