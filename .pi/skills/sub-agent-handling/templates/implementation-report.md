@@ -36,5 +36,9 @@ Put this block at the **VERY TOP of the output file**. Hard cap ~12 lines.
   redefine the brief.
 - Do not claim runtime/provider behavior from unit tests. Put that under
   `UNDETERMINED` until exercised against the pinned runtime.
+- Do not label a test integration/production-path evidence when it copies the
+  production logic into a helper. It must call the actual production entrypoint
+  or fire the real registered handler. For branch coverage, report how the test
+  proves the branch precondition was reached, not only the test name.
 - The main session will inspect the diff and use an independent reviewer before
   committing. Do not commit from the worker run.

@@ -248,6 +248,14 @@ run.
   emitted. Require numbered requirement→file:line→covering-test mapping; any
   unmet or deferred requirement forces `partial`/`scope-blocked`. Independently
   trace production wiring before accepting implementation.
+- **A mirrored production helper is not an integration test.** Verified
+  2026-07-25: repair 20 copied `index.ts` wiring into
+  `simulateProductionWiring()` and claimed the test would fail if production
+  omitted telemetry; because it never imported/called the production path, it
+  could not. Another test named "pre-governor skip" explicitly ran the normal
+  path. Integration evidence must invoke the real exported entrypoint or fire the
+  real registered handler, and branch tests must prove the branch precondition
+  plus side effects. Copied logic is a unit-contract test only.
 
 ## Open question
 

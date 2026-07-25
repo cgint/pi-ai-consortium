@@ -70,3 +70,10 @@ VERY TOP, before implementation notes. Under it include:
 requirement is `PASS`. If any required behavior is deferred, absent, or only
 covered by callback/unit tests while production wiring is untested, report
 `partial` or `scope-blocked` even when every command is green.
+
+**Integration-test identity rule:** a test may be called integration/production-
+path evidence only when it imports/calls the actual production entrypoint or
+fires the real registered handler. Reimplementing production wiring in a test
+helper is unit-contract coverage and must be labelled as such. A branch test must
+assert the branch precondition was reached (for example zero model calls on a
+pre-governor skip), not merely carry the branch name.
