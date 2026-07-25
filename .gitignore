@@ -3,7 +3,9 @@ node_modules/
 dist/
 
 # Local pi artifacts
-.pi/
+.pi/consortium/
+.pi/*.json
+.pi-subagents/
 .scan-results/
 
 # Behavioral parcour: templates are committed, run evidence is not.
