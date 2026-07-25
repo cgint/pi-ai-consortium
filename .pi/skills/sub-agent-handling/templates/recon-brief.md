@@ -3,10 +3,11 @@
 Paste into the `task` field. Delete the guidance in angle brackets.
 
 - **Recon ID:** `<nn-topic>` — matches the output filename
-- **Role:** Scout (read-only) | Reviewer (read-only) | Worker (writes)
+- **Role:** Scout (read-only) | Reviewer (read-only)
+  (writing work uses `templates/implementation-brief.md`)
 - **Goal, one sentence:** `<what this run must establish>`
 - **Model:** `olla/qwen36-27b-nvidia-nvfp4:off` (mandatory)
-- **Output:** `/Users/cgint/dev/concepts/deliberate-agent/agent/inventory/<nn-topic>.md`
+- **Output:** `/Users/cgint/dev/concepts/pi-ai-consortium/agent/inventory/<nn-topic>.md`
   (absolute, plus `outputMode: "file-only"`)
 
 ## Mode
@@ -61,6 +62,8 @@ Then: **Most reusable asset** — one schema, script, or concept, or `NONE`.
   paraphrase.
 - Length cap: under `<N>` lines.
 
-## Required final response
+## Required output-file headline
 
-Use the exact headings from `templates/recon-report.md`. Keep it under 10 lines.
+Put the exact headings from `templates/recon-report.md` at the **VERY TOP of the
+output file**, before detailed findings. Keep the block under 10 lines.
+`outputMode: "file-only"` means there may be no substantive inline return.

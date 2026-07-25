@@ -1,8 +1,9 @@
-# RECON REPORT — the short return
+# RECON REPORT — output-file headline block
 
-This is the **inline** return, not the output file. Hard cap ~10 lines. The full
-report goes to the output path; this exists so the main session knows whether it
-must open it, and cannot miss a falsification.
+Put this block at the **VERY TOP of the output file**, before the full report.
+Hard cap ~10 lines. With `outputMode: "file-only"`, the runtime's inline return
+may contain only a path and byte count; this block is how the main session can
+open only the first lines and still cannot miss a falsification.
 
 ```text
 - Recon ID:      <nn-topic>
