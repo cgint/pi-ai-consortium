@@ -75,6 +75,15 @@ Operating loop:
 This rule applies to single, parallel, and chained delegation. Async execution is
 not permission to abandon children; it is what makes live supervision possible.
 
+**Do not request `acceptance: "checked"` for a read-only analysis/review.**
+Verified 2026-07-25: the advisor completed a 144-line review and wrote its output,
+but the run was marked failed because checked acceptance required command-run
+evidence that a read-only review had no reason to produce. Omit acceptance for
+read-only scouts/advisors; reserve checked/verified acceptance for execution work
+with an actual verification command. Also do not request `reviewed` from a
+single read-only run — the runtime correctly rejects it when no independent
+reviewer can be supplied.
+
 ### 1. Model
 
 **Always** pass `model: "olla/qwen36-27b-nvidia-nvfp4:off"` — the local model with
