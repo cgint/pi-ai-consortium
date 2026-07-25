@@ -50,6 +50,31 @@ Do **not** delegate:
 
 ## Non-negotiables
 
+### 0. Always launch asynchronously; the main session remains the overseer
+
+**Every sub-agent run must pass `async: true`.** The main session must remain
+available while children work — both to advance independent architect-level work
+and, more importantly, to answer child questions through `pi-intercom` so the
+child can continue with corrected guidance.
+
+A foreground run on 2026-07-25 blocked the main session until both scouts had
+finished. That defeated the intended supervision model: the lead could neither
+inspect other evidence nor respond if a child discovered a wrong premise and
+needed clarification.
+
+Operating loop:
+
+1. launch with `async: true`;
+2. keep the main session free for judgement, independent reads, and coordination;
+3. check/respond to `intercom` questions while children are active;
+4. do **not** call `subagent_wait` merely to idle until completion — return control
+   and let Pi wake the session, unless the current turn truly cannot finish
+   without the result;
+5. after completion, read only the headline block and decision-bearing citations.
+
+This rule applies to single, parallel, and chained delegation. Async execution is
+not permission to abandon children; it is what makes live supervision possible.
+
 ### 1. Model
 
 **Always** pass `model: "olla/qwen36-27b-nvidia-nvfp4:off"` — the local model with
