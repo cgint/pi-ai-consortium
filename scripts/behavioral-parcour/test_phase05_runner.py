@@ -611,7 +611,7 @@ def _edit_pair(tid, old_text, new_text, is_error):
     """Generate a pair of tool_execution_start/end events."""
     return [
         {"type": "tool_execution_start", "toolCallId": tid, "toolName": "edit",
-         "args": {"path": "RELEASE_NOTES.txt", "oldText": old_text, "newText": new_text}},
+         "args": {"path": "RELEASE_NOTES.txt", "edits": [{"oldText": old_text, "newText": new_text}]}},
         {"type": "tool_execution_end", "toolCallId": tid, "toolName": "edit",
          "result": {"content": []}, "isError": is_error},
     ]
@@ -1072,9 +1072,13 @@ def test_no_rmtree() -> None:
 
 
 def test_import_no_side_effects() -> None:
-    """Importing the runner module should not create temp dirs."""
-    parcour_dirs = [d for d in Path("/tmp").glob("parcour-*") if "phase05" in d.name]
-    true(len(parcour_dirs) == 0, "No side-effect dirs")
+    """A fresh import must not change the existing temp parcour set."""
+    before = {str(d) for d in Path("/tmp").glob("parcour-*")}
+    spec = _ilu.spec_from_file_location("phase05_runner_import_check", str(_RUNNER_FILE))
+    module = _ilu.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    after = {str(d) for d in Path("/tmp").glob("parcour-*")}
+    eq(after, before, "Import creates no temp directories")
 
 
 # ---------------------------------------------------------------------------

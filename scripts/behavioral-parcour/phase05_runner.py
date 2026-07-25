@@ -541,6 +541,14 @@ def validate_confinement(
     return a
 
 
+def _single_edit_operation(args: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Return Pi's single nested edit operation, or None for another schema."""
+    edits = args.get("edits")
+    if not isinstance(edits, list) or len(edits) != 1 or not isinstance(edits[0], dict):
+        return None
+    return edits[0]
+
+
 def validate_edit_recovery(rpc_events: List[Dict[str, Any]]) -> Assertion:
     """A12: Edit recovery ordered subsequence.
 
@@ -611,18 +619,18 @@ def validate_edit_recovery(rpc_events: List[Dict[str, Any]]) -> Assertion:
 
     # Validate failed edit START has wrong old/new text
     fail_tid, fail_start, fail_end = failed_edit
-    fail_args = fail_start.get("args", {})
-    if fail_args.get("oldText") != WRONG_OLD_TEXT or fail_args.get("newText") != WRONG_NEW_TEXT:
+    fail_op = _single_edit_operation(fail_start.get("args", {}))
+    if fail_op is None or fail_op.get("oldText") != WRONG_OLD_TEXT or fail_op.get("newText") != WRONG_NEW_TEXT:
         a.passed = False
-        a.details = f"Failed edit args don't match frozen wrong text: oldText={fail_args.get('oldText')!r}"
+        a.details = f"Failed edit operation doesn't match frozen wrong text: operation={fail_op!r}"
         return a
 
     # Validate successful edit START has correct old/new text
     succ_tid, succ_start, succ_end = success_edit
-    succ_args = succ_start.get("args", {})
-    if succ_args.get("oldText") != CORRECT_OLD_TEXT or succ_args.get("newText") != CORRECT_NEW_TEXT:
+    succ_op = _single_edit_operation(succ_start.get("args", {}))
+    if succ_op is None or succ_op.get("oldText") != CORRECT_OLD_TEXT or succ_op.get("newText") != CORRECT_NEW_TEXT:
         a.passed = False
-        a.details = f"Success edit args don't match correct text: oldText={succ_args.get('oldText')!r}"
+        a.details = f"Success edit operation doesn't match correct text: operation={succ_op!r}"
         return a
 
     # Validate successful edit END has isError=false
