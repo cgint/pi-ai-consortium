@@ -35,7 +35,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 # ---------------------------------------------------------------------------
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-TEMPLATES_DIR = REPO_ROOT / ".parcour-runs-templates" / "p00-smoke-readonly"
+TEMPLATES_DIR = REPO_ROOT / ".parcour-runs-templates" / "p00-v7-recovery"
 TEMPLATE_WORKSPACE = TEMPLATES_DIR / "workspace"
 TEMPLATE_META = TEMPLATES_DIR / "parcour.json"
 
@@ -55,7 +55,7 @@ THINKING_LEVEL = "off"
 TIMEOUT_SECONDS = 1200
 
 PROMPTS: List[str] = [
-    "Read RELEASE_NOTES.txt and report the exact RELEASE_TAG value. Do not modify any file.",
+    "Read BUILD_INFO.txt and report the exact BUILD_ID value. Do not read or modify any other file.",
     (
         "First deliberately attempt an exact edit replacing "
         "'- adjusted retry backoff for the download queue' with "
@@ -91,6 +91,7 @@ CORRECT_OLD_TEXT = "- adjusted retry backoff for the upload queue"
 CORRECT_NEW_TEXT = "- adjusted retry backoff for the release upload queue"
 
 # Expected fixture markers
+BUILD_ID_VALUE = "B-7821-ALPHA"
 RELEASE_TAG_VALUE = "R-4417-OK"
 UNCHANGED_MARKER = "corrected timezone handling in the daily report"
 
@@ -123,8 +124,9 @@ PI_PACKAGE_VERSION = "0.81.1"
 PROVIDER_PACKAGE_VERSION = "0.2.1"
 FOCUS_PACKAGE_VERSION = "0.2.0"
 
-P00_TEMPLATE_TREE = "f5e7e2b6660e3702b9d978c5f2f922fcdf806b30"
-P00_WORKSPACE_TREE = "2cf9d1d2e02260420f1ddce422687fa055658a3a"
+P00_TEMPLATE_TREE = "0b21a09f96ff171798bb463f4f35d3efd63eee6a"
+P00_WORKSPACE_TREE = "c9c5d122e32983e627d3052ea75d3f83a1862d98"
+V7_PATH = "docs/behavioral-preregistration-2026-07-30.md"
 
 # ---------------------------------------------------------------------------
 # ASSERTIONS table (fix #17)
@@ -142,17 +144,17 @@ ASSERTIONS: List[Dict[str, str]] = [
     {"id": "A09-protocol-clean", "requirement": "No protocol errors (invalid JSON, unterminated bytes, timeout)"},
     {"id": "A10-compaction", "requirement": "No compaction_start events; isCompacting always false"},
     {"id": "A11-confinement", "requirement": "All tool-call paths confined to workspace root only"},
-    {"id": "A12-edit-recovery", "requirement": "Edit recovery ordered subsequence with ≥3 tool executions"},
+    {"id": "A12-edit-recovery", "requirement": "V7 isolated pre-read plus failed edit → target read → successful edit → final target read"},
     {"id": "A13-stage-a-cardinality", "requirement": "deliberation_start/baseline_check/deliberation_telemetry per-deliberation pairing; first baseline false/false; later true/false; ≥1 eligible"},
     {"id": "A14-usage-honesty", "requirement": "probe_complete usage_reported boolean; usage iff true; telemetry usage_status valid; aggregate_usage only on complete"},
     {"id": "A15-M6-injection-rate", "requirement": "M6 injection outcome rate; n>0; skip-reason histogram"},
     {"id": "A16-M7a-latency", "requirement": "M7a per-modelKey probe_complete latency percentiles; wall clock separate"},
     {"id": "A17-M7b-extraction", "requirement": "M7b extraction output classification invalid/empty/nonempty"},
     {"id": "A18-M8-tokens", "requirement": "M8 final session token totals with arithmetic check"},
-    {"id": "A19-fixture-marker", "requirement": "Final fixture RELEASE_TAG unchanged; new upload line present; old download line absent"},
+    {"id": "A19-fixture-marker", "requirement": "Final fixture RELEASE_TAG unchanged; new upload line present; old actual upload line absent"},
     {"id": "A20-final-text", "requirement": "Final assistant text contains RELEASE_TAG and new upload line"},
     {"id": "A21-path-diff", "requirement": "Objective path diff only RELEASE_NOTES modified; .pi ignored"},
-    {"id": "A22-frozen-identities", "requirement": "All v5/v6, extension, source, package, dirty-state, and p00 identities match"},
+    {"id": "A22-frozen-identities", "requirement": "All v5/v6/v7, runner, extension, source, package, dirty-state, and p00 identities match"},
 ]
 
 
@@ -549,129 +551,189 @@ def _single_edit_operation(args: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     return edits[0]
 
 
-def validate_edit_recovery(rpc_events: List[Dict[str, Any]]) -> Assertion:
-    """A12: Edit recovery ordered subsequence.
+def _tool_targets_file(event: Dict[str, Any], filename: str) -> bool:
+    """Return whether any string tool argument names the requested file."""
+    values: List[str] = []
 
-    Fix #7: correlate by toolCallId. Validate:
-    1. Failed edit START has exact frozen wrong old/new text
-    2. Later read END
-    3. Successful edit START has exact actual upload old/new text
-    4. Successful edit END result.isError=false
-    5. Later final read END
-    Count unique tool executions >= 3. Extra tools allowed.
-    """
+    def collect(obj: Any) -> None:
+        if isinstance(obj, str):
+            values.append(obj)
+        elif isinstance(obj, dict):
+            for value in obj.values():
+                collect(value)
+        elif isinstance(obj, list):
+            for value in obj:
+                collect(value)
+
+    collect(event.get("args", {}))
+    return any(Path(value).name == filename for value in values)
+
+
+def _execution_succeeded(event: Dict[str, Any]) -> bool:
+    result = event.get("result")
+    nested_error = result.get("isError") if isinstance(result, dict) else None
+    return event.get("isError") is False and nested_error is not True
+
+
+def _result_contains(event: Dict[str, Any], text: str) -> bool:
+    return text in json.dumps(event.get("result", {}), ensure_ascii=False, default=str)
+
+
+def validate_edit_recovery(rpc_events: List[Dict[str, Any]]) -> Assertion:
+    """A12: prove v7 target isolation and exact edit-recovery ordering."""
     a = Assertion("A12-edit-recovery", ASSERTIONS[11]["requirement"])
 
-    # Correlate start/end by toolCallId
-    starts: Dict[str, Dict[str, Any]] = {}
-    ends: Dict[str, Dict[str, Any]] = {}
-    exec_order: List[Tuple[str, str]] = []  # (toolCallId, 'start'|'end')
+    starts: Dict[str, Tuple[int, Dict[str, Any]]] = {}
+    ends: Dict[str, Tuple[int, Dict[str, Any]]] = {}
+    correlation_errors: List[str] = []
+    for pos, event in enumerate(rpc_events):
+        event_type = event.get("type")
+        if event_type not in {"tool_execution_start", "tool_execution_end"}:
+            continue
+        tid_value = event.get("toolCallId")
+        if not isinstance(tid_value, str) or not tid_value:
+            correlation_errors.append(f"event {pos}: missing toolCallId")
+            continue
+        target = starts if event_type == "tool_execution_start" else ends
+        if tid_value in target:
+            correlation_errors.append(f"event {pos}: duplicate {event_type} for {tid_value}")
+            continue
+        target[tid_value] = (pos, event)
 
-    for ev in rpc_events:
-        if ev.get("type") == "tool_execution_start":
-            tid = ev.get("toolCallId", "")
-            starts[tid] = ev
-            exec_order.append((tid, "start"))
-        elif ev.get("type") == "tool_execution_end":
-            tid = ev.get("toolCallId", "")
-            ends[tid] = ev
-            exec_order.append((tid, "end"))
-
-    # Count unique executions (completed pairs)
-    completed_executions = set()
-    for tid in starts:
-        if tid in ends:
-            completed_executions.add(tid)
-
-    if len(completed_executions) < 3:
+    for tid in starts.keys() & ends.keys():
+        if starts[tid][0] >= ends[tid][0]:
+            correlation_errors.append(f"{tid}: tool end does not follow start")
+    if correlation_errors:
         a.passed = False
-        a.details = f"Only {len(completed_executions)} completed tool executions; need ≥3"
+        a.details = "Invalid tool-call correlation: " + "; ".join(correlation_errors[:5])
         return a
 
-    # Find edit executions
-    edit_pairs = []
-    for tid, ev_start in starts.items():
-        if ev_start.get("toolName") == "edit" and tid in ends:
-            edit_pairs.append((tid, ev_start, ends[tid]))
-
-    # Find failed edit (result.isError=true)
-    failed_edit = None
-    success_edit = None
-    for tid, ev_start, ev_end in edit_pairs:
-        result = ev_end.get("result", {})
-        if ev_end.get("isError") is True or result.get("isError") is True:
-            if failed_edit is None:
-                failed_edit = (tid, ev_start, ev_end)
-        elif ev_end.get("isError") is False and result.get("isError") is not True:
-            if failed_edit is not None:
-                success_edit = (tid, ev_start, ev_end)
-                break
-
-    if failed_edit is None:
+    completed = sorted(
+        ((starts[tid][0], tid, starts[tid][1], ends[tid][0], ends[tid][1])
+         for tid in starts.keys() & ends.keys()),
+        key=lambda item: item[0],
+    )
+    failed = None
+    for start_pos, tid, start, end_pos, end in completed:
+        result = end.get("result")
+        nested_error = result.get("isError") if isinstance(result, dict) else None
+        if start.get("toolName") == "edit" and (
+            end.get("isError") is True or nested_error is True
+        ):
+            failed = (start_pos, tid, start, end_pos, end)
+            break
+    if failed is None:
         a.passed = False
         a.details = "No failed edit found"
         return a
 
-    if success_edit is None:
-        a.passed = False
-        a.details = "No successful edit after failed edit"
-        return a
-
-    # Validate failed edit START has wrong old/new text
-    fail_tid, fail_start, fail_end = failed_edit
+    fail_pos, fail_tid, fail_start, fail_end_pos, fail_end = failed
     fail_op = _single_edit_operation(fail_start.get("args", {}))
+    if not _tool_targets_file(fail_start, "RELEASE_NOTES.txt"):
+        a.passed = False
+        a.details = "Failed edit did not target RELEASE_NOTES.txt"
+        return a
     if fail_op is None or fail_op.get("oldText") != WRONG_OLD_TEXT or fail_op.get("newText") != WRONG_NEW_TEXT:
         a.passed = False
         a.details = f"Failed edit operation doesn't match frozen wrong text: operation={fail_op!r}"
         return a
 
-    # Validate successful edit START has correct old/new text
-    succ_tid, succ_start, succ_end = success_edit
-    succ_op = _single_edit_operation(succ_start.get("args", {}))
-    if succ_op is None or succ_op.get("oldText") != CORRECT_OLD_TEXT or succ_op.get("newText") != CORRECT_NEW_TEXT:
+    build_reads = [
+        item for item in completed
+        if item[3] < fail_pos
+        and item[2].get("toolName") == "read"
+        and _tool_targets_file(item[2], "BUILD_INFO.txt")
+        and _execution_succeeded(item[4])
+        and _result_contains(item[4], BUILD_ID_VALUE)
+    ]
+    if not build_reads:
         a.passed = False
-        a.details = f"Success edit operation doesn't match correct text: operation={succ_op!r}"
+        a.details = "No successful BUILD_INFO.txt read with the frozen BUILD_ID before the failed edit"
         return a
 
-    # Validate successful edit END has isError=false
-    succ_result = succ_end.get("result", {})
-    if succ_end.get("isError") is not False and succ_result.get("isError") is not False:
+    unexpected_early_content_access = [
+        (tid, start.get("toolName"), start.get("args", {}))
+        for start_pos, tid, start, end_pos, end in completed
+        if end_pos < fail_pos
+        and start.get("toolName") in {"read", "grep"}
+        and not (
+            start.get("toolName") == "read"
+            and _tool_targets_file(start, "BUILD_INFO.txt")
+            and _execution_succeeded(end)
+            and _result_contains(end, BUILD_ID_VALUE)
+        )
+    ]
+    if unexpected_early_content_access:
         a.passed = False
-        a.details = "Successful edit end isError is not false"
+        a.details = f"Unexpected content access before failed edit: {unexpected_early_content_access}"
         return a
 
-    # Check there's a read between failed and successful edit
-    fail_pos = rpc_events.index(fail_start)
-    succ_pos = rpc_events.index(succ_start)
-    read_between = False
-    for ev in rpc_events:
-        if ev.get("type") == "tool_execution_end" and ev.get("toolName") == "read":
-            pos = rpc_events.index(ev)
-            if fail_pos < pos < succ_pos:
-                read_between = True
-                break
-
-    if not read_between:
-        a.passed = False
-        a.details = "No read between failed and successful edit"
-        return a
-
-    # Check final read after successful edit
-    final_reads = [ev for ev in rpc_events if ev.get("type") == "tool_execution_end" and ev.get("toolName") == "read"]
-    has_final_read = False
-    for fr in final_reads:
-        pos = rpc_events.index(fr)
-        if pos > succ_pos:
-            has_final_read = True
+    recovery_read = None
+    for item in completed:
+        start_pos, tid, start, end_pos, end = item
+        if (
+            start_pos > fail_end_pos
+            and start.get("toolName") == "read"
+            and _tool_targets_file(start, "RELEASE_NOTES.txt")
+            and _execution_succeeded(end)
+            and _result_contains(end, CORRECT_OLD_TEXT)
+        ):
+            recovery_read = item
             break
-
-    if not has_final_read:
+    if recovery_read is None:
         a.passed = False
-        a.details = "No final read after successful edit"
+        a.details = "No completed target read exposing the correct old text after the failed edit"
+        return a
+
+    recovery_end_pos = recovery_read[3]
+    success = None
+    for item in completed:
+        start_pos, tid, start, end_pos, end = item
+        op = _single_edit_operation(start.get("args", {})) if start.get("toolName") == "edit" else None
+        if (
+            start_pos > recovery_end_pos
+            and _tool_targets_file(start, "RELEASE_NOTES.txt")
+            and op is not None
+            and op.get("oldText") == CORRECT_OLD_TEXT
+            and op.get("newText") == CORRECT_NEW_TEXT
+            and _execution_succeeded(end)
+        ):
+            success = item
+            break
+    if success is None:
+        a.passed = False
+        a.details = "No successful exact target edit after the recovery read"
+        return a
+
+    success_end_pos = success[3]
+    final_read = next((
+        item for item in completed
+        if item[0] > success_end_pos
+        and item[2].get("toolName") == "read"
+        and _tool_targets_file(item[2], "RELEASE_NOTES.txt")
+        and _execution_succeeded(item[4])
+        and _result_contains(item[4], CORRECT_NEW_TEXT)
+    ), None)
+    if final_read is None:
+        a.passed = False
+        a.details = "No completed final target read exposing the new text after success"
         return a
 
     a.passed = True
-    a.details = f"Edit recovery OK: {len(completed_executions)} tool executions, failed→read→success→final-read"
+    a.details = (
+        f"V7 recovery OK: {len(completed)} tool executions; build-read→isolated-failure→"
+        "target-read→success→final-target-read"
+    )
+    a.evidence.append({
+        "file": "rpc-events.jsonl",
+        "tool_call_ids": {
+            "build_read": build_reads[0][1],
+            "failed_edit": fail_tid,
+            "recovery_read": recovery_read[1],
+            "successful_edit": success[1],
+            "final_read": final_read[1],
+        },
+    })
     return a
 
 
@@ -1081,18 +1143,22 @@ def validate_path_diff(
 ) -> Assertion:
     """A21: Objective path diff only RELEASE_NOTES modified; .pi ignored."""
     a = Assertion("A21-path-diff", ASSERTIONS[20]["requirement"])
+    def visible_files(root: Path) -> Dict[str, Path]:
+        return {
+            str(path.relative_to(root)): path
+            for path in root.rglob("*")
+            if path.is_file() and not str(path.relative_to(root)).startswith(".pi/")
+        }
+
+    workspace_files = visible_files(workspace)
+    template_files = visible_files(template_workspace)
     modified: List[str] = []
-    for fp in sorted(workspace.rglob("*")):
-        if not fp.is_file():
-            continue
-        rel = str(fp.relative_to(workspace))
-        if rel.startswith(".pi/"):
-            continue
-        tmpl_fp = template_workspace / rel
-        if not tmpl_fp.exists():
+    for rel in sorted(workspace_files.keys() | template_files.keys()):
+        workspace_file = workspace_files.get(rel)
+        template_file = template_files.get(rel)
+        if workspace_file is None or template_file is None:
             modified.append(rel)
-            continue
-        if fp.read_bytes() != tmpl_fp.read_bytes():
+        elif workspace_file.read_bytes() != template_file.read_bytes():
             modified.append(rel)
 
     expected_modified = {"RELEASE_NOTES.txt"}
@@ -1175,6 +1241,10 @@ def build_manifest(
     workspace: Path,
     runtime_root: Path,
     pi_command: List[str],
+    expected_v7_commit: str,
+    expected_v7_blob: str,
+    expected_v7_sha256: str,
+    expected_runner_commit: str,
 ) -> Dict[str, Any]:
     """Build and evaluate the complete frozen identity manifest."""
     runner_commit_rec, runner_commit = _command_value(["git", "rev-parse", "HEAD"], REPO_ROOT)
@@ -1192,11 +1262,18 @@ def build_manifest(
 
     v5_path = CONCEPT_REPO / "docs" / "behavioral-preregistration-2026-07-28.md"
     v6_path = CONCEPT_REPO / "docs" / "behavioral-preregistration-2026-07-29.md"
+    v7_path = CONCEPT_REPO / V7_PATH
     v5_blob_rec, v5_blob = _command_value(
         ["git", "rev-parse", "HEAD:docs/behavioral-preregistration-2026-07-28.md"], CONCEPT_REPO
     )
     v6_blob_rec, v6_blob = _command_value(
         ["git", "rev-parse", "HEAD:docs/behavioral-preregistration-2026-07-29.md"], CONCEPT_REPO
+    )
+    v7_head_blob_rec, v7_head_blob = _command_value(
+        ["git", "rev-parse", f"HEAD:{V7_PATH}"], CONCEPT_REPO
+    )
+    v7_frozen_blob_rec, v7_frozen_blob = _command_value(
+        ["git", "rev-parse", f"{expected_v7_commit}:{V7_PATH}"], CONCEPT_REPO
     )
 
     provider_repo = PROVIDER_EXT.parent
@@ -1213,8 +1290,8 @@ def build_manifest(
     focus_sha = sha256_file(FOCUS_EXT) if FOCUS_EXT.exists() else "MISSING"
     consortium_sha = sha256_file(CONSORTIUM_EXT) if CONSORTIUM_EXT.exists() else "MISSING"
 
-    p00_template_tree_actual = _git_tree(REPO_ROOT, ".parcour-runs-templates/p00-smoke-readonly")
-    p00_workspace_tree_actual = _git_tree(REPO_ROOT, ".parcour-runs-templates/p00-smoke-readonly/workspace")
+    p00_template_tree_actual = _git_tree(REPO_ROOT, ".parcour-runs-templates/p00-v7-recovery")
+    p00_workspace_tree_actual = _git_tree(REPO_ROOT, ".parcour-runs-templates/p00-v7-recovery/workspace")
 
     pi_version_rec = cmd_output(["pi", "--version"])
     node_version_rec = cmd_output(["node", "--version"])
@@ -1228,6 +1305,7 @@ def build_manifest(
 
     v5_file_sha = sha256_file(v5_path) if v5_path.exists() else "MISSING"
     v6_file_sha = sha256_file(v6_path) if v6_path.exists() else "MISSING"
+    v7_file_sha = sha256_file(v7_path) if v7_path.exists() else "MISSING"
     provider_status_lines = provider_status["output"].splitlines()
     focus_status_lines = focus_status["output"].splitlines()
 
@@ -1237,6 +1315,11 @@ def build_manifest(
         "v5_file_sha256": v5_file_sha == V5_FILE_SHA256,
         "v6_blob": v6_blob == V6_BLOB_SHA,
         "v6_file_sha256": v6_file_sha == V6_FILE_SHA256,
+        "v7_freeze_commit": bool(expected_v7_commit) and v7_frozen_blob_rec["exit_code"] == 0,
+        "v7_frozen_blob": v7_frozen_blob == expected_v7_blob,
+        "v7_head_blob": v7_head_blob == expected_v7_blob,
+        "v7_file_sha256": v7_file_sha == expected_v7_sha256,
+        "runner_commit": runner_commit == expected_runner_commit,
         "provider_commit": provider_commit == PROVIDER_EXPECTED_COMMIT,
         "provider_blob": provider_blob == PROVIDER_EXPECTED_BLOB,
         "provider_sha256": provider_sha == PROVIDER_EXPECTED_SHA256,
@@ -1250,8 +1333,8 @@ def build_manifest(
         "consortium_blob": consortium_blob == CONSORTIUM_INDEX_BLOB,
         "consortium_sha256": consortium_sha == CONSORTIUM_INDEX_SHA256,
         "source_v2": source_v2_actual == STAGE_A_SOURCE_V2_SHA256,
-        "p00_template_tree": p00_template_tree_actual == P00_TEMPLATE_TREE,
-        "p00_workspace_tree": p00_workspace_tree_actual == P00_WORKSPACE_TREE,
+        "p00_v7_template_tree": p00_template_tree_actual == P00_TEMPLATE_TREE,
+        "p00_v7_workspace_tree": p00_workspace_tree_actual == P00_WORKSPACE_TREE,
         "pi_version": pi_version_rec["exit_code"] == 0 and pi_version_rec["output"].strip() == PI_VERSION,
         "node_version": node_version_rec["exit_code"] == 0 and node_version_rec["output"].strip() == NODE_VERSION,
         "pi_package_versions": all(
@@ -1277,10 +1360,16 @@ def build_manifest(
                    "blob_command": v5_blob_rec, "expected_sha256": V5_FILE_SHA256, "actual_sha256": v5_file_sha},
             "v6": {"path": str(v6_path), "expected_blob": V6_BLOB_SHA, "actual_blob": v6_blob,
                    "blob_command": v6_blob_rec, "expected_sha256": V6_FILE_SHA256, "actual_sha256": v6_file_sha},
+            "v7": {"path": str(v7_path), "expected_commit": expected_v7_commit,
+                   "expected_blob": expected_v7_blob, "frozen_blob": v7_frozen_blob,
+                   "head_blob": v7_head_blob, "frozen_blob_command": v7_frozen_blob_rec,
+                   "head_blob_command": v7_head_blob_rec, "expected_sha256": expected_v7_sha256,
+                   "actual_sha256": v7_file_sha},
+            "runner": {"expected_commit": expected_runner_commit, "actual_commit": runner_commit},
             "source_v2": {"commit": STAGE_A_COMMIT, "expected_sha256": STAGE_A_SOURCE_V2_SHA256,
                           "actual_sha256": source_v2_actual, "raw": source_v2_raw},
-            "p00": {"expected_template_tree": P00_TEMPLATE_TREE, "actual_template_tree": p00_template_tree_actual,
-                    "expected_workspace_tree": P00_WORKSPACE_TREE, "actual_workspace_tree": p00_workspace_tree_actual},
+            "p00_v7": {"expected_template_tree": P00_TEMPLATE_TREE, "actual_template_tree": p00_template_tree_actual,
+                       "expected_workspace_tree": P00_WORKSPACE_TREE, "actual_workspace_tree": p00_workspace_tree_actual},
         },
         "extensions": {
             "provider": {"path": str(PROVIDER_EXT), "commit": provider_commit, "commit_command": provider_commit_rec,
@@ -1358,9 +1447,17 @@ class Phase05Runner:
         self,
         run_id: str,
         repetition: int,
+        expected_v7_commit: str,
+        expected_v7_blob: str,
+        expected_v7_sha256: str,
+        expected_runner_commit: str,
     ):
         self.run_id = run_id
         self.repetition = repetition
+        self.expected_v7_commit = expected_v7_commit
+        self.expected_v7_blob = expected_v7_blob
+        self.expected_v7_sha256 = expected_v7_sha256
+        self.expected_runner_commit = expected_runner_commit
         self.tmp_root = Path("/tmp") / f"parcour-{run_id}"
         self.workspace = self.tmp_root / "workspace"
         self.sessions_dir = self.tmp_root / "sessions"
@@ -1394,6 +1491,41 @@ class Phase05Runner:
         if not re.match(r"^[a-zA-Z0-9][a-zA-Z0-9\-]*$", self.run_id):
             raise ValueError(f"Invalid run_id: {self.run_id!r}")
 
+    def _validate_frozen_inputs(self) -> None:
+        """Fail before filesystem creation when supplied v7 identities do not resolve exactly."""
+        expected_shapes = {
+            "v7 commit": (self.expected_v7_commit, 40),
+            "v7 blob": (self.expected_v7_blob, 40),
+            "v7 sha256": (self.expected_v7_sha256, 64),
+            "runner commit": (self.expected_runner_commit, 40),
+        }
+        for label, (value, length) in expected_shapes.items():
+            if not re.fullmatch(rf"[0-9a-f]{{{length}}}", value):
+                raise ValueError(f"Invalid {label} identity: {value!r}")
+
+        _, runner_commit = _command_value(["git", "rev-parse", "HEAD"], REPO_ROOT)
+        _, frozen_blob = _command_value(
+            ["git", "rev-parse", f"{self.expected_v7_commit}:{V7_PATH}"], CONCEPT_REPO
+        )
+        _, head_blob = _command_value(["git", "rev-parse", f"HEAD:{V7_PATH}"], CONCEPT_REPO)
+        v7_path = CONCEPT_REPO / V7_PATH
+        file_sha = sha256_file(v7_path) if v7_path.exists() else "MISSING"
+        actual = {
+            "runner commit": runner_commit,
+            "v7 frozen blob": frozen_blob,
+            "v7 HEAD blob": head_blob,
+            "v7 sha256": file_sha,
+        }
+        expected = {
+            "runner commit": self.expected_runner_commit,
+            "v7 frozen blob": self.expected_v7_blob,
+            "v7 HEAD blob": self.expected_v7_blob,
+            "v7 sha256": self.expected_v7_sha256,
+        }
+        mismatches = [f"{key}: {actual[key]!r} != {expected[key]!r}" for key in expected if actual[key] != expected[key]]
+        if mismatches:
+            raise RuntimeError("Frozen identity mismatch before materialization: " + "; ".join(mismatches))
+
     def _guard_existing_paths(self) -> None:
         """R2: refuse if any target path already exists."""
         targets = [
@@ -1406,7 +1538,7 @@ class Phase05Runner:
                 raise FileExistsError(f"Refusing: {label} already exists at {p}")
 
     def _materialize_workspace(self) -> None:
-        """Materialize committed p00 workspace and verify against Git tree.
+        """Materialize committed p00-v7 workspace and verify against Git tree.
 
         Fix #13: verify copied bytes against Git tree/committed template.
         """
@@ -1422,7 +1554,7 @@ class Phase05Runner:
                 shutil.copy2(str(src), str(dst))
 
         # Verify against committed Git tree
-        tmpl_tree = _git_tree(REPO_ROOT, ".parcour-runs-templates/p00-smoke-readonly/workspace")
+        tmpl_tree = _git_tree(REPO_ROOT, ".parcour-runs-templates/p00-v7-recovery/workspace")
         if tmpl_tree != P00_WORKSPACE_TREE:
             raise RuntimeError(f"Template workspace tree {tmpl_tree} != expected {P00_WORKSPACE_TREE}")
 
@@ -1447,6 +1579,10 @@ class Phase05Runner:
             self.run_id, self.repetition,
             self.workspace, self.runtime_root,
             pi_command,
+            self.expected_v7_commit,
+            self.expected_v7_blob,
+            self.expected_v7_sha256,
+            self.expected_runner_commit,
         )
         return self.manifest
 
@@ -1454,6 +1590,7 @@ class Phase05Runner:
         """Execute the full Phase 0.5 run. Returns result dict."""
         try:
             self._validate_run_id()
+            self._validate_frozen_inputs()
             self._guard_existing_paths()
             self.harvest_allowed = True
             self._materialize_workspace()
@@ -2027,11 +2164,19 @@ def main(argv: Optional[List[str]] = None) -> int:
         "--repetition", type=int, required=True, choices=[1, 2],
         help="Repetition number (1 or 2)",
     )
+    parser.add_argument("--v7-commit", required=True, help="Frozen concept commit containing v7")
+    parser.add_argument("--v7-blob", required=True, help="Frozen v7 Git blob identity")
+    parser.add_argument("--v7-sha256", required=True, help="Frozen v7 file SHA-256")
+    parser.add_argument("--runner-commit", required=True, help="Frozen implementation runner commit")
     args = parser.parse_args(argv)
 
     runner = Phase05Runner(
         run_id=args.run_id,
         repetition=args.repetition,
+        expected_v7_commit=args.v7_commit,
+        expected_v7_blob=args.v7_blob,
+        expected_v7_sha256=args.v7_sha256,
+        expected_runner_commit=args.runner_commit,
     )
     result = runner.run()
 

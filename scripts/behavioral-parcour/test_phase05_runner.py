@@ -83,6 +83,21 @@ validate_manifest_identities = _runner_mod.validate_manifest_identities
 _strip_fences = _runner_mod._strip_fences
 _content_manifest = _runner_mod._content_manifest
 
+_DUMMY_COMMIT = "1" * 40
+_DUMMY_BLOB = "2" * 40
+_DUMMY_SHA256 = "3" * 64
+
+
+def make_runner(run_id: str, repetition: int) -> Phase05Runner:
+    return Phase05Runner(
+        run_id,
+        repetition,
+        expected_v7_commit=_DUMMY_COMMIT,
+        expected_v7_blob=_DUMMY_BLOB,
+        expected_v7_sha256=_DUMMY_SHA256,
+        expected_runner_commit=_DUMMY_COMMIT,
+    )
+
 
 # ---------------------------------------------------------------------------
 # Test framework
@@ -178,19 +193,53 @@ def test_argv_order() -> None:
 # ---------------------------------------------------------------------------
 
 def test_unsafe_run_id() -> None:
-    raises(ValueError, lambda: Phase05Runner("bad run!", 1)._validate_run_id())
-    raises(ValueError, lambda: Phase05Runner("", 1)._validate_run_id())
+    raises(ValueError, lambda: make_runner("bad run!", 1)._validate_run_id())
+    raises(ValueError, lambda: make_runner("", 1)._validate_run_id())
 
 
 def test_guard_existing_paths() -> None:
     with tempfile.TemporaryDirectory() as td:
         existing = Path(td) / "parcour-existing"
         existing.mkdir()
-        r = Phase05Runner("existing", 1)
+        r = make_runner("existing", 1)
         r.tmp_root = existing
         r.workspace = existing / "workspace"
         r.evidence_dir = existing / "evidence"
         raises(FileExistsError, r._guard_existing_paths)
+
+
+def test_frozen_identity_shape_rejected_before_commands() -> None:
+    r = make_runner("shape-check", 1)
+    r.expected_v7_commit = "not-a-commit"
+    raises(ValueError, r._validate_frozen_inputs)
+
+
+def _with_stubbed_identity_resolution(v7_exists: bool, assertion_fn) -> None:
+    original_command = _runner_mod._command_value
+    original_concept_repo = _runner_mod.CONCEPT_REPO
+    with tempfile.TemporaryDirectory() as td:
+        concept_repo = Path(td)
+        v7_path = concept_repo / _runner_mod.V7_PATH
+        if v7_exists:
+            v7_path.parent.mkdir(parents=True)
+            v7_path.write_text("prospective v7\n")
+        _runner_mod.CONCEPT_REPO = concept_repo
+        _runner_mod._command_value = lambda command, cwd: ({"exit_code": 0, "output": "frozen\n"}, "f" * 40)
+        try:
+            assertion_fn()
+        finally:
+            _runner_mod._command_value = original_command
+            _runner_mod.CONCEPT_REPO = original_concept_repo
+
+
+def test_frozen_identity_resolved_mismatch_rejected() -> None:
+    r = make_runner("resolved-mismatch", 1)
+    _with_stubbed_identity_resolution(True, lambda: raises(RuntimeError, r._validate_frozen_inputs))
+
+
+def test_frozen_identity_missing_v7_rejected() -> None:
+    r = make_runner("missing-v7", 1)
+    _with_stubbed_identity_resolution(False, lambda: raises(RuntimeError, r._validate_frozen_inputs))
 
 
 # ---------------------------------------------------------------------------
@@ -617,78 +666,158 @@ def _edit_pair(tid, old_text, new_text, is_error):
     ]
 
 
-def _read_pair(tid):
+def _read_pair(tid, filename, text, is_error=False):
     return [
         {"type": "tool_execution_start", "toolCallId": tid, "toolName": "read",
-         "args": {"path": "RELEASE_NOTES.txt"}},
+         "args": {"path": filename}},
         {"type": "tool_execution_end", "toolCallId": tid, "toolName": "read",
-         "result": {"content": [{"type": "text", "text": "..."}]}, "isError": False},
+         "result": {"content": [{"type": "text", "text": text}]}, "isError": is_error},
     ]
 
 
-def test_edit_recovery_ordered() -> None:
-    events = (
-        _edit_pair("t1", WRONG_OLD_TEXT, WRONG_NEW_TEXT, True) +
-        _read_pair("t2") +
-        _edit_pair("t3", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
-        _read_pair("t4")
+def _valid_recovery_events():
+    return (
+        _read_pair("build", "BUILD_INFO.txt", "BUILD_ID=B-7821-ALPHA") +
+        _edit_pair("fail", WRONG_OLD_TEXT, WRONG_NEW_TEXT, True) +
+        _read_pair("recover", "RELEASE_NOTES.txt", CORRECT_OLD_TEXT) +
+        _edit_pair("success", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
+        _read_pair("final", "RELEASE_NOTES.txt", CORRECT_NEW_TEXT)
     )
-    a = validate_edit_recovery(events)
-    true(a.passed, "Ordered recovery")
+
+
+def test_edit_recovery_ordered() -> None:
+    a = validate_edit_recovery(_valid_recovery_events())
+    true(a.passed, "V7 isolated ordered recovery")
+    in_("build-read", a.details, "V7 sequence reported")
 
 
 def test_edit_recovery_wrong_text() -> None:
     events = (
-        _edit_pair("t1", "wrong old", "wrong new", True) +
-        _read_pair("t2") +
-        _edit_pair("t3", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
-        _read_pair("t4")
+        _read_pair("build", "BUILD_INFO.txt", "BUILD_ID=B-7821-ALPHA") +
+        _edit_pair("fail", "wrong old", "wrong new", True) +
+        _read_pair("recover", "RELEASE_NOTES.txt", CORRECT_OLD_TEXT) +
+        _edit_pair("success", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
+        _read_pair("final", "RELEASE_NOTES.txt", CORRECT_NEW_TEXT)
     )
-    a = validate_edit_recovery(events)
-    false(a.passed, "Wrong old text → fail")
+    false(validate_edit_recovery(events).passed, "Wrong failed text → fail")
 
 
 def test_edit_recovery_no_read_between() -> None:
     events = (
-        _edit_pair("t1", WRONG_OLD_TEXT, WRONG_NEW_TEXT, True) +
-        _edit_pair("t2", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
-        _read_pair("t3")
+        _read_pair("build", "BUILD_INFO.txt", "BUILD_ID=B-7821-ALPHA") +
+        _edit_pair("fail", WRONG_OLD_TEXT, WRONG_NEW_TEXT, True) +
+        _edit_pair("success", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
+        _read_pair("final", "RELEASE_NOTES.txt", CORRECT_NEW_TEXT)
     )
     a = validate_edit_recovery(events)
     false(a.passed, "No read between → fail")
+    in_("No completed target read", a.details, "Exact missing step reported")
 
 
-def test_edit_recovery_few_tools() -> None:
-    events = _edit_pair("t1", WRONG_OLD_TEXT, WRONG_NEW_TEXT, True) + _read_pair("t2")
+def test_edit_recovery_requires_build_read() -> None:
+    events = (
+        _edit_pair("fail", WRONG_OLD_TEXT, WRONG_NEW_TEXT, True) +
+        _read_pair("recover", "RELEASE_NOTES.txt", CORRECT_OLD_TEXT) +
+        _edit_pair("success", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
+        _read_pair("final", "RELEASE_NOTES.txt", CORRECT_NEW_TEXT)
+    )
     a = validate_edit_recovery(events)
-    false(a.passed, "Too few tools → fail")
+    false(a.passed, "Missing first-turn build read → fail")
+    in_("No successful BUILD_INFO", a.details, "Build read requirement reported")
+
+
+def test_edit_recovery_rejects_early_target_read() -> None:
+    events = (
+        _read_pair("build", "BUILD_INFO.txt", "BUILD_ID=B-7821-ALPHA") +
+        _read_pair("early", "RELEASE_NOTES.txt", CORRECT_OLD_TEXT) +
+        _edit_pair("fail", WRONG_OLD_TEXT, WRONG_NEW_TEXT, True) +
+        _read_pair("recover", "RELEASE_NOTES.txt", CORRECT_OLD_TEXT) +
+        _edit_pair("success", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
+        _read_pair("final", "RELEASE_NOTES.txt", CORRECT_NEW_TEXT)
+    )
+    a = validate_edit_recovery(events)
+    false(a.passed, "Pre-failure target exposure → fail")
+    in_("Unexpected content access", a.details, "Isolation failure reported")
+
+
+def test_edit_recovery_rejects_broad_early_grep() -> None:
+    events = (
+        _read_pair("build", "BUILD_INFO.txt", "BUILD_ID=B-7821-ALPHA") +
+        [{"type": "tool_execution_start", "toolCallId": "broad", "toolName": "grep",
+          "args": {"path": ".", "pattern": "upload"}},
+         {"type": "tool_execution_end", "toolCallId": "broad", "toolName": "grep",
+          "result": {"content": [{"type": "text", "text": CORRECT_OLD_TEXT}]}, "isError": False}] +
+        _edit_pair("fail", WRONG_OLD_TEXT, WRONG_NEW_TEXT, True) +
+        _read_pair("recover", "RELEASE_NOTES.txt", CORRECT_OLD_TEXT) +
+        _edit_pair("success", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
+        _read_pair("final", "RELEASE_NOTES.txt", CORRECT_NEW_TEXT)
+    )
+    a = validate_edit_recovery(events)
+    false(a.passed, "Broad pre-failure grep fails")
+    in_("Unexpected content access", a.details, "Broad grep reported")
+
+
+def test_edit_recovery_rejects_direct_early_grep() -> None:
+    events = (
+        _read_pair("build", "BUILD_INFO.txt", "BUILD_ID=B-7821-ALPHA") +
+        [{"type": "tool_execution_start", "toolCallId": "direct", "toolName": "grep",
+          "args": {"path": "RELEASE_NOTES.txt", "pattern": "upload"}},
+         {"type": "tool_execution_end", "toolCallId": "direct", "toolName": "grep",
+          "result": {"content": [{"type": "text", "text": CORRECT_OLD_TEXT}]}, "isError": False}] +
+        _edit_pair("fail", WRONG_OLD_TEXT, WRONG_NEW_TEXT, True) +
+        _read_pair("recover", "RELEASE_NOTES.txt", CORRECT_OLD_TEXT) +
+        _edit_pair("success", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
+        _read_pair("final", "RELEASE_NOTES.txt", CORRECT_NEW_TEXT)
+    )
+    false(validate_edit_recovery(events).passed, "Direct pre-failure grep fails")
+
+
+def test_edit_recovery_rejects_wrong_recovery_file() -> None:
+    events = (
+        _read_pair("build", "BUILD_INFO.txt", "BUILD_ID=B-7821-ALPHA") +
+        _edit_pair("fail", WRONG_OLD_TEXT, WRONG_NEW_TEXT, True) +
+        _read_pair("recover", "BUILD_INFO.txt", CORRECT_OLD_TEXT) +
+        _edit_pair("success", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
+        _read_pair("final", "RELEASE_NOTES.txt", CORRECT_NEW_TEXT)
+    )
+    false(validate_edit_recovery(events).passed, "Wrong recovery file → fail")
 
 
 def test_edit_recovery_extra_tools() -> None:
     events = (
-        _edit_pair("t1", WRONG_OLD_TEXT, WRONG_NEW_TEXT, True) +
-        [{"type": "tool_execution_start", "toolCallId": "tX", "toolName": "grep",
-          "args": {"path": "RELEASE_NOTES.txt", "pattern": "upload"}},
-         {"type": "tool_execution_end", "toolCallId": "tX", "toolName": "grep",
+        _read_pair("build", "BUILD_INFO.txt", "BUILD_ID=B-7821-ALPHA") +
+        _edit_pair("fail", WRONG_OLD_TEXT, WRONG_NEW_TEXT, True) +
+        [{"type": "tool_execution_start", "toolCallId": "extra", "toolName": "grep",
+          "args": {"path": "BUILD_INFO.txt", "pattern": "BUILD"}},
+         {"type": "tool_execution_end", "toolCallId": "extra", "toolName": "grep",
           "result": {"content": []}, "isError": False}] +
-        _read_pair("t2") +
-        _edit_pair("t3", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
-        _read_pair("t4")
+        _read_pair("recover", "RELEASE_NOTES.txt", CORRECT_OLD_TEXT) +
+        _edit_pair("success", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
+        _read_pair("final", "RELEASE_NOTES.txt", CORRECT_NEW_TEXT)
     )
-    a = validate_edit_recovery(events)
-    true(a.passed, "Extra tools allowed")
+    true(validate_edit_recovery(events).passed, "Non-target extra tools allowed")
 
 
 def test_edit_recovery_tool_call_id_correlation() -> None:
-    """Verify toolCallId is used for correlation, not position."""
-    events = (
-        _edit_pair("edit-fail", WRONG_OLD_TEXT, WRONG_NEW_TEXT, True) +
-        _read_pair("read-recover") +
-        _edit_pair("edit-ok", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
-        _read_pair("read-final")
-    )
-    a = validate_edit_recovery(events)
+    a = validate_edit_recovery(_valid_recovery_events())
     true(a.passed, "toolCallId correlation works")
+    eq(a.evidence[0]["tool_call_ids"]["failed_edit"], "fail", "Failed edit ID retained")
+
+
+def test_edit_recovery_rejects_duplicate_tool_ids() -> None:
+    events = _valid_recovery_events()
+    events.insert(1, dict(events[0]))
+    a = validate_edit_recovery(events)
+    false(a.passed, "Duplicate tool start fails")
+    in_("duplicate", a.details, "Duplicate correlation reported")
+
+
+def test_edit_recovery_rejects_end_before_start() -> None:
+    events = _valid_recovery_events()
+    events[0], events[1] = events[1], events[0]
+    a = validate_edit_recovery(events)
+    false(a.passed, "End before start fails")
+    in_("does not follow start", a.details, "Reversed correlation reported")
 
 
 # ---------------------------------------------------------------------------
@@ -710,6 +839,16 @@ def test_model_exact() -> None:
 def test_thinking_off() -> None:
     true(validate_thinking_off({"thinkingLevel": "off"}).passed, "Thinking off")
     false(validate_thinking_off({"thinkingLevel": "high"}).passed, "Wrong thinking")
+
+
+def test_v7_first_prompt_isolates_target() -> None:
+    eq(
+        PROMPTS[0],
+        "Read BUILD_INFO.txt and report the exact BUILD_ID value. Do not read or modify any other file.",
+        "Exact v7 first prompt",
+    )
+    false("RELEASE_NOTES" in PROMPTS[0], "First prompt does not name target file")
+    false(CORRECT_OLD_TEXT in PROMPTS[0], "First prompt does not expose target text")
 
 
 def test_prompts_count() -> None:
@@ -805,12 +944,46 @@ def test_fixture_text_missing() -> None:
     false(validate_final_text("Nothing here.").passed, "Missing content")
 
 
+def _path_diff_fixture(root: Path):
+    template = root / "template"
+    workspace = root / "workspace"
+    template.mkdir()
+    workspace.mkdir()
+    (template / "BUILD_INFO.txt").write_text("BUILD_ID=B-7821-ALPHA\n")
+    (workspace / "BUILD_INFO.txt").write_text("BUILD_ID=B-7821-ALPHA\n")
+    (template / "RELEASE_NOTES.txt").write_text(CORRECT_OLD_TEXT + "\n")
+    (workspace / "RELEASE_NOTES.txt").write_text(CORRECT_NEW_TEXT + "\n")
+    return workspace, template
+
+
+def test_path_diff_allows_only_release_change() -> None:
+    with tempfile.TemporaryDirectory() as td:
+        workspace, template = _path_diff_fixture(Path(td))
+        true(validate_path_diff(workspace, template).passed, "Only release notes changed")
+
+
+def test_path_diff_rejects_deleted_build_fixture() -> None:
+    with tempfile.TemporaryDirectory() as td:
+        workspace, template = _path_diff_fixture(Path(td))
+        (workspace / "BUILD_INFO.txt").unlink()
+        a = validate_path_diff(workspace, template)
+        false(a.passed, "Deleted build fixture fails")
+        in_("BUILD_INFO.txt", a.details, "Deleted path reported")
+
+
+def test_path_diff_rejects_modified_build_fixture() -> None:
+    with tempfile.TemporaryDirectory() as td:
+        workspace, template = _path_diff_fixture(Path(td))
+        (workspace / "BUILD_INFO.txt").write_text("BUILD_ID=changed\n")
+        false(validate_path_diff(workspace, template).passed, "Modified build fixture fails")
+
+
 # ---------------------------------------------------------------------------
 # ASSERTIONS table (fix #17)
 # ---------------------------------------------------------------------------
 
 def test_assertions_table_exists() -> None:
-    true(len(ASSERTIONS) >= 21, f"ASSERTIONS has {len(ASSERTIONS)} entries")
+    eq(len(ASSERTIONS), 22, "ASSERTIONS covers exactly A01-A22")
     for a in ASSERTIONS:
         true("id" in a, "Has id")
         true("requirement" in a, "Has requirement")
@@ -863,7 +1036,7 @@ def test_content_manifest_lf() -> None:
 
 def test_exit_classification_infra() -> None:
     """Infrastructure assertion failure → exit code 2."""
-    r = Phase05Runner("test", 1)
+    r = make_runner("test", 1)
     assertions = [
         Assertion("A09-protocol-clean", "test"),
     ]
@@ -874,7 +1047,7 @@ def test_exit_classification_infra() -> None:
 
 def test_exit_classification_behavior() -> None:
     """Behavior assertion failure → exit code 1."""
-    r = Phase05Runner("test", 1)
+    r = make_runner("test", 1)
     assertions = [
         Assertion("A15-M6-injection-rate", "test"),
     ]
@@ -885,7 +1058,7 @@ def test_exit_classification_behavior() -> None:
 
 def test_exit_classification_pass() -> None:
     """All pass → exit code 0."""
-    r = Phase05Runner("test", 1)
+    r = make_runner("test", 1)
     assertions = [
         Assertion("A01-process-exit", "test"),
     ]
@@ -957,7 +1130,9 @@ def test_manifest_constants() -> None:
     true(hasattr(_runner_mod, "STAGE_A_COMMIT"), "Stage A commit")
     true(hasattr(_runner_mod, "V5_BLOB_SHA"), "V5 blob")
     true(hasattr(_runner_mod, "V6_BLOB_SHA"), "V6 blob")
-    true(hasattr(_runner_mod, "P00_TEMPLATE_TREE"), "p00 template tree")
+    eq(_runner_mod.V7_PATH, "docs/behavioral-preregistration-2026-07-30.md", "V7 path")
+    eq(_runner_mod.P00_TEMPLATE_TREE, "0b21a09f96ff171798bb463f4f35d3efd63eee6a", "V7 template tree")
+    eq(_runner_mod.P00_WORKSPACE_TREE, "c9c5d122e32983e627d3052ea75d3f83a1862d98", "V7 workspace tree")
 
 
 def test_manifest_identity_validator() -> None:
@@ -991,7 +1166,7 @@ def test_assertion_has_evidence() -> None:
 def test_log_collection_and_malformed_failure() -> None:
     with tempfile.TemporaryDirectory() as td:
         root = Path(td)
-        runner = Phase05Runner("unit-logs", 1)
+        runner = make_runner("unit-logs", 1)
         runner.workspace = root / "workspace"
         runner.sessions_dir = root / "sessions"
         consortium = runner.workspace / ".pi" / "consortium"
@@ -1014,7 +1189,7 @@ def test_log_collection_and_malformed_failure() -> None:
 def test_harvest_evidence_manifest_coverage() -> None:
     with tempfile.TemporaryDirectory() as td:
         root = Path(td)
-        runner = Phase05Runner("unit-harvest", 1)
+        runner = make_runner("unit-harvest", 1)
         runner.tmp_root = root / "runtime"
         runner.workspace = runner.tmp_root / "workspace"
         runner.sessions_dir = runner.tmp_root / "sessions"
@@ -1092,6 +1267,9 @@ def run_all_tests() -> int:
         # R2 guards
         test_unsafe_run_id,
         test_guard_existing_paths,
+        test_frozen_identity_shape_rejected_before_commands,
+        test_frozen_identity_resolved_mismatch_rejected,
+        test_frozen_identity_missing_v7_rejected,
         # Fix #5 compaction
         test_compaction_clean,
         test_compaction_start_fails,
@@ -1151,13 +1329,20 @@ def run_all_tests() -> int:
         test_edit_recovery_ordered,
         test_edit_recovery_wrong_text,
         test_edit_recovery_no_read_between,
-        test_edit_recovery_few_tools,
+        test_edit_recovery_requires_build_read,
+        test_edit_recovery_rejects_early_target_read,
+        test_edit_recovery_rejects_broad_early_grep,
+        test_edit_recovery_rejects_direct_early_grep,
+        test_edit_recovery_rejects_wrong_recovery_file,
         test_edit_recovery_extra_tools,
         test_edit_recovery_tool_call_id_correlation,
+        test_edit_recovery_rejects_duplicate_tool_ids,
+        test_edit_recovery_rejects_end_before_start,
         # Additional assertions
         test_provider_exact,
         test_model_exact,
         test_thinking_off,
+        test_v7_first_prompt_isolates_target,
         test_prompts_count,
         test_prompts_count_short,
         test_response_success,
@@ -1170,6 +1355,9 @@ def run_all_tests() -> int:
         test_fixture_old_line_remaining,
         test_fixture_text,
         test_fixture_text_missing,
+        test_path_diff_allows_only_release_change,
+        test_path_diff_rejects_deleted_build_fixture,
+        test_path_diff_rejects_modified_build_fixture,
         # Assertions table
         test_assertions_table_exists,
         test_assertion_structure,
@@ -1199,6 +1387,10 @@ def run_all_tests() -> int:
         test_no_rmtree,
         test_import_no_side_effects,
     ]
+
+    defined_tests = {name for name, value in globals().items() if name.startswith("test_") and callable(value)}
+    registered_tests = {fn.__name__ for fn in test_funcs}
+    eq(registered_tests, defined_tests, "Manual registry covers every defined test")
 
     for fn in test_funcs:
         try:
