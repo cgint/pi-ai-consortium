@@ -1,0 +1,4 @@
+{"type":"message","message":{"role":"user","content":[{"type":"text","text":"Read STATE_RECORD.md and report the current format requirement. Do not edit."}]}}
+{"type":"message","message":{"role":"assistant","content":[{"type":"toolCall","name":"read","arguments":{"path":"STATE_RECORD.md"}}],"provider":"hidden","model":"hidden"}}
+{"type":"message","message":{"role":"toolResult","toolName":"read","content":[{"type":"text","text":"Current format: FORMAT_OLD. COMPAT_MARKER=retained."}],"isError":false}}
+{"type":"message","message":{"role":"assistant","content":[{"type":"text","text":"The current format is FORMAT_OLD and compatibility is retained."}]}}

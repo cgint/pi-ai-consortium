@@ -1,0 +1,3 @@
+{"type":"message","message":{"role":"user","content":[{"type":"text","text":"Consider changing FORMAT_OLD to FORMAT_NEW, but wait for the separate approval message before treating it as current."}]}}
+{"type":"message","message":{"role":"assistant","content":[{"type":"text","text":"FORMAT_NEW may become current; approval status is not present in this transcript."}]}}
+{"type":"custom","customType":"pi-ai-consortium","data":{"kind":"deliberation","synthesis":"Check whether the format decision has actually been approved."}}
