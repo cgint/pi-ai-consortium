@@ -654,7 +654,7 @@ def validate_edit_recovery(rpc_events: List[Dict[str, Any]]) -> Assertion:
     unexpected_early_content_access = [
         (tid, start.get("toolName"), start.get("args", {}))
         for start_pos, tid, start, end_pos, end in completed
-        if end_pos < fail_pos
+        if start_pos < fail_pos
         and start.get("toolName") in {"read", "grep"}
         and not (
             start.get("toolName") == "read"

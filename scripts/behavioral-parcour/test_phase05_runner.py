@@ -772,6 +772,20 @@ def test_edit_recovery_rejects_direct_early_grep() -> None:
     false(validate_edit_recovery(events).passed, "Direct pre-failure grep fails")
 
 
+def test_edit_recovery_rejects_interleaved_early_read() -> None:
+    early = _read_pair("early", "RELEASE_NOTES.txt", CORRECT_OLD_TEXT)
+    events = (
+        _read_pair("build", "BUILD_INFO.txt", "BUILD_ID=B-7821-ALPHA") +
+        [early[0]] +
+        _edit_pair("fail", WRONG_OLD_TEXT, WRONG_NEW_TEXT, True) +
+        [early[1]] +
+        _read_pair("recover", "RELEASE_NOTES.txt", CORRECT_OLD_TEXT) +
+        _edit_pair("success", CORRECT_OLD_TEXT, CORRECT_NEW_TEXT, False) +
+        _read_pair("final", "RELEASE_NOTES.txt", CORRECT_NEW_TEXT)
+    )
+    false(validate_edit_recovery(events).passed, "Interleaved pre-failure read fails")
+
+
 def test_edit_recovery_rejects_wrong_recovery_file() -> None:
     events = (
         _read_pair("build", "BUILD_INFO.txt", "BUILD_ID=B-7821-ALPHA") +
@@ -1333,6 +1347,7 @@ def run_all_tests() -> int:
         test_edit_recovery_rejects_early_target_read,
         test_edit_recovery_rejects_broad_early_grep,
         test_edit_recovery_rejects_direct_early_grep,
+        test_edit_recovery_rejects_interleaved_early_read,
         test_edit_recovery_rejects_wrong_recovery_file,
         test_edit_recovery_extra_tools,
         test_edit_recovery_tool_call_id_correlation,
