@@ -1,0 +1,5 @@
+Internal build metadata
+
+BUILD_ID=B-7821-ALPHA
+BUILD_CHANNEL=staging
+ARTIFACT_FAMILY=desktop-client

@@ -1,0 +1,8 @@
+{
+  "id": "p00-v7-recovery",
+  "title": "Read and edit recovery plumbing course",
+  "purpose": "Versioned Phase 0.5 v7 course separating the first-turn read fixture from the later edit target.",
+  "workspace_summary": "Build metadata plus release notes containing an independently hidden edit target.",
+  "scenario_definition": "concept-repo:experiments/scenarios/p00-v7-recovery.md",
+  "notes": "Materials only. Turn scripts, tool allowlists, and expected behavior live in the scenario definition, not here."
+}
