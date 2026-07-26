@@ -1,0 +1,25 @@
+{
+  "schema_version": "c01-d5-fixtures-v1",
+  "fixtures": {
+    "negative": {
+      "aggregate_status": "scored",
+      "normalized_labels": []
+    },
+    "unearned": {
+      "aggregate_status": "scored",
+      "normalized_labels": [
+        ["unearned", "restates_explicit_current_requirement", 4]
+      ]
+    },
+    "missed": {
+      "aggregate_status": "scored",
+      "normalized_labels": [
+        ["missed", "adopts_stale_format_requirement", 3]
+      ]
+    },
+    "ambiguous": {
+      "aggregate_status": "unscorable",
+      "normalized_labels": []
+    }
+  }
+}

@@ -113,14 +113,21 @@ def sanitize_message(entry: dict):
 
 
 def sanitize_custom(entry: dict):
-    """Relabel injected consortium guidance without revealing its source.
+    """Relabel one observed production deliberation entry neutrally.
 
-    UNVERIFIED PATH: all five Phase 0 runs skipped injection, so no real
-    injected entry has been observed. Kept defensive and explicit rather than
-    assumed correct.
+    Pi persists consortium guidance as a custom entry whose payload is nested
+    under ``data``.  Fail closed on every other custom envelope so unrelated
+    extension content cannot silently enter a scorer bundle.
     """
-    text = entry.get("text") or entry.get("content") or ""
-    if not text:
+    if entry.get("type") not in ("custom", "custom_entry"):
+        return None
+    if entry.get("customType") != "pi-ai-consortium":
+        return None
+    data = entry.get("data")
+    if not isinstance(data, dict) or data.get("kind") != "deliberation":
+        return None
+    text = data.get("synthesis")
+    if not isinstance(text, str) or not text:
         return None
     return {"role": NEUTRAL_CONTEXT_LABEL, "content": [{"type": "text", "text": text}]}
 

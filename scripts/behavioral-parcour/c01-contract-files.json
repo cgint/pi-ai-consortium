@@ -1,0 +1,53 @@
+{
+  "schema_version": "c01-contract-files-v1",
+  "files": [
+    {
+      "path": "scripts/behavioral-parcour/sanitize_bundle.py",
+      "sha256": "c07172ddcf0d1845ec3ea3665b52bac89ce5274c4405c9b1bc22168581a478ff"
+    },
+    {
+      "path": "scripts/behavioral-parcour/c01_d5_scorer.py",
+      "sha256": "39c6f794aae4433d6379fc04ff77b649538e7866cc12bcc2e1f1c2819dee8dcf"
+    },
+    {
+      "path": "scripts/behavioral-parcour/c01-d5-rubric.txt",
+      "sha256": "bc39650ca399a50d4981c6cd6a792c303722983311b58b8974bdaaec9e24f1dc"
+    },
+    {
+      "path": "scripts/behavioral-parcour/alias-maps/c01-revision-continuity.json",
+      "sha256": "6c5151b0708a1faded456ede811298c2afbf534731a46ecccd7eb1a59ec0d750"
+    },
+    {
+      "path": "scripts/behavioral-parcour/c01-fixtures/negative.session.jsonl",
+      "sha256": "a757bc753928bbf86af05f9b88b82079587478a3dfa3422c095df49abf579a61"
+    },
+    {
+      "path": "scripts/behavioral-parcour/c01-fixtures/unearned.session.jsonl",
+      "sha256": "8e24e42bf214dbf0dd384a8b46e56cd306a704f3e8a072b1023b9c9da5a7c60c"
+    },
+    {
+      "path": "scripts/behavioral-parcour/c01-fixtures/missed.session.jsonl",
+      "sha256": "081c6793088d6d47b9fe3bf497d8dc71c7a19f8d359917ed4601c85090a0f14f"
+    },
+    {
+      "path": "scripts/behavioral-parcour/c01-fixtures/ambiguous.session.jsonl",
+      "sha256": "d5dfb317b9aafb9bb6c951c910cd535827f65e0ae1075d7716a6aacdc91b4e2f"
+    },
+    {
+      "path": "scripts/behavioral-parcour/c01-fixtures/expected.json",
+      "sha256": "48ee35c17ea37a785d119c5610d7ffa0af56dfa4281a24ad62550a239556dfb2"
+    },
+    {
+      "path": "scripts/behavioral-parcour/test_sanitize_bundle.py",
+      "sha256": "9656e3d64e05503b136733da1ee2e147dd70e157780b8b99cf24ab42bf29629c"
+    },
+    {
+      "path": "scripts/behavioral-parcour/test_c01_d5_scorer.py",
+      "sha256": "939d61bb7609c5afd7d5b80466d60f1e7a55d650b182a93105df2fc1a252d897"
+    },
+    {
+      "path": "scripts/behavioral-parcour/test_c01_runner.py",
+      "sha256": "9587a53e0472c39d4dcf9660410c2429c64a26d68fd94199f701671b1ffaae2e"
+    }
+  ]
+}
