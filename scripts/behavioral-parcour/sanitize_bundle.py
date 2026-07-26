@@ -142,8 +142,23 @@ def main() -> int:
     ap.add_argument("--arm", default="unspecified", help="recorded in the unblinding key only")
     args = ap.parse_args()
 
+    if not re.fullmatch(r"[A-Z][A-Z0-9]{3,15}", args.bundle_id):
+        print("error: bundle-id must be opaque uppercase alphanumeric", file=sys.stderr)
+        return 2
     if not args.session.exists():
         print(f"error: session not found: {args.session}", file=sys.stderr)
+        return 2
+
+    key_path = args.out_dir.parent / "unblinding" / f"{args.bundle_id}.json"
+    output_targets = [
+        args.out_dir / f"{args.bundle_id}.jsonl",
+        args.out_dir / f"{args.bundle_id}.jsonl.QUARANTINED",
+        args.out_dir / f"{args.bundle_id}.gate.json",
+        key_path,
+    ]
+    existing = [str(path) for path in output_targets if path.exists()]
+    if existing:
+        print(f"error: refusing existing bundle artifacts: {existing}", file=sys.stderr)
         return 2
 
     alias_meta, ordered = load_alias_map(args.alias_map)
@@ -198,7 +213,6 @@ def main() -> int:
 
     # The unblinding key is written outside the bundle directory by the caller's
     # convention; here it is a sibling file the scoring pass must not read.
-    key_path = args.out_dir.parent / "unblinding" / f"{args.bundle_id}.json"
     key_path.parent.mkdir(parents=True, exist_ok=True)
     key_path.write_text(
         json.dumps(

@@ -14,10 +14,23 @@ import c01_runner as runner
 
 
 class C01RunnerTests(unittest.TestCase):
-    def test_frozen_prompts_and_cell_order(self):
-        self.assertEqual(list(runner.CELL_SPECS), ["A1", "D1", "A2", "D2", "A3", "D3"])
+    def test_frozen_prompts_checkpoint_schedules_and_run_ids(self):
+        self.assertEqual(runner.CHECKPOINT_SCHEDULES["pre-stage-c"], ["A1", "D1", "A2", "D2", "A3", "D3"])
+        self.assertEqual(runner.CHECKPOINT_SCHEDULES["post-stage-c"], ["A1", "D1", "A2", "D2", "A3", "D3"])
+        self.assertEqual(runner.CHECKPOINT_SCHEDULES["post-stage-d"], ["A1", "A2", "D2", "A3"])
+        self.assertEqual(runner.CHECKPOINT_SCHEDULES["post-stage-e"], ["A1", "A2", "D2", "A3"])
+        self.assertEqual(runner.RUN_SPECS["post-stage-e"]["D2"]["run_id"], "c01-poststagee-d2-r2")
         self.assertEqual(len(runner.PROMPTS), 3)
         self.assertIn("replace the YAML changelog requirement with Markdown", runner.PROMPTS[1])
+
+    def test_alias_map_covers_every_frozen_checkpoint_run_path(self):
+        alias_path = runner.HERE / "alias-maps" / "c01-revision-continuity.json"
+        literals = json.loads(alias_path.read_text())["literals"]
+        for checkpoint in runner.CHECKPOINT_SCHEDULES:
+            for spec in runner.RUN_SPECS[checkpoint].values():
+                for prefix in ("/private/tmp", "/tmp"):
+                    path = f"{prefix}/parcour-{spec['run_id']}/workspace"
+                    self.assertEqual(literals.get(path), "/workspace", path)
 
     def test_command_has_exact_arm_extension_order_and_controls(self):
         workspace = Path("/tmp/example/workspace")
@@ -106,16 +119,22 @@ class C01RunnerTests(unittest.TestCase):
 
     def test_well_formed_identity_mismatch_fails_before_any_target_path(self):
         spec = runner.CELL_SPECS["A1"]
-        instance = runner.C01Runner("A1", spec["run_id"], spec["arm"], spec["repetition"], "a" * 40, "b" * 40, "c" * 64, "d" * 64, "e" * 64, "f" * 40)
+        instance = runner.C01Runner("pre-stage-c", "A1", spec["run_id"], spec["arm"], spec["repetition"], "a" * 40, "b" * 40, "c" * 64, "d" * 64, "e" * 64, "f" * 40)
         result = instance.run()
         self.assertIn("Frozen identity mismatch before materialization", result["exception"])
         self.assertEqual(result["prompts_delivered"], 0)
         self.assertFalse(instance.tmp_root.exists())
         self.assertFalse(instance.evidence_dir.exists())
 
+    def test_cell_not_in_checkpoint_schedule_fails_before_identity_resolution(self):
+        instance = runner.C01Runner("post-stage-d", "D1", "c01-poststaged-d1-r1", "disabled", 1, "a" * 40, "b" * 40, "c" * 64, "d" * 64, "e" * 64, "f" * 40)
+        with self.assertRaisesRegex(ValueError, "do not match frozen mapping"):
+            instance._validate_frozen_inputs()
+        self.assertFalse(instance.tmp_root.exists())
+
     def test_malformed_identity_fails_before_any_target_path(self):
         spec = runner.CELL_SPECS["A1"]
-        instance = runner.C01Runner("A1", spec["run_id"], spec["arm"], spec["repetition"], "bad", "b" * 40, "c" * 64, "d" * 64, "e" * 64, "f" * 40)
+        instance = runner.C01Runner("pre-stage-c", "A1", spec["run_id"], spec["arm"], spec["repetition"], "bad", "b" * 40, "c" * 64, "d" * 64, "e" * 64, "f" * 40)
         self.assertFalse(instance.tmp_root.exists())
         result = instance.run()
         self.assertIn("Invalid addendum commit identity", result["exception"])

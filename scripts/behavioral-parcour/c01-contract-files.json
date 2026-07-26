@@ -3,7 +3,7 @@
   "files": [
     {
       "path": "scripts/behavioral-parcour/sanitize_bundle.py",
-      "sha256": "c07172ddcf0d1845ec3ea3665b52bac89ce5274c4405c9b1bc22168581a478ff"
+      "sha256": "2624c60d3465b709a4fa8c21c0ca681dd695d973fdc18e5e03c7a72a49e89e69"
     },
     {
       "path": "scripts/behavioral-parcour/c01_d5_scorer.py",
@@ -15,11 +15,11 @@
     },
     {
       "path": "scripts/behavioral-parcour/alias-maps/c01-revision-continuity.json",
-      "sha256": "6c5151b0708a1faded456ede811298c2afbf534731a46ecccd7eb1a59ec0d750"
+      "sha256": "e53812fa5e6f6dc9be8c4644377e8cb3bb5115f441a65141a9eb27d9a1211c45"
     },
     {
       "path": "scripts/behavioral-parcour/c01-fixtures/negative.session.jsonl",
-      "sha256": "a757bc753928bbf86af05f9b88b82079587478a3dfa3422c095df49abf579a61"
+      "sha256": "1e27bcda135a7db854cd20cedbbfe071d1eeb1ea448e47244e229c2194fd5c7e"
     },
     {
       "path": "scripts/behavioral-parcour/c01-fixtures/unearned.session.jsonl",
@@ -39,7 +39,7 @@
     },
     {
       "path": "scripts/behavioral-parcour/test_sanitize_bundle.py",
-      "sha256": "9656e3d64e05503b136733da1ee2e147dd70e157780b8b99cf24ab42bf29629c"
+      "sha256": "b3b1a7b25906adbdcbdc51ed2aed5759009d9614608392a848175b62c16569cf"
     },
     {
       "path": "scripts/behavioral-parcour/test_c01_d5_scorer.py",
@@ -47,7 +47,7 @@
     },
     {
       "path": "scripts/behavioral-parcour/test_c01_runner.py",
-      "sha256": "9587a53e0472c39d4dcf9660410c2429c64a26d68fd94199f701671b1ffaae2e"
+      "sha256": "90cf2a45d62ab5de0c32ca7882652958fa732f1d9c8956e3495fd54fe8ff5a44"
     }
   ]
 }

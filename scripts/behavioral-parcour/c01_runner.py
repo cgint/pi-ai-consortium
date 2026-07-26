@@ -50,14 +50,30 @@ PROMPTS = [
     "Read the updated file and report the current format requirement, the preserved compatibility constraint, and the requirement that this decision superseded. Do not make further edits.",
 ]
 
-CELL_SPECS: Dict[str, Dict[str, Any]] = {
-    "A1": {"arm": "active", "repetition": 1, "run_id": "c01-prestagec-a1-r1"},
-    "D1": {"arm": "disabled", "repetition": 1, "run_id": "c01-prestagec-d1-r1"},
-    "A2": {"arm": "active", "repetition": 2, "run_id": "c01-prestagec-a2-r2"},
-    "D2": {"arm": "disabled", "repetition": 2, "run_id": "c01-prestagec-d2-r2"},
-    "A3": {"arm": "active", "repetition": 3, "run_id": "c01-prestagec-a3-r3"},
-    "D3": {"arm": "disabled", "repetition": 3, "run_id": "c01-prestagec-d3-r3"},
+CHECKPOINT_SCHEDULES: Dict[str, List[str]] = {
+    "pre-stage-c": ["A1", "D1", "A2", "D2", "A3", "D3"],
+    "post-stage-c": ["A1", "D1", "A2", "D2", "A3", "D3"],
+    "post-stage-d": ["A1", "A2", "D2", "A3"],
+    "post-stage-e": ["A1", "A2", "D2", "A3"],
 }
+CHECKPOINT_SLUGS = {
+    "pre-stage-c": "prestagec",
+    "post-stage-c": "poststagec",
+    "post-stage-d": "poststaged",
+    "post-stage-e": "poststagee",
+}
+RUN_SPECS: Dict[str, Dict[str, Dict[str, Any]]] = {}
+for _checkpoint, _cells in CHECKPOINT_SCHEDULES.items():
+    RUN_SPECS[_checkpoint] = {}
+    for _cell in _cells:
+        _repetition = int(_cell[1])
+        RUN_SPECS[_checkpoint][_cell] = {
+            "arm": "active" if _cell.startswith("A") else "disabled",
+            "repetition": _repetition,
+            "run_id": f"c01-{CHECKPOINT_SLUGS[_checkpoint]}-{_cell.lower()}-r{_repetition}",
+        }
+# Compatibility name for pre-Stage-C tests and reporting.
+CELL_SPECS = RUN_SPECS["pre-stage-c"]
 
 ASSERTIONS = [
     ("C01-process-exit", "Pi process exited cleanly"),
@@ -361,10 +377,11 @@ def validate_identities(manifest: Dict[str, Any]) -> p.Assertion:
 
 
 class C01Runner(p.Phase05Runner):
-    def __init__(self, cell: str, run_id: str, arm: str, repetition: int,
+    def __init__(self, checkpoint: str, cell: str, run_id: str, arm: str, repetition: int,
                  addendum_commit: str, addendum_blob: str, addendum_sha256: str,
                  runner_sha256: str, contract_sha256: str, product_commit: str):
-        self.cell, self.run_id, self.arm, self.repetition = cell, run_id, arm, repetition
+        self.checkpoint, self.cell = checkpoint, cell
+        self.run_id, self.arm, self.repetition = run_id, arm, repetition
         self.addendum_commit, self.addendum_blob = addendum_commit, addendum_blob
         self.addendum_sha256, self.expected_runner_sha = addendum_sha256, runner_sha256
         self.expected_contract_sha, self.product_commit = contract_sha256, product_commit
@@ -403,7 +420,7 @@ class C01Runner(p.Phase05Runner):
             ("contract sha256", self.expected_contract_sha, 64), ("product commit", self.product_commit, 40),
         ):
             _safe_identity(value, length, label)
-        spec = CELL_SPECS.get(self.cell)
+        spec = RUN_SPECS.get(self.checkpoint, {}).get(self.cell)
         if spec != {"arm": self.arm, "repetition": self.repetition, "run_id": self.run_id}:
             raise ValueError("Cell, arm, repetition, and run_id do not match frozen mapping")
         _, head = _git_value(["git", "rev-parse", "HEAD"], REPO_ROOT)
@@ -482,7 +499,7 @@ class C01Runner(p.Phase05Runner):
         checks = {
             **self.frozen_checks,
             "implementation_clean": status["exit_code"] == 0 and not status["output"].strip(),
-            "cell_mapping": CELL_SPECS.get(self.cell) == {"arm": self.arm, "repetition": self.repetition, "run_id": self.run_id},
+            "cell_mapping": RUN_SPECS.get(self.checkpoint, {}).get(self.cell) == {"arm": self.arm, "repetition": self.repetition, "run_id": self.run_id},
             "provider_commit": provider_commit == p.PROVIDER_EXPECTED_COMMIT,
             "provider_blob": provider_blob == p.PROVIDER_EXPECTED_BLOB,
             "provider_sha256": p.sha256_file(p.PROVIDER_EXT) == p.PROVIDER_EXPECTED_SHA256,
@@ -508,7 +525,7 @@ class C01Runner(p.Phase05Runner):
             "extension_order": [command[i + 1] for i, value in enumerate(command) if value == "-e"] == ([str(p.PROVIDER_EXT), str(p.CONSORTIUM_EXT), str(p.FOCUS_EXT)] if self.arm == "active" else [str(p.PROVIDER_EXT), str(p.FOCUS_EXT)]),
         }
         self.manifest = {
-            "schema_version": "c01-run-manifest-v1", "run_id": self.run_id, "cell": self.cell,
+            "schema_version": "c01-run-manifest-v1", "run_id": self.run_id, "checkpoint": self.checkpoint, "cell": self.cell,
             "arm": self.arm, "repetition": self.repetition, "started_at": datetime.datetime.utcnow().isoformat() + "Z",
             "workspace": str(self.workspace), "runtime_root": str(self.runtime_root), "argv": command,
             "expected": {
@@ -579,7 +596,7 @@ class C01Runner(p.Phase05Runner):
                         if action.get("type") == "prompt":
                             if action.get("id") == "prompt_0" and self.live_boundary_ts is None:
                                 self.live_boundary_ts = datetime.datetime.utcnow().isoformat() + "Z"
-                                (self.tmp_root / "live-boundary.json").write_text(json.dumps({"run_id": self.run_id, "cell": self.cell, "ts": self.live_boundary_ts}, indent=2) + "\n")
+                                (self.tmp_root / "live-boundary.json").write_text(json.dumps({"run_id": self.run_id, "checkpoint": self.checkpoint, "cell": self.cell, "ts": self.live_boundary_ts}, indent=2) + "\n")
                             turn_start = time.monotonic()
                         self._send(proc, action)
                 if sequencer.errors:
@@ -700,11 +717,11 @@ class C01Runner(p.Phase05Runner):
             self._collect_consortium_logs(); self._collect_session_logs()
             self.manifest.update({"ended_at": datetime.datetime.utcnow().isoformat() + "Z", "wall_clock_ms": round(self.wall_clock_ms, 1), "process_returncode": self.process_returncode, "live_boundary_timestamp": self.live_boundary_ts, "workspace_content_manifest_after": p._content_manifest(self.workspace)})
             assertions = self._validate_all()
-            result = {"schema_version": "c01-run-result-v1", "run_id": self.run_id, "cell": self.cell, "arm": self.arm, "repetition": self.repetition, "pass": all(x.passed for x in assertions), "process_returncode": self.process_returncode, "wall_clock_ms": round(self.wall_clock_ms, 1), "prompts_delivered": len([x for x in self.outgoing_commands if x.get("type") == "prompt"]), "timeout_occurred": self.timeout_occurred, "exception": self.exception_info, "assertions": [x.to_dict() for x in assertions], "d1": self.d1, "d2_capture_status": self.d2_capture.get("status"), "metrics": copy.deepcopy(self.metric_results), "manifest": self.manifest}
+            result = {"schema_version": "c01-run-result-v1", "run_id": self.run_id, "checkpoint": self.checkpoint, "cell": self.cell, "arm": self.arm, "repetition": self.repetition, "pass": all(x.passed for x in assertions), "process_returncode": self.process_returncode, "wall_clock_ms": round(self.wall_clock_ms, 1), "prompts_delivered": len([x for x in self.outgoing_commands if x.get("type") == "prompt"]), "timeout_occurred": self.timeout_occurred, "exception": self.exception_info, "assertions": [x.to_dict() for x in assertions], "d1": self.d1, "d2_capture_status": self.d2_capture.get("status"), "metrics": copy.deepcopy(self.metric_results), "manifest": self.manifest}
         except Exception as exc:
             self.exception_info = f"{type(exc).__name__}: {exc}"; self.protocol_errors.append(self.exception_info)
             assertions = self._validate_all()
-            result = {"schema_version": "c01-run-result-v1", "run_id": self.run_id, "cell": self.cell, "arm": self.arm, "repetition": self.repetition, "pass": False, "process_returncode": self.process_returncode, "wall_clock_ms": round(self.wall_clock_ms, 1), "prompts_delivered": len([x for x in self.outgoing_commands if x.get("type") == "prompt"]), "timeout_occurred": self.timeout_occurred, "exception": self.exception_info, "assertions": [x.to_dict() for x in assertions], "d1": self.d1, "d2_capture_status": self.d2_capture.get("status"), "metrics": copy.deepcopy(self.metric_results), "manifest": self.manifest}
+            result = {"schema_version": "c01-run-result-v1", "run_id": self.run_id, "checkpoint": self.checkpoint, "cell": self.cell, "arm": self.arm, "repetition": self.repetition, "pass": False, "process_returncode": self.process_returncode, "wall_clock_ms": round(self.wall_clock_ms, 1), "prompts_delivered": len([x for x in self.outgoing_commands if x.get("type") == "prompt"]), "timeout_occurred": self.timeout_occurred, "exception": self.exception_info, "assertions": [x.to_dict() for x in assertions], "d1": self.d1, "d2_capture_status": self.d2_capture.get("status"), "metrics": copy.deepcopy(self.metric_results), "manifest": self.manifest}
         if self.harvest_allowed:
             try: self._harvest(result)
             except Exception as exc: result["pass"] = False; result["harvest_error"] = f"{type(exc).__name__}: {exc}"
@@ -713,7 +730,8 @@ class C01Runner(p.Phase05Runner):
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="c01 revision-continuity runner")
-    parser.add_argument("--cell", required=True, choices=list(CELL_SPECS))
+    parser.add_argument("--checkpoint", required=True, choices=list(CHECKPOINT_SCHEDULES))
+    parser.add_argument("--cell", required=True, choices=["A1", "D1", "A2", "D2", "A3", "D3"])
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--arm", required=True, choices=["active", "disabled"])
     parser.add_argument("--repetition", required=True, type=int, choices=[1, 2, 3])
@@ -724,7 +742,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--contract-sha256", required=True)
     parser.add_argument("--product-commit", required=True)
     args = parser.parse_args(argv)
-    runner = C01Runner(args.cell, args.run_id, args.arm, args.repetition, args.addendum_commit, args.addendum_blob, args.addendum_sha256, args.runner_sha256, args.contract_sha256, args.product_commit)
+    runner = C01Runner(args.checkpoint, args.cell, args.run_id, args.arm, args.repetition, args.addendum_commit, args.addendum_blob, args.addendum_sha256, args.runner_sha256, args.contract_sha256, args.product_commit)
     result = runner.run(); print(json.dumps(result, indent=2, default=str))
     if result.get("pass") is True: return 0
     if result.get("harvest_error"): return 2

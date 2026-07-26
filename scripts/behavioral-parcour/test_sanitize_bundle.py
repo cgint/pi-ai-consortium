@@ -54,6 +54,38 @@ class SanitizeBundleTests(unittest.TestCase):
             self.assertFalse((out / "Q001.jsonl").exists())
             self.assertFalse(json.loads((out / "Q001.gate.json").read_text())["clean"])
 
+    def test_same_bundle_id_cannot_overwrite_bundle_gate_or_unblinding_key(self):
+        root = Path(__file__).resolve().parent
+        raw = root / "c01-fixtures" / "negative.session.jsonl"
+        alias = root / "alias-maps" / "c01-revision-continuity.json"
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "scoring"
+            import subprocess
+            command = [sys.executable, str(root / "sanitize_bundle.py"), "--session", str(raw),
+                       "--alias-map", str(alias), "--bundle-id", "R001", "--out-dir", str(out)]
+            first = subprocess.run(command, capture_output=True, text=True, check=False)
+            self.assertEqual(first.returncode, 0)
+            bundle = out / "R001.jsonl"
+            before = bundle.read_bytes()
+            second = subprocess.run(command, capture_output=True, text=True, check=False)
+            self.assertEqual(second.returncode, 2)
+            self.assertIn("refusing existing bundle artifacts", second.stderr)
+            self.assertEqual(bundle.read_bytes(), before)
+
+    def test_invalid_bundle_id_creates_no_output(self):
+        root = Path(__file__).resolve().parent
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "scoring"
+            import subprocess
+            completed = subprocess.run(
+                [sys.executable, str(root / "sanitize_bundle.py"), "--session", str(root / "c01-fixtures" / "negative.session.jsonl"),
+                 "--alias-map", str(root / "alias-maps" / "c01-revision-continuity.json"),
+                 "--bundle-id", "../bad", "--out-dir", str(out)],
+                capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(completed.returncode, 2)
+            self.assertFalse(out.exists())
+
     def test_c01_synthetic_bundle_keeps_guidance_and_strips_provenance(self):
         root = Path(__file__).resolve().parent
         raw = root / "c01-fixtures" / "unearned.session.jsonl"
