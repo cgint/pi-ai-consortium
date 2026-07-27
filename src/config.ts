@@ -29,6 +29,22 @@ export const PROBE_SYSTEM_PROMPT = [
 /** Canonical probe order — alphabetical for deterministic display. */
 export const CANONICAL_PROBE_ORDER = ["architect", "clarifier", "contrarian", "navigator", "responder"];
 
+/**
+ * Parse a "provider/modelId" string from the CONSORTIUM_MODEL env var.
+ *
+ * Returns undefined for empty, missing, or malformed input.
+ * Pure function — no side effects, no process.env access.
+ */
+export function parseModelRef(
+  raw: string | undefined,
+): { provider: string; modelId: string } | undefined {
+  const s = raw?.trim();
+  if (!s) return undefined;
+  const sep = s.indexOf("/");
+  if (sep <= 0 || sep === s.length - 1) return undefined;
+  return { provider: s.slice(0, sep), modelId: s.slice(sep + 1) };
+}
+
 export const DEFAULT_CONFIG: Omit<ConsortiumConfig, "probes" | "synthesis" | "extraction"> & {
   probes: Array<Omit<ConsortiumConfig["probes"][number], "provider" | "modelId">>;
   synthesis: Omit<ConsortiumConfig["synthesis"], "provider" | "modelId">;

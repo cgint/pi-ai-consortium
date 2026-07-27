@@ -10,6 +10,7 @@ vi.mock("../src/core.js", () => ({
 }));
 vi.mock("../src/config.js", () => ({
   DEFAULT_CONFIG: { probes: [], synthesis: {} },
+  parseModelRef: () => undefined,
 }));
 vi.mock("../src/context.js", () => ({
   buildUserContext: vi.fn(),

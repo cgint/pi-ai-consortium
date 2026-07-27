@@ -11,6 +11,7 @@ vi.mock("../src/core.js", () => ({
 }));
 vi.mock("../src/config.js", () => ({
   DEFAULT_CONFIG: { probes: [], synthesis: {} },
+  parseModelRef: () => undefined,
 }));
 vi.mock("../src/context.js", () => ({
   buildUserContext: vi.fn(),
@@ -123,5 +124,25 @@ describe("consortium enabled/disabled toggle", () => {
     const offCmd = commands.get("ai-consortium-off");
     expect(offCmd).toBeDefined();
     expect(offCmd!.description).toMatch(/disable/i);
+  });
+
+  it("status command reports deliberation model", async () => {
+    const ctx = {
+      cwd: process.cwd(),
+      sessionManager: { getSessionId: () => "test-session" },
+      model: { provider: "test", id: "model" },
+      modelRegistry: { find: () => undefined },
+      signal: new AbortController().signal,
+      hasUI: true,
+      ui: { setStatus: vi.fn(), notify: vi.fn(), setWidget: vi.fn() },
+    };
+
+    const statusHandler = commands.get("ai-consortium")!.handler;
+    await statusHandler("", ctx);
+
+    expect(ctx.ui.notify).toHaveBeenCalledWith(
+      expect.stringContaining("Deliberation Model: test/model (ctx.model)"),
+      "info",
+    );
   });
 });

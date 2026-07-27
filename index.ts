@@ -17,7 +17,7 @@ import type {
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import { ConsortiumCore, type ModelCallFn } from "./src/core.js";
 import { callModelWithAuth } from "./src/model.js";
-import { DEFAULT_CONFIG } from "./src/config.js";
+import { DEFAULT_CONFIG, parseModelRef } from "./src/config.js";
 import { buildUserContext, buildUserContextFromMessages } from "./src/context.js";
 import { ConsortiumLogger, createProgressCallback, formatVisibleMessage } from "./src/ui.js";
 import type { ConsortiumConfig, TurnState, DeliberationResult, GovernorMode, TelemetryEvent } from "./src/types.js";
@@ -272,8 +272,10 @@ export default function (pi: ExtensionAPI): void {
   pi.registerCommand("ai-consortium", {
     description: "Show consortium deliberation status and governor mode",
     handler: async (_args, ctx) => {
+      const deliberationModel = resolveDeliberationModel(ctx);
       const info = [
         `Consortium: ${enabled ? "enabled" : "disabled"}`,
+        `Deliberation Model: ${deliberationModel.provider}/${deliberationModel.id} (${deliberationModel.source})`,
         `Governor Mode: ${governorMode}`,
         `Max Turn Gap (Safety Net): ${maxTurnGap}`,
         `Periodic Interval: ${periodicInterval}`,
@@ -356,6 +358,24 @@ export default function (pi: ExtensionAPI): void {
   });
 }
 
+/** Resolve the deliberation model from CONSORTIUM_MODEL env var, falling back to ctx.model. */
+function resolveDeliberationModel(
+  ctx: ExtensionContext,
+): { provider: string; id: string; source: string } {
+  const ref = parseModelRef(process.env.CONSORTIUM_MODEL);
+  if (ref) {
+    const model = ctx.modelRegistry.find(ref.provider, ref.modelId);
+    if (model) {
+      return { provider: model.provider, id: model.id, source: "CONSORTIUM_MODEL" };
+    }
+  }
+  // Fallback to executor model
+  if (!ctx.model) {
+    throw new Error("No active model available from ctx.model and CONSORTIUM_MODEL not resolvable");
+  }
+  return { provider: ctx.model.provider, id: ctx.model.id, source: "ctx.model" };
+}
+
 /** Run the full deliberation cycle. */
 export async function runDeliberation(
   baseConfig: typeof DEFAULT_CONFIG,
@@ -366,37 +386,34 @@ export async function runDeliberation(
   turnsSinceLastAudit: number,
   baselineAvailable: boolean,
 ): Promise<DeliberationResult> {
-  const activeModel = ctx.model;
-  if (!activeModel) {
-    throw new Error("No active model available from ctx.model");
-  }
-
+  const deliberationModel = resolveDeliberationModel(ctx);
   const modelRegistry = ctx.modelRegistry;
 
   const config: ConsortiumConfig = {
     ...baseConfig,
     probes: baseConfig.probes.map((p) => ({
       ...p,
-      provider: activeModel.provider,
-      modelId: activeModel.id,
+      provider: deliberationModel.provider,
+      modelId: deliberationModel.id,
     })),
     synthesis: {
       ...baseConfig.synthesis,
-      provider: activeModel.provider,
-      modelId: activeModel.id,
+      provider: deliberationModel.provider,
+      modelId: deliberationModel.id,
     },
     extraction: baseConfig.extraction
       ? {
           ...baseConfig.extraction,
-          provider: activeModel.provider,
-          modelId: activeModel.id,
+          provider: deliberationModel.provider,
+          modelId: deliberationModel.id,
         }
       : undefined,
   };
 
   logger.log({
     type: "deliberation_start",
-    model: `${activeModel.provider}/${activeModel.id}`,
+    model: `${deliberationModel.provider}/${deliberationModel.id}`,
+    modelSource: deliberationModel.source,
     probe_count: config.probes.length,
   });
 
