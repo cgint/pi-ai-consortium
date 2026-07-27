@@ -20,5 +20,6 @@ dist/
 # Parcour templates are committed starting states, so re-include any
 # fixture files the broad rules above would otherwise exclude.
 !.parcour-runs-templates/**
-# Ignore Code Giant output directory
+# Ignore Code Giant output directory and result files
 .codegiant/
+cg-task-result-*.md
