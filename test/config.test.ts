@@ -52,9 +52,9 @@ describe("src/config.ts", () => {
     });
 
     it("handles model id with slashes (splits on first /)", () => {
-      expect(parseModelRef("ollama/qwen3:latest")).toEqual({
-        provider: "ollama",
-        modelId: "qwen3:latest",
+      expect(parseModelRef("openrouter/anthropic/claude-3.5-sonnet")).toEqual({
+        provider: "openrouter",
+        modelId: "anthropic/claude-3.5-sonnet",
       });
     });
 

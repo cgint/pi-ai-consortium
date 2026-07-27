@@ -368,6 +368,8 @@ function resolveDeliberationModel(
     if (model) {
       return { provider: model.provider, id: model.id, source: "CONSORTIUM_MODEL" };
     }
+    // Env var set but model not found — log warning and fall through
+    console.warn(`[consortium] CONSORTIUM_MODEL="${process.env.CONSORTIUM_MODEL}" resolved but not found in model registry — falling back to executor model`);
   }
   // Fallback to executor model
   if (!ctx.model) {
