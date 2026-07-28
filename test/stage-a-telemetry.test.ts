@@ -243,7 +243,7 @@ describe("regression: existing behavior unchanged", () => {
     const core = new ConsortiumCore(baseConfig, callFn);
     await core.deliberate("Test");
 
-    expect(keys).toEqual(["probe:0", "probe:1", "synthesis"]);
+    expect(keys).toEqual(["probe:0:clarifier", "probe:1:contrarian", "synthesis"]);
   });
 
   it("executes probes serially in serial mode", async () => {
@@ -257,9 +257,9 @@ describe("regression: existing behavior unchanged", () => {
     const core = new ConsortiumCore({ ...baseConfig, executionMode: "serial" }, callFn);
     await core.deliberate("Test");
 
-    expect(order[0]).toBe("probe:0-start");
-    expect(order[1]).toBe("probe:0-end");
-    expect(order[2]).toBe("probe:1-start");
-    expect(order[3]).toBe("probe:1-end");
+    expect(order[0]).toBe("probe:0:clarifier-start");
+    expect(order[1]).toBe("probe:0:clarifier-end");
+    expect(order[2]).toBe("probe:1:contrarian-start");
+    expect(order[3]).toBe("probe:1:contrarian-end");
   });
 });

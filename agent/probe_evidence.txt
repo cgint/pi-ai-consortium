@@ -1,0 +1,82 @@
+================================================================================
+1. TAG PREFIX OUTPUTS BY ROLE (silently discarded)
+================================================================================
+
+ARCHITECT: 0 outputs
+
+CLARIFIER: 2 outputs
+  1. TAG The timeout test fails because `baseConfig` now defaults to `executionMode: "serial"`, causing the two 2-second probes to run sequentially (~4s total), exceeding the 5000ms test timeout even thoug
+  2. TAG The request construction happens in `src/model.ts` within the `callModelWithAuth` function (lines 50-105), which builds the `Context` object with `systemPrompt` and `messages` before passing it to
+
+CONTRARIAN: 0 outputs
+
+NAVIGATOR: 1 outputs
+  1. TAG NO_CONTRIBUTION
+
+RESPONDER: 0 outputs
+
+================================================================================
+2. RESPONDER BLOCK OUTPUTS (6 total)
+================================================================================
+  1. BLOCK The agent is exploring TUI rendering internals instead of answering the user's question about whether consortium insights intentionally don't appear in the TUI.
+  2. BLOCK The agent is analyzing server-side KV-cache metrics and prefix-hit rates instead of addressing the user's immediate question about whether the code changes resolved the parallelism issue; the user's logs suggest the serial switch worked (fewer concurrent requests), but the agent is drifting in
+  3. BLOCK The current model explicitly states it does not support images, so the agent cannot fulfill the user's request to read the image file without switching models or providing an alternative solution.
+  4. BLOCK The agent is diving back into reading source files to answer a question it already fully answered multiple times—the user's question about where the synthesis will be added in a 100k context was already answered four messages ago, and this repeated investigation is pure analysis paralysis that
+  5. BLOCK The user is asking you to look at session JSONL timing data and create a playground smoke-test script—but the jsonl file does not contain any per-LM-call timing (cache stats, duration, or token counts) beyond wall‑clock timestamps at the message level. You cannot extract TTFT or KV‑cache metri
+  6. BLOCK The agent is re-exploring and re-reading files (the probe-behavior-issues doc and inspector code) rather than moving toward the user's stated goal of prototyping a preparation step for probe context.
+
+================================================================================
+3. RESPONDER WARN OUTPUTS (35 total)
+================================================================================
+  1. WARN The agent is attempting to use the edit tool with malformed JSON syntax, causing validation failures instead of applying the code changes.
+  2. WARN The "respects per-probe timeout" test is timing out, likely due to the default `baseConfig` now using serial execution which changes the expected timing behavior of the mock timeouts.
+  3. WARN The failing timeout test is caused by the new default `executionMode: "serial"` in `baseConfig`, which makes the 2-second mock delays sum up instead of running concurrently, exceeding the test's global timeout.
+  4. WARN The agent is reading internal source code and exploring the logging mechanism, but the user's specific question was about whether the absence of consortium insights in the TUI is intentional, and the agent hasn't yet addressed that design question.
+  5. WARN The agent is deep-diving into pi-tui internals and session-manager implementation details instead of addressing the user's core question about whether consortium insights are intentionally hidden from the TUI.
+  6. WARN The agent committed the benchmark scripts but did not explicitly confirm that the commit was pushed to the remote repository, leaving the user's specific question unanswered.
+  7. WARN Position-0 prepend looks architecturally wrong regardless of caching: it inverts the natural conversation order (system, deliberation, user input, assistant, tool results) into (deliberation, system, user input, assistant, tool results), which breaks the narrative coherence the LLM expects from
+  8. WARN The agent appears to have gone silent after the user's pointed question about where the synthesis is placed in a 100k context, which is the exact investigation the user asked for, and it's been several seconds without a response or tool use.
+  9. WARN The agent has shifted from answering the user's direct question about position-0 to presenting and analyzing verbose timing data from another agent, which is a different discussion thread and not producing the concise verdict the user requested.
+  10. WARN The agent is conflating the consortium's own probe/synthesis models with a "DSPy endpoint" — the DSPy reference came from the *other agent's* batch analysis, not from the current investigation. This risks wasting time debugging phantom infrastructure. The user's actual question was about positi
+  ... and 25 more
+
+================================================================================
+4. ALL-5-FIRE DELIBERATIONS (41 total)
+================================================================================
+
+  Deliberation 1 (2026-07-20T15-32-55-440Z_019f8028-7c47-7e62-ab25-93185de648fc.jsonl):
+    responder: INFO The agent has read the source files containing the `deliberate` method which orchestrates the probe calls
+    architect: INFO The `deliberate` method in `core.ts` uses `Promise.allSettled` to run probes concurrently, confirming they are called in parallel.
+    contrarian: INFO The `deliberate` method in `src/core.ts` uses `Promise.allSettled` to invoke probes concurrently, confirming they are called in parallel.
+    clarifier: INFO The `ConsortiumCore.deliberate` method in `src/core.ts` uses `Promise.allSettled` to call all configured probes concurrently, confirming they are
+    navigator: INFO The agent has identified the `ConsortiumCore` class and its `deliberate` method but has not yet explicitly confirmed the use of `Promise.all` or 
+
+  Deliberation 2 (2026-07-20T15-32-55-440Z_019f8028-7c47-7e62-ab25-93185de648fc.jsonl):
+    responder: INFO The agent has already answered the user's previous question about parallel execution correctly.
+    navigator: INFO The agent has already confirmed parallel execution and is ready to discuss implementing a serial execution option to address KV-cache constraints
+    architect: INFO The agent has confirmed parallel execution via `Promise.all`, which validates the user's hypothesis regarding KV-cache contention on limited GPU 
+    contrarian: INFO The codebase currently hardcodes parallel execution via `Promise.all`, so adding a serial option requires modifying `src/core.ts` to conditionall
+    clarifier: INFO The agent should explain that implementing serial execution requires refactoring `runProbes` to use a loop with `await` instead of `Promise.all`,
+
+  Deliberation 3 (2026-07-20T15-32-55-440Z_019f8028-7c47-7e62-ab25-93185de648fc.jsonl):
+    responder: INFO The user wants to implement a configurable toggle for serial vs. parallel execution, which requires modifying the codebase.
+    contrarian: INFO Adding a serial execution toggle requires modifying `src/core.ts` to conditionally replace `Promise.all` with sequential `for...of` iteration bas
+    architect: INFO The agent needs to modify `src/core.ts` to add an environment variable check (e.g., `CONSORTIUM_SERIAL=true`) that switches the probe execution l
+    clarifier: INFO The agent should modify `src/core.ts` to add a conditional check for an environment variable (e.g., `CONSORTIUM_EXECUTION_MODE`) that switches be
+    navigator: INFO The agent should propose adding a configuration flag (e.g., `executionMode: 'parallel' | 'serial'`) to `ConsortiumConfig` and modifying `runProbe
+
+  Deliberation 4 (2026-07-20T15-32-55-440Z_019f8028-7c47-7e62-ab25-93185de648fc.jsonl):
+    clarifier: INFO The agent should implement the serial/parallel toggle since the code change is minimal and directly addresses the confirmed KV-cache contention i
+    navigator: INFO The agent should propose the simplest implementation (a single env var toggle) since the user explicitly accepted that approach as preferable to 
+    architect: INFO The agent should proceed with the implementation since adding an `executionMode` flag to the config and a simple env var override is low-risk and
+    responder: INFO The agent should propose the simplest viable change—likely hardcoding serial execution or adding a minimal env var toggle—to address the user's p
+    contrarian: BLOCK Implementing a configurable serial/parallel switch adds unnecessary complexity when the user explicitly stated they are okay with picking the be
+
+  Deliberation 5 (2026-07-20T15-32-55-440Z_019f8028-7c47-7e62-ab25-93185de648fc.jsonl):
+    contrarian: INFO The agent should implement the requested feature with "serial" as the default execution mode.
+    clarifier: INFO The agent should default to 'serial' execution mode instead of 'parallel' as requested by the user.
+    navigator: INFO The agent should implement the serial execution option with serial as the default, as requested by the user.
+    responder: INFO The agent is ready to implement the feature with the specified constraint that the default execution mode should be serial.
+    architect: INFO The agent should implement the feature with `serial` as the default value for `executionMode` in the config, rather than the previously proposed 
+
+  ... and 36 more

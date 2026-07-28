@@ -147,7 +147,7 @@ export interface UsageAccumulator {
 /** A single telemetry event emitted during deliberation. */
 export type TelemetryEvent =
   | { type: "baseline_check"; baseline_available: boolean; baseline_supplied: boolean }
-  | { type: "probe_complete"; modelKey: string; duration_ms: number; output_length: number; usage_reported: boolean; usage?: Usage }
+  | { type: "probe_complete"; modelKey: string; role?: string; duration_ms: number; output_length: number; usage_reported: boolean; usage?: Usage }
   | { type: "deliberation_telemetry"; baseline_available: boolean; baseline_supplied: boolean | "not_applicable"; successful_calls: number; reported_calls: number; usage_status: "complete" | "partial" | "unreported" | "not_applicable"; aggregate_usage?: Usage };
 
 /** Optional telemetry callback. Exceptions must never affect deliberation. */

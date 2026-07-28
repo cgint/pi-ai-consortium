@@ -433,11 +433,12 @@ export async function runDeliberation(
 
   const callModel: ModelCallFn = async (modelKey, system, user, _maxTokens, _temperature, signal) => {
     const start = Date.now();
-    const { provider, modelId } = resolveModelKey(modelKey, config);
+    const { provider, modelId, role } = resolveModelKey(modelKey, config);
 
     logger.log({
       type: "probe_start",
       modelKey,
+      role: role ?? undefined,
       provider,
       modelId,
       system_prompt: system,
@@ -460,6 +461,7 @@ export async function runDeliberation(
       const logEntry: Record<string, unknown> = {
         type: "probe_complete",
         modelKey,
+        role: role ?? undefined,
         duration_ms: duration,
         output_length: result.text.length,
         output: result.text,
@@ -493,7 +495,7 @@ export async function runDeliberation(
 function resolveModelKey(
   modelKey: string,
   config: ConsortiumConfig,
-): { provider: string; modelId: string } {
+): { provider: string; modelId: string; role?: string } {
   if (modelKey === "synthesis") {
     return { provider: config.synthesis.provider, modelId: config.synthesis.modelId };
   }
@@ -503,14 +505,14 @@ function resolveModelKey(
     }
     return { provider: config.synthesis.provider, modelId: config.synthesis.modelId };
   }
-  const match = modelKey.match(/^probe:(\d+)$/);
+  const match = modelKey.match(/^probe:(\d+)(?::(.+))?$/);
   if (match) {
     const i = parseInt(match[1], 10);
     const probe = config.probes[i];
     if (!probe) {
       throw new Error(`Probe ${i} not found in config`);
     }
-    return { provider: probe.provider, modelId: probe.modelId };
+    return { provider: probe.provider, modelId: probe.modelId, role: match[2] ?? probe.role };
   }
   throw new Error(`Unknown modelKey: "${modelKey}"`);
 }

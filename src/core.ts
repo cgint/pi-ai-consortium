@@ -19,9 +19,21 @@ export type ModelCallFn = (
 
 /** Validate probe output — must start with NO_CONTRIBUTION or severity tag.
  * If the model ignored instructions and answered the user's question,
- * coerce to NO_CONTRIBUTION so it never reaches synthesis. */
+ * coerce to NO_CONTRIBUTION so it never reaches synthesis.
+ *
+ * Normalizes a leading "TAG " prefix (e.g. "TAG INFO x" → "INFO x")
+ * before validation, recovering outputs where the model wrote the
+ * placeholder literally. */
 function validateProbeOutput(text: string): string {
-  const trimmed = text.trim();
+  let trimmed = text.trim();
+  // Strip leading "TAG " if followed by a recognized severity tag.
+  if (trimmed.startsWith("TAG ") && /^(INFO|WARN|BLOCK)\s+\S/.test(trimmed.slice(4))) {
+    trimmed = trimmed.slice(4);
+  }
+  // Also handle "TAG NO_CONTRIBUTION".
+  if (trimmed === "TAG NO_CONTRIBUTION") {
+    trimmed = "NO_CONTRIBUTION";
+  }
   if (trimmed.startsWith("NO_CONTRIBUTION")) return trimmed;
   // Match severity tag followed by any non-whitespace (not just space).
   // Bare tags like "WARN\n" with no content are invalid.
@@ -180,7 +192,7 @@ export class ConsortiumCore {
           ? `${userContext}\n\n---\n\n${probe.roleLens}`
           : userContext;
         const result = await this.callModel(
-          `probe:${i}`,
+          `probe:${i}:${probe.role}`,
           probe.systemPrompt,
           probeUser,
           this.config.maxProbeTokens,
@@ -225,7 +237,7 @@ export class ConsortiumCore {
           ? `${userContext}\n\n---\n\n${probe.roleLens}`
           : userContext;
         const result = await this.callModel(
-          `probe:${i}`,
+          `probe:${i}:${probe.role}`,
           probe.systemPrompt,
           probeUser,
           this.config.maxProbeTokens,

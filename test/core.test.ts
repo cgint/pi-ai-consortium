@@ -128,8 +128,8 @@ describe("ConsortiumCore", () => {
 
   it("runs full deliberation cycle (diverge → converge)", async () => {
     const callFn = createMockCallFn({
-      "probe:0": "WARN Hidden assumptions about auth strategy.",
-      "probe:1": "WARN This could break under load.",
+      "probe:0:clarifier": "WARN Hidden assumptions about auth strategy.",
+      "probe:1:contrarian": "WARN This could break under load.",
       synthesis: "Synthesized: Watch for hidden assumptions AND load issues.",
     });
     const core = new ConsortiumCore(baseConfig, callFn);
@@ -144,10 +144,10 @@ describe("ConsortiumCore", () => {
 
   it("collects per-probe errors without failing entirely", async () => {
     const callFn: ModelCallFn = async (modelKey) => {
-      if (modelKey === "probe:0") {
+      if (modelKey.startsWith("probe:0")) {
         throw new Error("Network timeout");
       }
-      return modelKey === "probe:1" ? "WARN Probe 1 OK" : "Synthesis OK";
+      return modelKey.startsWith("probe:1") ? "WARN Probe 1 OK" : "Synthesis OK";
     };
     const core = new ConsortiumCore(baseConfig, callFn);
     const result = await core.deliberate("Test input");
@@ -210,7 +210,7 @@ describe("ConsortiumCore", () => {
     const core = new ConsortiumCore(baseConfig, callFn);
     await core.deliberate("Test");
 
-    expect(keys).toEqual(["probe:0", "probe:1", "synthesis"]);
+    expect(keys).toEqual(["probe:0:clarifier", "probe:1:contrarian", "synthesis"]);
   });
 
   it("aborts deliberation when external signal is fired", async () => {
@@ -250,8 +250,8 @@ describe("ConsortiumCore", () => {
 
   it("rejects probe output that doesn't start with severity tag or NO_CONTRIBUTION", async () => {
     const callFn = createMockCallFn({
-      "probe:0": "Today is Monday, June 29, 2026.",
-      "probe:1": "WARN This could break under load.",
+      "probe:0:clarifier": "Today is Monday, June 29, 2026.",
+      "probe:1:contrarian": "WARN This could break under load.",
       synthesis: "Synthesized: Load warning noted.",
     });
     const core = new ConsortiumCore(baseConfig, callFn);
@@ -261,6 +261,62 @@ describe("ConsortiumCore", () => {
     expect(result.probes[0].text).toBe("NO_CONTRIBUTION");
     expect(result.probes[1].text).toBe("WARN This could break under load.");
     expect(result.synthesis).toBe("Synthesized: Load warning noted.");
+  });
+
+  it("normalizes TAG prefix on probe output (TAG INFO, TAG WARN, TAG BLOCK)", async () => {
+    const callFn = createMockCallFn({
+      "probe:0:clarifier": "TAG INFO The agent has correctly identified the structure.",
+      "probe:1:contrarian": "TAG WARN Modified code unverified by tests.",
+      synthesis: "Synthesized.",
+    });
+    const core = new ConsortiumCore(baseConfig, callFn);
+    const result = await core.deliberate("Test");
+
+    // TAG prefix stripped, severity tag preserved
+    expect(result.probes[0].text).toBe("INFO The agent has correctly identified the structure.");
+    expect(result.probes[1].text).toBe("WARN Modified code unverified by tests.");
+  });
+
+  it("coerces bare TAG and empty output to NO_CONTRIBUTION", async () => {
+    const callFn = createMockCallFn({
+      "probe:0:clarifier": "TAG The timeout test fails because...",
+      "probe:1:contrarian": "",
+      synthesis: "NO_CONTRIBUTION",
+    });
+    const core = new ConsortiumCore(baseConfig, callFn);
+    const result = await core.deliberate("Test");
+
+    // Bare TAG (no severity) and empty both coerced
+    expect(result.probes[0].text).toBe("NO_CONTRIBUTION");
+    expect(result.probes[1].text).toBe("NO_CONTRIBUTION");
+    // All NC → synthesis is NO_CONTRIBUTION
+    expect(result.synthesis).toBe("NO_CONTRIBUTION");
+  });
+
+  it("handles TAG NO_CONTRIBUTION as NO_CONTRIBUTION", async () => {
+    const callFn = createMockCallFn({
+      "probe:0:clarifier": "TAG NO_CONTRIBUTION",
+      "probe:1:contrarian": "TAG NO_CONTRIBUTION",
+      synthesis: "NO_CONTRIBUTION",
+    });
+    const core = new ConsortiumCore(baseConfig, callFn);
+    const result = await core.deliberate("Test");
+
+    expect(result.probes[0].text).toBe("NO_CONTRIBUTION");
+    expect(result.probes[1].text).toBe("NO_CONTRIBUTION");
+  });
+
+  it("passes through outputs without TAG prefix unchanged", async () => {
+    const callFn = createMockCallFn({
+      "probe:0:clarifier": "INFO Direct observation without TAG prefix.",
+      "probe:1:contrarian": "BLOCK Critical issue.",
+      synthesis: "Synthesized.",
+    });
+    const core = new ConsortiumCore(baseConfig, callFn);
+    const result = await core.deliberate("Test");
+
+    expect(result.probes[0].text).toBe("INFO Direct observation without TAG prefix.");
+    expect(result.probes[1].text).toBe("BLOCK Critical issue.");
   });
 
   it("executes probes serially when executionMode is serial", async () => {
@@ -276,10 +332,10 @@ describe("ConsortiumCore", () => {
 
     // Serial: probe:0 completes before probe:1 starts
     expect(order).toEqual([
-      "probe:0-start",
-      "probe:0-end",
-      "probe:1-start",
-      "probe:1-end",
+      "probe:0:clarifier-start",
+      "probe:0:clarifier-end",
+      "probe:1:contrarian-start",
+      "probe:1:contrarian-end",
       "synthesis-start",
       "synthesis-end",
     ]);
@@ -297,11 +353,11 @@ describe("ConsortiumCore", () => {
     await core.deliberate("Test");
 
     // Parallel: both probes start before either ends
-    expect(order[0]).toBe("probe:0-start");
-    expect(order[1]).toBe("probe:1-start");
+    expect(order[0]).toBe("probe:0:clarifier-start");
+    expect(order[1]).toBe("probe:1:contrarian-start");
     // Both ends come after both starts
-    expect(order.findIndex((o) => o === "probe:0-end")).toBeGreaterThan(1);
-    expect(order.findIndex((o) => o === "probe:1-end")).toBeGreaterThan(1);
+    expect(order.findIndex((o) => o === "probe:0:clarifier-end")).toBeGreaterThan(1);
+    expect(order.findIndex((o) => o === "probe:1:contrarian-end")).toBeGreaterThan(1);
   });
 
   it("defaults to serial when executionMode is undefined", async () => {
@@ -318,10 +374,10 @@ describe("ConsortiumCore", () => {
     await core.deliberate("Test");
 
     // Should behave serially (probe:0 completes before probe:1 starts)
-    expect(order[0]).toBe("probe:0-start");
-    expect(order[1]).toBe("probe:0-end");
-    expect(order[2]).toBe("probe:1-start");
-    expect(order[3]).toBe("probe:1-end");
+    expect(order[0]).toBe("probe:0:clarifier-start");
+    expect(order[1]).toBe("probe:0:clarifier-end");
+    expect(order[2]).toBe("probe:1:contrarian-start");
+    expect(order[3]).toBe("probe:1:contrarian-end");
   });
 
   it("appends roleLens to user context per probe", async () => {
@@ -344,8 +400,8 @@ describe("ConsortiumCore", () => {
 
   it("works without roleLens (backward compat)", async () => {
     const callFn = createMockCallFn({
-      "probe:0": "WARN OK",
-      "probe:1": "WARN OK",
+      "probe:0:clarifier": "WARN OK",
+      "probe:1:contrarian": "WARN OK",
       synthesis: "Synthesized.",
     });
     const config: ConsortiumConfig = {
@@ -387,10 +443,10 @@ describe("ConsortiumCore", () => {
     const result = await core.deliberate(messages);
 
     expect(receivedUsers["extraction"]).toBeDefined();
-    expect(receivedUsers["probe:0"].startsWith("<historical_observed_past>")).toBe(true);
-    expect(receivedUsers["probe:0"]).toContain("<durable_user_intent_and_constraints>");
-    expect(receivedUsers["probe:0"]).toContain("<user_requirements>");
-    expect(receivedUsers["probe:0"]).toContain("Test extraction integration");
+    expect(receivedUsers["probe:0:clarifier"].startsWith("<historical_observed_past>")).toBe(true);
+    expect(receivedUsers["probe:0:clarifier"]).toContain("<durable_user_intent_and_constraints>");
+    expect(receivedUsers["probe:0:clarifier"]).toContain("<user_requirements>");
+    expect(receivedUsers["probe:0:clarifier"]).toContain("Test extraction integration");
     expect(result.extractedContext).toBeDefined();
     expect(result.extractedContext?.userRequirements[0]).toBe("Test extraction integration");
   });
