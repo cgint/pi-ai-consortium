@@ -9,6 +9,10 @@ describe("src/config.ts", () => {
     expect(DEFAULT_CONFIG.probes).toHaveLength(5);
   });
 
+  it("defaults periodic cadence to 10 turns", () => {
+    expect(DEFAULT_CONFIG.periodicInterval).toBe(10);
+  });
+
   it("PROBE_SYSTEM_PROMPT instructs reality-grounded auditing without speculation", () => {
     expect(PROBE_SYSTEM_PROMPT).toContain("OBSERVED PAST REALITY ONLY");
     expect(PROBE_SYSTEM_PROMPT).toContain("NO_CONTRIBUTION");

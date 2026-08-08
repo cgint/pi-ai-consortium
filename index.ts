@@ -30,7 +30,7 @@ export default function (pi: ExtensionAPI): void {
   let enabled = true;
   let governorMode: GovernorMode = "smart_extractor";
   let maxTurnGap = 20;
-  let periodicInterval = 3;
+  let periodicInterval = 10;
   let turnsSinceLastAudit = 0;
 
   let turnState: TurnState = { deliberation: null };

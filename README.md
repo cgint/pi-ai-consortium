@@ -68,7 +68,7 @@ To prevent high token consumption and latency on simple or routine turns, `pi-ai
 3. **Modes:**
    - `smart_extractor`: Semantic extraction gate + 20-turn safety net.
    - `always`: Full deliberation on every turn.
-   - `periodic N`: Deliberate every N turns.
+   - `periodic [N]`: Deliberate every N turns; defaults to 10 when N is omitted.
    - `manual`: Deliberate only when manually triggered.
 
 ## Key design

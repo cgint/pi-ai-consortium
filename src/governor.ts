@@ -17,7 +17,7 @@ export function shouldDeliberate(
 ): GovernorDecision {
   const mode: GovernorMode = config.governorMode ?? "smart_extractor";
   const maxTurnGap = config.maxTurnGap ?? 20;
-  const periodicInterval = config.periodicInterval ?? 3;
+  const periodicInterval = config.periodicInterval ?? 10;
 
   if (mode === "always") {
     return {
