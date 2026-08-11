@@ -715,14 +715,25 @@ class C01Runner(p.Phase05Runner):
         evidence_manifest = {"run_id": self.run_id, "files": files, "coverage": {"total_files": len(files), "total_bytes": sum(x["size"] for x in files)}}
         (self.evidence_dir / "evidence-manifest.json").write_text(json.dumps(evidence_manifest, indent=2) + "\n")
 
+    def _preflight(self) -> None:
+        self._validate_frozen_inputs()
+        self._guard_existing_paths()
+        self._build_manifest()
+        identity = validate_identities(self.manifest)
+        if not identity.passed:
+            raise RuntimeError(f"Runtime identity preflight failed: {identity.details}")
+
+    def preflight(self) -> Dict[str, Any]:
+        try:
+            self._preflight()
+            return {"schema_version": "c01-preflight-v1", "run_id": self.run_id, "pass": True, "prompts_delivered": 0, "manifest": self.manifest}
+        except Exception as exc:
+            return {"schema_version": "c01-preflight-v1", "run_id": self.run_id, "pass": False, "prompts_delivered": 0, "exception": f"{type(exc).__name__}: {exc}", "manifest": self.manifest}
+
     def run(self) -> Dict[str, Any]:
         result: Dict[str, Any]
         try:
-            self._validate_frozen_inputs()
-            self._guard_existing_paths()
-            self._build_manifest()
-            identity = validate_identities(self.manifest)
-            if not identity.passed: raise RuntimeError(f"Runtime identity preflight failed: {identity.details}")
+            self._preflight()
             self.harvest_allowed = True
             self._materialize_workspace()
             command = build_pi_command(self.run_id, self.repetition, self.arm, self.workspace, self.sessions_dir)
@@ -757,9 +768,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--runner-sha256", required=True)
     parser.add_argument("--contract-sha256", required=True)
     parser.add_argument("--product-commit", required=True)
+    parser.add_argument("--preflight-only", action="store_true")
     args = parser.parse_args(argv)
     runner = C01Runner(args.checkpoint, args.cell, args.run_id, args.arm, args.repetition, args.addendum_commit, args.addendum_blob, args.addendum_sha256, args.runner_sha256, args.contract_sha256, args.product_commit)
-    result = runner.run(); print(json.dumps(result, indent=2, default=str))
+    result = runner.preflight() if args.preflight_only else runner.run(); print(json.dumps(result, indent=2, default=str))
     if result.get("pass") is True: return 0
     if result.get("harvest_error"): return 2
     infra = {f"C{i:02d}" for i in range(1, 13)} | {"C23"}

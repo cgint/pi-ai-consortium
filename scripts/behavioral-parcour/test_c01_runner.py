@@ -69,6 +69,20 @@ class C01RunnerTests(unittest.TestCase):
             else:
                 self.assertEqual({a["id"] for a in actions}, {"state_final", "entries_final", "stats_final", "text_final"})
 
+    def test_cli_preflight_only_never_calls_live_run(self):
+        argv = [
+            "--checkpoint", "pre-stage-c", "--cell", "A1", "--run-id", "c01-prestagec-a1-r1b",
+            "--arm", "active", "--repetition", "1", "--addendum-commit", "a" * 40,
+            "--addendum-blob", "b" * 40, "--addendum-sha256", "c" * 64,
+            "--runner-sha256", "d" * 64, "--contract-sha256", "e" * 64,
+            "--product-commit", "f" * 40, "--preflight-only",
+        ]
+        with patch.object(runner, "C01Runner") as mocked_runner:
+            mocked_runner.return_value.preflight.return_value = {"pass": True, "prompts_delivered": 0}
+            self.assertEqual(runner.main(argv), 0)
+        mocked_runner.return_value.preflight.assert_called_once_with()
+        mocked_runner.return_value.run.assert_not_called()
+
     def test_d1_zero_eligible_is_valid_per_run_fact(self):
         events = [{"type": "baseline_check", "baseline_available": False, "baseline_supplied": False}]
         check, facts = runner.d1_facts(events, "active")
@@ -136,6 +150,24 @@ class C01RunnerTests(unittest.TestCase):
         self.assertFalse(instance.tmp_root.exists())
         self.assertFalse(instance.evidence_dir.exists())
 
+    def test_preflight_only_passes_without_target_paths(self):
+        spec = runner.CELL_SPECS["A1"]
+        instance = runner.C01Runner("pre-stage-c", "A1", spec["run_id"], spec["arm"], spec["repetition"], "a" * 40, "b" * 40, "c" * 64, "d" * 64, "e" * 64, "f" * 40)
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            instance.tmp_root = root / "runtime"
+            instance.workspace = instance.tmp_root / "workspace"
+            instance.sessions_dir = instance.tmp_root / "sessions"
+            instance.runtime_root = instance.tmp_root
+            instance.evidence_dir = root / "evidence"
+            instance.manifest = {"identity_checks": {"pi_version": True, "node_version": True}}
+            with patch.object(instance, "_validate_frozen_inputs"), patch.object(instance, "_build_manifest", return_value=instance.manifest):
+                result = instance.preflight()
+            self.assertTrue(result["pass"])
+            self.assertEqual(result["prompts_delivered"], 0)
+            self.assertFalse(instance.tmp_root.exists())
+            self.assertFalse(instance.evidence_dir.exists())
+
     def test_runtime_preflight_failure_creates_no_target_paths(self):
         spec = runner.CELL_SPECS["A1"]
         instance = runner.C01Runner("pre-stage-c", "A1", spec["run_id"], spec["arm"], spec["repetition"], "a" * 40, "b" * 40, "c" * 64, "d" * 64, "e" * 64, "f" * 40)
@@ -146,7 +178,8 @@ class C01RunnerTests(unittest.TestCase):
             instance.sessions_dir = instance.tmp_root / "sessions"
             instance.runtime_root = instance.tmp_root
             instance.evidence_dir = root / "evidence"
-            with patch.object(instance, "_validate_frozen_inputs"), patch.object(instance, "_build_manifest", return_value={"identity_checks": {"pi_version": False}}):
+            instance.manifest = {"identity_checks": {"pi_version": False}}
+            with patch.object(instance, "_validate_frozen_inputs"), patch.object(instance, "_build_manifest", return_value=instance.manifest):
                 result = instance.run()
             self.assertFalse(result["pass"])
             self.assertFalse(instance.tmp_root.exists())
