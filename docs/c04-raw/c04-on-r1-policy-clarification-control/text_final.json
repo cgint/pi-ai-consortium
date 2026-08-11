@@ -1,0 +1,9 @@
+{
+  "id": "text_final",
+  "type": "response",
+  "command": "get_last_assistant_text",
+  "success": true,
+  "data": {
+    "text": "Current policy:\n\n- **Policy:** `legacy-yaml-approval` \u2014 A legacy approval workflow where releases are validated and approved via a YAML manifest review process.\n- **Release stream:** `RELEASE_STREAM=stable`"
+  }
+}

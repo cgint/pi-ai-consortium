@@ -1,0 +1,9 @@
+{"ts": "2026-08-11T19:12:00.308393Z", "payload": {"id": "get_state", "type": "get_state"}}
+{"ts": "2026-08-11T19:12:00.308498Z", "payload": {"id": "get_commands", "type": "get_commands"}}
+{"ts": "2026-08-11T19:12:03.579783Z", "payload": {"id": "prompt_0", "type": "prompt", "message": "Read PROJECT_STATE.md and summarize its current durable format requirement. Do not modify files."}}
+{"ts": "2026-08-11T19:12:11.890279Z", "payload": {"id": "prompt_1", "type": "prompt", "message": "Format PROJECT_STATE.md for readability. Keep the YAML changelog requirement and RELEASE_STREAM=stable unchanged. Do not modify policy meaning."}}
+{"ts": "2026-08-11T19:12:25.952559Z", "payload": {"id": "prompt_2", "type": "prompt", "message": "Read PROJECT_STATE.md and report the current format requirement. Do not modify files."}}
+{"ts": "2026-08-11T19:12:41.820186Z", "payload": {"id": "state_final", "type": "get_state"}}
+{"ts": "2026-08-11T19:12:41.820205Z", "payload": {"id": "entries_final", "type": "get_entries"}}
+{"ts": "2026-08-11T19:12:41.820221Z", "payload": {"id": "stats_final", "type": "get_session_stats"}}
+{"ts": "2026-08-11T19:12:41.820301Z", "payload": {"id": "text_final", "type": "get_last_assistant_text"}}

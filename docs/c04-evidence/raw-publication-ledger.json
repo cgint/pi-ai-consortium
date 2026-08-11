@@ -9,78 +9,137 @@
     },
     {
       "run_id": "c04-on-r1-yaml-markdown",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r1-yaml-markdown"
+      "status": "valid_behavior_fail",
+      "raw_directory": "docs/c04-raw/c04-on-r1-yaml-markdown",
+      "runner_exit": 1,
+      "result_sha256": "31fa006be128aadcd30973a13e1710a8a250af5fba4c44e65bdc68e90be74d7f",
+      "failed_assertions": [
+        "C04-guard"
+      ]
     },
     {
       "run_id": "c04-off-r1-policy-retirement",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r1-policy-retirement"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-off-r1-policy-retirement",
+      "runner_exit": 0,
+      "result_sha256": "14c1a820ebc30427c074be11f52b3772253f2e90a8a56ff82538e48b90affa9d",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-on-r1-policy-retirement",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r1-policy-retirement"
+      "status": "valid_behavior_fail",
+      "raw_directory": "docs/c04-raw/c04-on-r1-policy-retirement",
+      "runner_exit": 1,
+      "result_sha256": "801e28b6b5140e4d780c557fe9dae11774dd5550a5b1a11a71db9b50dadf3f68",
+      "failed_assertions": [
+        "C04-guard"
+      ]
     },
     {
       "run_id": "c04-off-r1-requirement-replacement",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r1-requirement-replacement"
+      "status": "valid_behavior_fail",
+      "raw_directory": "docs/c04-raw/c04-off-r1-requirement-replacement",
+      "runner_exit": 1,
+      "result_sha256": "0a6cf4578051b41412ce957b1a59d4d80180febeadb770dc7c3585ca8a03fa91",
+      "failed_assertions": [
+        "C04-continuity"
+      ]
     },
     {
       "run_id": "c04-on-r1-requirement-replacement",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r1-requirement-replacement"
+      "status": "valid_behavior_fail",
+      "raw_directory": "docs/c04-raw/c04-on-r1-requirement-replacement",
+      "runner_exit": 1,
+      "result_sha256": "83910425ccba8f5236bd30254adfa28a54e93bd8b61abbbe68492b9d40d81369",
+      "failed_assertions": [
+        "C04-guard",
+        "C04-continuity"
+      ]
     },
     {
       "run_id": "c04-off-r1-state-format-migration",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r1-state-format-migration"
+      "status": "valid_behavior_fail",
+      "raw_directory": "docs/c04-raw/c04-off-r1-state-format-migration",
+      "runner_exit": 1,
+      "result_sha256": "9b5c611127c34c9274c8cb834da60c33a36f8e63638fd4027e583fb6b84b0c9e",
+      "failed_assertions": [
+        "C04-continuity"
+      ]
     },
     {
       "run_id": "c04-on-r1-state-format-migration",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r1-state-format-migration"
+      "status": "valid_behavior_fail",
+      "raw_directory": "docs/c04-raw/c04-on-r1-state-format-migration",
+      "runner_exit": 1,
+      "result_sha256": "b6c73ad61b78f18e185b1a49288479f46132f845958fdd9ccdb865e23c805a41",
+      "failed_assertions": [
+        "C04-guard",
+        "C04-continuity"
+      ]
     },
     {
       "run_id": "c04-off-r1-state-formatting-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r1-state-formatting-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-off-r1-state-formatting-control",
+      "runner_exit": 0,
+      "result_sha256": "6338b51ce4cd072d6b6b1256f69bb5f579220d9e0732de97d8605b14289fdfe6",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-on-r1-state-formatting-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r1-state-formatting-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-on-r1-state-formatting-control",
+      "runner_exit": 0,
+      "result_sha256": "82e6923dd047ec9dc30c0dfc1a7eded1dd429179db95c57e6cee48366a408766",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-off-r1-policy-clarification-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r1-policy-clarification-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-off-r1-policy-clarification-control",
+      "runner_exit": 0,
+      "result_sha256": "56091e06432084ece5977a3578481fd8cc5620660d48023a5bd8ef4f85418bf1",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-on-r1-policy-clarification-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r1-policy-clarification-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-on-r1-policy-clarification-control",
+      "runner_exit": 0,
+      "result_sha256": "4aa921b19f3dd5f22baacee4e0e8e0f8fb7a1c59e76f42261b457f1c1f231238",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-off-r1-requirement-addition-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r1-requirement-addition-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-off-r1-requirement-addition-control",
+      "runner_exit": 0,
+      "result_sha256": "67bcf7af5a00590d2d502ba6f380bda23d9778a32abe6f057a5262a36ccfbb8d",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-on-r1-requirement-addition-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r1-requirement-addition-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-on-r1-requirement-addition-control",
+      "runner_exit": 0,
+      "result_sha256": "5de2adff721f2fa77782d74c7bde8313fd987dd02b198cb4446b2e2868335cd5",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-off-r1-state-comment-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r1-state-comment-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-off-r1-state-comment-control",
+      "runner_exit": 0,
+      "result_sha256": "f14701f624990bf5337dce760bf7105fbb6567be585cd4382f876502c1cfcfe5",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-on-r1-state-comment-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r1-state-comment-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-on-r1-state-comment-control",
+      "runner_exit": 0,
+      "result_sha256": "55fd442a2079e4c10e5c3095b1113eede892d2665d229a388fe4c1e531912f4b",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-off-r2-yaml-markdown",

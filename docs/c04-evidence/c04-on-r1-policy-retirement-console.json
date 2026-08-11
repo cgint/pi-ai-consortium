@@ -1,0 +1,231 @@
+{
+  "schema_version": "c04-run-result-v1",
+  "run_id": "c04-on-r1-policy-retirement",
+  "arm": "on",
+  "repetition": 1,
+  "fixture_id": "policy-retirement",
+  "fixture_kind": "positive",
+  "pass": false,
+  "process_returncode": 0,
+  "wall_clock_ms": 47705.5,
+  "prompts_delivered": 3,
+  "exception": null,
+  "assertions": [
+    {
+      "id": "C04-process",
+      "requirement": "returncode=0",
+      "pass": true,
+      "details": "returncode=0",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C04-process"
+        }
+      ]
+    },
+    {
+      "id": "C04-executor-provider",
+      "requirement": "initial=8081-twins; final=8081-twins",
+      "pass": true,
+      "details": "initial=8081-twins; final=8081-twins",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C04-executor-provider"
+        }
+      ]
+    },
+    {
+      "id": "C04-executor-model",
+      "requirement": "initial=qwen36-27b-nvidia-nvfp4; final=qwen36-27b-nvidia-nvfp4",
+      "pass": true,
+      "details": "initial=qwen36-27b-nvidia-nvfp4; final=qwen36-27b-nvidia-nvfp4",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C04-executor-model"
+        }
+      ]
+    },
+    {
+      "id": "C04-executor-thinking",
+      "requirement": "initial=off; final=off",
+      "pass": true,
+      "details": "initial=off; final=off",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C04-executor-thinking"
+        }
+      ]
+    },
+    {
+      "id": "C04-prompts",
+      "requirement": "count=3",
+      "pass": true,
+      "details": "count=3",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C04-prompts"
+        }
+      ]
+    },
+    {
+      "id": "C04-protocol",
+      "requirement": "errors=[]",
+      "pass": true,
+      "details": "errors=[]",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C04-protocol"
+        }
+      ]
+    },
+    {
+      "id": "C04-preflight-identities",
+      "requirement": "checks={'contract_nonempty': True, 'review_identity_and_verdict': True, 'review_after_freeze_before_preflight': True, 'captured_state_schema': True, 'pi_version': True, 'node_version': True, 'executor_provider': True, 'executor_model': True, 'executor_thinking': True, 'effective_consortium_model': True, 'extension_order': True, 'publication_ledger': True, 'workspace_guard_setting': True}",
+      "pass": true,
+      "details": "checks={'contract_nonempty': True, 'review_identity_and_verdict': True, 'review_after_freeze_before_preflight': True, 'captured_state_schema': True, 'pi_version': True, 'node_version': True, 'executor_provider': True, 'executor_model': True, 'executor_thinking': True, 'effective_consortium_model': True, 'extension_order': True, 'publication_ledger': True, 'workspace_guard_setting': True}",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C04-preflight-identities"
+        }
+      ]
+    },
+    {
+      "id": "C04-trace-identity",
+      "requirement": "starts=6; models=['8081-twins/qwen36-27b-nvidia-nvfp4']; sources=['CONSORTIUM_MODEL']",
+      "pass": true,
+      "details": "starts=6; models=['8081-twins/qwen36-27b-nvidia-nvfp4']; sources=['CONSORTIUM_MODEL']",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C04-trace-identity"
+        }
+      ]
+    },
+    {
+      "id": "C04-guard",
+      "requirement": "expected=True; observed=False",
+      "pass": false,
+      "details": "expected=True; observed=False",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C04-guard"
+        }
+      ]
+    },
+    {
+      "id": "C04-continuity",
+      "requirement": "positive=True; continuity=True",
+      "pass": true,
+      "details": "positive=True; continuity=True",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C04-continuity"
+        }
+      ]
+    }
+  ],
+  "c04": {
+    "guard_fired": false,
+    "continuity_passes": true,
+    "tool_call_count": 3
+  },
+  "manifest": {
+    "schema_version": "c04-run-manifest-v1",
+    "run_id": "c04-on-r1-policy-retirement",
+    "arm": "on",
+    "repetition": 1,
+    "fixture_id": "policy-retirement",
+    "fixture_kind": "positive",
+    "started_at": "2026-08-11T19:06:53.718097+00:00",
+    "workspace": "/tmp/parcour-c04-on-r1-policy-retirement/workspace",
+    "runtime_root": "/tmp/parcour-c04-on-r1-policy-retirement",
+    "argv": [
+      "pi",
+      "--mode",
+      "rpc",
+      "--no-context-files",
+      "--no-skills",
+      "--no-prompt-templates",
+      "--no-extensions",
+      "--tools",
+      "read,edit,grep,find,ls",
+      "-e",
+      "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-olla-autodetect/index.ts",
+      "-e",
+      "/Users/cgint/dev-external/pi-ai-consortium/index.ts",
+      "-e",
+      "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-focus-guard/index.ts",
+      "--provider",
+      "8081-twins",
+      "--model",
+      "qwen36-27b-nvidia-nvfp4",
+      "--thinking",
+      "off",
+      "--dm-off",
+      "--write-guard",
+      "/tmp/parcour-c04-on-r1-policy-retirement/workspace",
+      "--approve",
+      "--session-dir",
+      "/tmp/parcour-c04-on-r1-policy-retirement/sessions",
+      "--name",
+      "c04-on-r1-policy-retirement"
+    ],
+    "expected": {
+      "freeze_commit": "c07bf194c3d0bb161802e6223283549d02976ff5",
+      "runner_sha256": "d3c057a522298eb4607fc2828b35d2caf99b38923617787c148a8135ed416168",
+      "corpus_sha256": "79d36d10ac7d7428d6b37373f54033c72878172d622b9e4a4f16d095a3448974",
+      "contract_sha256": "863ae128752097fbc4edd2be7355fe5d4d35ad03d6cb37b19fe30e943ed28d4b",
+      "review_session_sha256": "1bf20e0ffa4c56efd37888297e3103e963ded5efb4c2c13f87ad67a6b3b55df4"
+    },
+    "runtime_versions": {
+      "pi_cli": {
+        "command": [
+          "pi",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "0.84.1\n"
+      },
+      "node_cli": {
+        "command": [
+          "node",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "v22.23.2\n"
+      }
+    },
+    "child_environment": {
+      "CONSORTIUM_MODEL": "8081-twins/qwen36-27b-nvidia-nvfp4",
+      "PI_SKIP_VERSION_CHECK": "1"
+    },
+    "identity_checks": {
+      "contract_nonempty": true,
+      "review_identity_and_verdict": true,
+      "review_after_freeze_before_preflight": true,
+      "captured_state_schema": true,
+      "pi_version": true,
+      "node_version": true,
+      "executor_provider": true,
+      "executor_model": true,
+      "executor_thinking": true,
+      "effective_consortium_model": true,
+      "extension_order": true,
+      "publication_ledger": true,
+      "workspace_guard_setting": true
+    },
+    "workspace_guard_setting": true,
+    "ended_at": "2026-08-11T19:07:41.431125+00:00",
+    "wall_clock_ms": 47705.5,
+    "process_returncode": 0,
+    "live_boundary_timestamp": "2026-08-11T19:06:59.268247+00:00"
+  }
+}

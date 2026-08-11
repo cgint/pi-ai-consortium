@@ -1,0 +1,7 @@
+{
+  "consortium": {
+    "enabled": true,
+    "governorMode": "smart_extractor",
+    "stateSupersessionGuard": false
+  }
+}

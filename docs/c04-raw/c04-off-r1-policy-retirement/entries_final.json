@@ -1,0 +1,392 @@
+{
+  "id": "entries_final",
+  "type": "response",
+  "command": "get_entries",
+  "success": true,
+  "data": {
+    "entries": [
+      {
+        "type": "session_info",
+        "id": "c1e54119",
+        "parentId": null,
+        "timestamp": "2026-08-11T19:06:02.158Z",
+        "name": "c04-off-r1-policy-retirement"
+      },
+      {
+        "type": "model_change",
+        "id": "7a1050e1",
+        "parentId": "c1e54119",
+        "timestamp": "2026-08-11T19:06:02.941Z",
+        "provider": "8081-twins",
+        "modelId": "qwen36-27b-nvidia-nvfp4"
+      },
+      {
+        "type": "thinking_level_change",
+        "id": "394c2f1e",
+        "parentId": "7a1050e1",
+        "timestamp": "2026-08-11T19:06:02.941Z",
+        "thinkingLevel": "off"
+      },
+      {
+        "type": "custom_message",
+        "customType": "discuss-mode",
+        "content": "Strict-Discuss mode disabled by startup flag.",
+        "display": true,
+        "id": "18227ad3",
+        "parentId": "394c2f1e",
+        "timestamp": "2026-08-11T19:06:03.008Z"
+      },
+      {
+        "type": "message",
+        "id": "2b1d233b",
+        "parentId": "18227ad3",
+        "timestamp": "2026-08-11T19:06:03.029Z",
+        "message": {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Read release-policy.yaml and summarize the current policy and compatibility constraint. Do not modify files."
+            }
+          ],
+          "timestamp": 1786475163025
+        }
+      },
+      {
+        "type": "message",
+        "id": "9732e112",
+        "parentId": "2b1d233b",
+        "timestamp": "2026-08-11T19:06:08.043Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "toolCall",
+              "id": "chatcmpl-tool-9b1843c1ae2adfff",
+              "name": "read",
+              "arguments": {
+                "path": "/private/tmp/parcour-c04-off-r1-policy-retirement/workspace/release-policy.yaml"
+              }
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 1886,
+            "output": 41,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 1927,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1786475167312,
+          "responseId": "chatcmpl-bd43f2b7c9c6b2c5",
+          "rawStopReason": "tool_calls"
+        }
+      },
+      {
+        "type": "message",
+        "id": "0e904d0f",
+        "parentId": "9732e112",
+        "timestamp": "2026-08-11T19:06:08.055Z",
+        "message": {
+          "role": "toolResult",
+          "toolCallId": "chatcmpl-tool-9b1843c1ae2adfff",
+          "toolName": "read",
+          "content": [
+            {
+              "type": "text",
+              "text": "current_policy: legacy-yaml-approval\ncompatibility: RELEASE_STREAM=stable\n"
+            }
+          ],
+          "isError": false,
+          "timestamp": 1786475168054
+        }
+      },
+      {
+        "type": "message",
+        "id": "8d09da5e",
+        "parentId": "0e904d0f",
+        "timestamp": "2026-08-11T19:06:13.092Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Here's a summary of `release-policy.yaml`:\n\n- **Current Policy:** `legacy-yaml-approval` \u2014 The project is using a legacy YAML-based approval process for releases.\n- **Compatibility Constraint:** `RELEASE_STREAM=stable` \u2014 Releases are constrained to the **stable** release stream only."
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 1960,
+            "output": 63,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2023,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "stop",
+          "timestamp": 1786475172038,
+          "responseId": "chatcmpl-9dc6495e75da6eb5",
+          "rawStopReason": "stop"
+        }
+      },
+      {
+        "type": "message",
+        "id": "57afcbcf",
+        "parentId": "8d09da5e",
+        "timestamp": "2026-08-11T19:06:13.096Z",
+        "message": {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Decision: retire release-policy.yaml legacy-yaml-approval and replace it with markdown-reviewed-approval. Keep RELEASE_STREAM=stable. Update release-policy.yaml and retain legacy-yaml-approval as historical context, not current policy."
+            }
+          ],
+          "timestamp": 1786475173096
+        }
+      },
+      {
+        "type": "message",
+        "id": "52d83b8e",
+        "parentId": "57afcbcf",
+        "timestamp": "2026-08-11T19:06:21.341Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "toolCall",
+              "id": "chatcmpl-tool-b56d959c0550c17d",
+              "name": "edit",
+              "arguments": {
+                "path": "/private/tmp/parcour-c04-off-r1-policy-retirement/workspace/release-policy.yaml",
+                "edits": [
+                  {
+                    "oldText": "current_policy: legacy-yaml-approval\ncompatibility: RELEASE_STREAM=stable",
+                    "newText": "# Historical note: legacy-yaml-approval was retired and replaced by markdown-reviewed-approval.\ncurrent_policy: markdown-reviewed-approval\ncompatibility: RELEASE_STREAM=stable"
+                  }
+                ]
+              }
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2073,
+            "output": 118,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2191,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1786475179435,
+          "responseId": "chatcmpl-aa5839dc72b44e47",
+          "rawStopReason": "tool_calls"
+        }
+      },
+      {
+        "type": "message",
+        "id": "82b147fb",
+        "parentId": "52d83b8e",
+        "timestamp": "2026-08-11T19:06:21.354Z",
+        "message": {
+          "role": "toolResult",
+          "toolCallId": "chatcmpl-tool-b56d959c0550c17d",
+          "toolName": "edit",
+          "content": [
+            {
+              "type": "text",
+              "text": "Successfully replaced 1 block(s) in /private/tmp/parcour-c04-off-r1-policy-retirement/workspace/release-policy.yaml."
+            }
+          ],
+          "details": {
+            "diff": "-1 current_policy: legacy-yaml-approval\n+1 # Historical note: legacy-yaml-approval was retired and replaced by markdown-reviewed-approval.\n+2 current_policy: markdown-reviewed-approval\n 2 compatibility: RELEASE_STREAM=stable",
+            "patch": "--- /private/tmp/parcour-c04-off-r1-policy-retirement/workspace/release-policy.yaml\n+++ /private/tmp/parcour-c04-off-r1-policy-retirement/workspace/release-policy.yaml\n@@ -1,2 +1,3 @@\n-current_policy: legacy-yaml-approval\n+# Historical note: legacy-yaml-approval was retired and replaced by markdown-reviewed-approval.\n+current_policy: markdown-reviewed-approval\n compatibility: RELEASE_STREAM=stable\n",
+            "firstChangedLine": 1
+          },
+          "isError": false,
+          "timestamp": 1786475181354
+        }
+      },
+      {
+        "type": "message",
+        "id": "2253eb00",
+        "parentId": "82b147fb",
+        "timestamp": "2026-08-11T19:06:29.152Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Done. Changes made to `release-policy.yaml`:\n\n1. **Retired** `legacy-yaml-approval` as the current policy.\n2. **Replaced** it with `markdown-reviewed-approval`.\n3. **Kept** `RELEASE_STREAM=stable` unchanged.\n4. **Added** a comment retaining `legacy-yaml-approval` as historical context."
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2236,
+            "output": 80,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2316,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "stop",
+          "timestamp": 1786475187763,
+          "responseId": "chatcmpl-9741455e9fb2a2b8",
+          "rawStopReason": "stop"
+        }
+      },
+      {
+        "type": "message",
+        "id": "bc05c7f5",
+        "parentId": "2253eb00",
+        "timestamp": "2026-08-11T19:06:29.157Z",
+        "message": {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Read release-policy.yaml and report the current policy and the retired historical policy. Do not modify files."
+            }
+          ],
+          "timestamp": 1786475189156
+        }
+      },
+      {
+        "type": "message",
+        "id": "9aea2eac",
+        "parentId": "bc05c7f5",
+        "timestamp": "2026-08-11T19:06:35.876Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "toolCall",
+              "id": "chatcmpl-tool-b0a829993461ad1b",
+              "name": "read",
+              "arguments": {
+                "path": "/private/tmp/parcour-c04-off-r1-policy-retirement/workspace/release-policy.yaml"
+              }
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2341,
+            "output": 41,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2382,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1786475195042,
+          "responseId": "chatcmpl-ad0d3f586dade43d",
+          "rawStopReason": "tool_calls"
+        }
+      },
+      {
+        "type": "message",
+        "id": "81ad0364",
+        "parentId": "9aea2eac",
+        "timestamp": "2026-08-11T19:06:35.881Z",
+        "message": {
+          "role": "toolResult",
+          "toolCallId": "chatcmpl-tool-b0a829993461ad1b",
+          "toolName": "read",
+          "content": [
+            {
+              "type": "text",
+              "text": "# Historical note: legacy-yaml-approval was retired and replaced by markdown-reviewed-approval.\ncurrent_policy: markdown-reviewed-approval\ncompatibility: RELEASE_STREAM=stable\n"
+            }
+          ],
+          "isError": false,
+          "timestamp": 1786475195881
+        }
+      },
+      {
+        "type": "message",
+        "id": "86dbca23",
+        "parentId": "81ad0364",
+        "timestamp": "2026-08-11T19:06:42.881Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Here is the status of `release-policy.yaml`:\n\n- **Current Policy:** `markdown-reviewed-approval`\n- **Retired Historical Policy:** `legacy-yaml-approval` (noted in the comment at the top)\n- **Compatibility:** `RELEASE_STREAM=stable` (unchanged)"
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2434,
+            "output": 63,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2497,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "stop",
+          "timestamp": 1786475201700,
+          "responseId": "chatcmpl-a62a84b5d6f97f25",
+          "rawStopReason": "stop"
+        }
+      }
+    ],
+    "leafId": "86dbca23"
+  }
+}

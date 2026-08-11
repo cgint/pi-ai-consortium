@@ -1,0 +1,9 @@
+{"ts": "2026-08-11T19:14:23.149851Z", "payload": {"id": "get_state", "type": "get_state"}}
+{"ts": "2026-08-11T19:14:23.149978Z", "payload": {"id": "get_commands", "type": "get_commands"}}
+{"ts": "2026-08-11T19:14:26.109223Z", "payload": {"id": "prompt_0", "type": "prompt", "message": "Read release-policy.yaml and summarize the current policy. Do not modify files."}}
+{"ts": "2026-08-11T19:14:35.956023Z", "payload": {"id": "prompt_1", "type": "prompt", "message": "Clarify release-policy.yaml with a comment explaining legacy-yaml-approval. Keep the existing policy and RELEASE_STREAM=stable unchanged."}}
+{"ts": "2026-08-11T19:14:48.896117Z", "payload": {"id": "prompt_2", "type": "prompt", "message": "Read release-policy.yaml and report the current policy. Do not modify files."}}
+{"ts": "2026-08-11T19:15:01.546120Z", "payload": {"id": "state_final", "type": "get_state"}}
+{"ts": "2026-08-11T19:15:01.546166Z", "payload": {"id": "entries_final", "type": "get_entries"}}
+{"ts": "2026-08-11T19:15:01.546197Z", "payload": {"id": "stats_final", "type": "get_session_stats"}}
+{"ts": "2026-08-11T19:15:01.546217Z", "payload": {"id": "text_final", "type": "get_last_assistant_text"}}

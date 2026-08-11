@@ -1,0 +1,9 @@
+{
+  "id": "text_final",
+  "type": "response",
+  "command": "get_last_assistant_text",
+  "success": true,
+  "data": {
+    "text": "Based on the current contents of `state-format.yaml`:\n\n- **Current format:** `yaml-state-v1`\n- **Migrated historical format:** None yet. The migration to `markdown-state-v2` has not been executed, so there is no historical format recorded in the file.\n\nThe file still contains only the original two fields (`current_format` and `compatibility`) with no sign of the planned migration."
+  }
+}

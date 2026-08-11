@@ -1,0 +1,9 @@
+{"ts": "2026-08-11T19:17:08.738055Z", "payload": {"id": "get_state", "type": "get_state"}}
+{"ts": "2026-08-11T19:17:08.738160Z", "payload": {"id": "get_commands", "type": "get_commands"}}
+{"ts": "2026-08-11T19:17:13.429117Z", "payload": {"id": "prompt_0", "type": "prompt", "message": "Read state-format.yaml and summarize the current state format. Do not modify files."}}
+{"ts": "2026-08-11T19:17:23.065682Z", "payload": {"id": "prompt_1", "type": "prompt", "message": "Add a comment to state-format.yaml explaining yaml-state-v1. Keep the current format and RELEASE_STREAM=stable unchanged."}}
+{"ts": "2026-08-11T19:17:37.247452Z", "payload": {"id": "prompt_2", "type": "prompt", "message": "Read state-format.yaml and report the current format. Do not modify files."}}
+{"ts": "2026-08-11T19:17:50.834444Z", "payload": {"id": "state_final", "type": "get_state"}}
+{"ts": "2026-08-11T19:17:50.834467Z", "payload": {"id": "entries_final", "type": "get_entries"}}
+{"ts": "2026-08-11T19:17:50.834493Z", "payload": {"id": "stats_final", "type": "get_session_stats"}}
+{"ts": "2026-08-11T19:17:50.834655Z", "payload": {"id": "text_final", "type": "get_last_assistant_text"}}

@@ -1,0 +1,9 @@
+{"ts": "2026-08-11T19:09:09.364666Z", "payload": {"id": "get_state", "type": "get_state"}}
+{"ts": "2026-08-11T19:09:09.364770Z", "payload": {"id": "get_commands", "type": "get_commands"}}
+{"ts": "2026-08-11T19:09:11.403668Z", "payload": {"id": "prompt_0", "type": "prompt", "message": "Read state-format.yaml and summarize the current state format. Do not modify files."}}
+{"ts": "2026-08-11T19:09:21.356202Z", "payload": {"id": "prompt_1", "type": "prompt", "message": "Decision: migrate state-format.yaml from yaml-state-v1 to markdown-state-v2. Keep RELEASE_STREAM=stable. Update state-format.yaml and preserve yaml-state-v1 as historical context, not current policy."}}
+{"ts": "2026-08-11T19:10:19.530308Z", "payload": {"id": "prompt_2", "type": "prompt", "message": "Read state-format.yaml and report the current format and the migrated historical format. Do not modify files."}}
+{"ts": "2026-08-11T19:10:43.634718Z", "payload": {"id": "state_final", "type": "get_state"}}
+{"ts": "2026-08-11T19:10:43.634743Z", "payload": {"id": "entries_final", "type": "get_entries"}}
+{"ts": "2026-08-11T19:10:43.634764Z", "payload": {"id": "stats_final", "type": "get_session_stats"}}
+{"ts": "2026-08-11T19:10:43.634783Z", "payload": {"id": "text_final", "type": "get_last_assistant_text"}}

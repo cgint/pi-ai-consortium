@@ -1,0 +1,9 @@
+{
+  "id": "text_final",
+  "type": "response",
+  "command": "get_last_assistant_text",
+  "success": true,
+  "data": {
+    "text": "The current policy remains unchanged:\n\n- **Policy:** `legacy-yaml-approval` \u2014 a legacy release gate requiring manual sign-off via YAML configuration review before promoting a build to production (human-in-the-loop check for every release candidate).\n- **Release stream:** `RELEASE_STREAM=stable`"
+  }
+}

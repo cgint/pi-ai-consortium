@@ -1,0 +1,45 @@
+{
+  "id": "state_final",
+  "type": "response",
+  "command": "get_state",
+  "success": true,
+  "data": {
+    "model": {
+      "id": "qwen36-27b-nvidia-nvfp4",
+      "name": "qwen36-27b-nvidia-nvfp4",
+      "api": "openai-completions",
+      "provider": "8081-twins",
+      "baseUrl": "http://twins:8081/v1",
+      "reasoning": true,
+      "thinkingLevelMap": {
+        "off": "none"
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "contextWindow": 262144,
+      "maxTokens": 32768,
+      "compat": {
+        "thinkingFormat": "openai"
+      }
+    },
+    "thinkingLevel": "off",
+    "isStreaming": false,
+    "isCompacting": false,
+    "steeringMode": "one-at-a-time",
+    "followUpMode": "one-at-a-time",
+    "sessionFile": "/tmp/parcour-c04-on-r1-policy-retirement/sessions/2026-08-11T19-06-58-283Z_019ff238-856b-786f-909d-9d753a55e4d2.jsonl",
+    "sessionId": "019ff238-856b-786f-909d-9d753a55e4d2",
+    "sessionName": "c04-on-r1-policy-retirement",
+    "autoCompactionEnabled": true,
+    "messageCount": 13,
+    "pendingMessageCount": 0
+  }
+}

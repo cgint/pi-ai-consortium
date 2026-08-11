@@ -1,0 +1,5 @@
+# legacy-yaml-approval: A legacy release gate that requires manual sign-off
+# via YAML configuration review before a build is promoted to production.
+# This ensures a human-in-the-loop check for every release candidate.
+current_policy: legacy-yaml-approval
+compatibility: RELEASE_STREAM=stable

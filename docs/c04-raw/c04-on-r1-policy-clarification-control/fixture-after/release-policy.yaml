@@ -1,0 +1,4 @@
+# legacy-yaml-approval: A legacy approval workflow where releases are
+# validated and approved via a YAML manifest review process.
+current_policy: legacy-yaml-approval
+compatibility: RELEASE_STREAM=stable

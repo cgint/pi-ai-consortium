@@ -1,0 +1,5 @@
+# yaml-state-v1: Initial YAML-based state format used for serializing agent runtime state.
+# It provides a human-readable, structured representation of conversation history,
+# tool call results, and internal agent context for debugging and reproducibility.
+current_format: yaml-state-v1
+compatibility: RELEASE_STREAM=stable

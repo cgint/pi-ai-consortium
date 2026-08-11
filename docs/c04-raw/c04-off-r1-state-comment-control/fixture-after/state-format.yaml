@@ -1,0 +1,4 @@
+# yaml-state-v1 is the current YAML-based state representation format.
+# It defines how application state is serialized and persisted.
+current_format: yaml-state-v1
+compatibility: RELEASE_STREAM=stable

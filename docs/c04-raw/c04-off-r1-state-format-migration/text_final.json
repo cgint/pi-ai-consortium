@@ -1,0 +1,9 @@
+{
+  "id": "text_final",
+  "type": "response",
+  "command": "get_last_assistant_text",
+  "success": true,
+  "data": {
+    "text": "Based on the current contents of `state-format.yaml`:\n\n- **Current format:** `yaml-state-v1`\n- **Historical/migrated formats:** None recorded \u2014 the file has no history, previous versions, or migration metadata. It only declares the active format.\n\nThere is no evidence of a prior migration or any archived format in this file."
+  }
+}
