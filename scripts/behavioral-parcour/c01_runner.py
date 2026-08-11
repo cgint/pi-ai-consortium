@@ -34,7 +34,7 @@ TEMPLATE_DIR = REPO_ROOT / ".parcour-runs-templates" / "c01-revision-continuity"
 TEMPLATE_WORKSPACE = TEMPLATE_DIR / "workspace"
 TEMPLATE_META = TEMPLATE_DIR / "parcour.json"
 CONTRACT_MANIFEST = HERE / "c01-contract-files.json"
-ADDENDUM_PATH = "docs/behavioral-preregistration-2026-07-31.md"
+ADDENDUM_PATH = "docs/behavioral-preregistration-2026-08-11-v9.md"
 SCENARIO_PATH = "experiments/scenarios/c01-revision-continuity.md"
 
 SCENARIO_BLOB = "76b8da0f4f7d3796e7bbda006946e69180a1f1e4"
@@ -720,11 +720,11 @@ class C01Runner(p.Phase05Runner):
         try:
             self._validate_frozen_inputs()
             self._guard_existing_paths()
-            self.harvest_allowed = True
-            self._materialize_workspace()
             self._build_manifest()
             identity = validate_identities(self.manifest)
-            if not identity.passed: raise RuntimeError(identity.details)
+            if not identity.passed: raise RuntimeError(f"Runtime identity preflight failed: {identity.details}")
+            self.harvest_allowed = True
+            self._materialize_workspace()
             command = build_pi_command(self.run_id, self.repetition, self.arm, self.workspace, self.sessions_dir)
             stderr = self.tmp_root / "rpc-stderr.log"; rpc_log = self.tmp_root / "rpc-events.jsonl"
             started = time.monotonic(); proc = self._spawn_pi(command, stderr)

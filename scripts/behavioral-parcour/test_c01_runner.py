@@ -5,6 +5,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
@@ -25,6 +26,7 @@ class C01RunnerTests(unittest.TestCase):
 
     def test_amended_a1_replacement_and_runtime_contract(self):
         self.assertEqual(runner.CELL_SPECS["A1"]["run_id"], "c01-prestagec-a1-r1b")
+        self.assertEqual(runner.ADDENDUM_PATH, "docs/behavioral-preregistration-2026-08-11-v9.md")
         self.assertEqual(runner.C01_PI_VERSION, "0.84.1")
         self.assertTrue(runner.is_allowed_c01_node_version("v22.23.1"))
         self.assertTrue(runner.is_allowed_c01_node_version("v22.23.2"))
@@ -133,6 +135,22 @@ class C01RunnerTests(unittest.TestCase):
         self.assertEqual(result["prompts_delivered"], 0)
         self.assertFalse(instance.tmp_root.exists())
         self.assertFalse(instance.evidence_dir.exists())
+
+    def test_runtime_preflight_failure_creates_no_target_paths(self):
+        spec = runner.CELL_SPECS["A1"]
+        instance = runner.C01Runner("pre-stage-c", "A1", spec["run_id"], spec["arm"], spec["repetition"], "a" * 40, "b" * 40, "c" * 64, "d" * 64, "e" * 64, "f" * 40)
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            instance.tmp_root = root / "runtime"
+            instance.workspace = instance.tmp_root / "workspace"
+            instance.sessions_dir = instance.tmp_root / "sessions"
+            instance.runtime_root = instance.tmp_root
+            instance.evidence_dir = root / "evidence"
+            with patch.object(instance, "_validate_frozen_inputs"), patch.object(instance, "_build_manifest", return_value={"identity_checks": {"pi_version": False}}):
+                result = instance.run()
+            self.assertFalse(result["pass"])
+            self.assertFalse(instance.tmp_root.exists())
+            self.assertFalse(instance.evidence_dir.exists())
 
     def test_cell_not_in_checkpoint_schedule_fails_before_identity_resolution(self):
         instance = runner.C01Runner("post-stage-d", "D1", "c01-poststaged-d1-r1", "disabled", 1, "a" * 40, "b" * 40, "c" * 64, "d" * 64, "e" * 64, "f" * 40)
