@@ -3,8 +3,9 @@
   "runs": [
     {
       "run_id": "c02-off-r1-yaml-markdown",
-      "status": "unconsumed",
-      "raw_directory": "docs/c02-raw/c02-off-r1-yaml-markdown"
+      "status": "identity_invalid_consumed",
+      "raw_directory": "docs/c02-raw/c02-off-r1-yaml-markdown",
+      "reason": "consortium trace resolved google/gemini-3.5-flash from CONSORTIUM_MODEL"
     },
     {
       "run_id": "c02-on-r1-yaml-markdown",

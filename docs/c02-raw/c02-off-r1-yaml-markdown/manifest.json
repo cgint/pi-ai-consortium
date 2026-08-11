@@ -1,0 +1,95 @@
+{
+  "schema_version": "c02-run-manifest-v1",
+  "run_id": "c02-off-r1-yaml-markdown",
+  "arm": "off",
+  "repetition": 1,
+  "fixture_id": "yaml-markdown",
+  "fixture_kind": "positive",
+  "started_at": "2026-08-11T18:07:35.373358Z",
+  "workspace": "/tmp/parcour-c02-off-r1-yaml-markdown/workspace",
+  "runtime_root": "/tmp/parcour-c02-off-r1-yaml-markdown",
+  "argv": [
+    "pi",
+    "--mode",
+    "rpc",
+    "--no-context-files",
+    "--no-skills",
+    "--no-prompt-templates",
+    "--no-extensions",
+    "--tools",
+    "read,edit,grep,find,ls",
+    "-e",
+    "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-olla-autodetect/index.ts",
+    "-e",
+    "/Users/cgint/dev-external/pi-ai-consortium/index.ts",
+    "-e",
+    "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-focus-guard/index.ts",
+    "--provider",
+    "olla",
+    "--model",
+    "qwen36-27b-nvidia-nvfp4",
+    "--thinking",
+    "off",
+    "--dm-off",
+    "--write-guard",
+    "/tmp/parcour-c02-off-r1-yaml-markdown/workspace",
+    "--approve",
+    "--session-dir",
+    "/tmp/parcour-c02-off-r1-yaml-markdown/sessions",
+    "--name",
+    "c01-c02-off-r1-yaml-markdown-rep1"
+  ],
+  "expected": {
+    "product_commit": "ca1821eeb942a2639bff3a083a5d0dca4b1de55c",
+    "runner_sha256": "371c9b46e661b269382e5ddc35391badb7b88c30f4a31b0642edf453607e91e1",
+    "corpus_sha256": "cf19c90c00888ea570a39dbc01d9686d878ea669f9a4f8fd6cfb69cdadecb658",
+    "contract_sha256": "8d8206505fb01b0da1a306c76d8e455200de7412798ad156eb9ce201abe910ab",
+    "review_session_sha256": "0977317957bf0220421dc36377e2a782ecdbc72a7aa2ce508bd9a24da3b1d104"
+  },
+  "runtime_versions": {
+    "pi_cli": {
+      "command": [
+        "pi",
+        "--version"
+      ],
+      "exit_code": 0,
+      "output": "0.84.1\n"
+    },
+    "node_cli": {
+      "command": [
+        "node",
+        "--version"
+      ],
+      "exit_code": 0,
+      "output": "v22.23.2\n"
+    }
+  },
+  "repository_status": {
+    "command": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "exit_code": 0,
+    "output": " M .gitignore\n?? docs/c02-evidence/c02-off-r1-yaml-markdown-console.json\n"
+  },
+  "identity_checks": {
+    "schedule": true,
+    "product_commit": true,
+    "runner_sha256": true,
+    "corpus_sha256": true,
+    "contract": true,
+    "review_session_sha256": true,
+    "pi_version": true,
+    "node_version": true,
+    "guard_setting": true,
+    "exact_model": true,
+    "workspace_guard_setting": true
+  },
+  "workspace_guard_setting": false,
+  "ended_at": "2026-08-11T18:07:57.420590Z",
+  "wall_clock_ms": 22043.0,
+  "process_returncode": 0,
+  "live_boundary_timestamp": "2026-08-11T18:07:38.876405Z",
+  "workspace_content_manifest_after": "1c3c589267a6c3ef5b3f2c9bd066fcebf37d5ce19b29af30e14399ed4b7bfca3"
+}
