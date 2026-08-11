@@ -1,19 +1,18 @@
 # c02 mandated independent-review identity
 
 **Status:** PASS — no blocker
-**Review attempt:** 2, authorized at `independent-review-attempt-2-authorization.md`
-**RLM child:** `sub-b5d9f6fc-c4a7-446e-99af-9403a7101d27`
+**Review attempt:** 3, required after amendment commit `ecd0fc9`
+**RLM child:** `sub-25fba46b-0b88-46ad-912a-374c373a9c94`
 **Required identity:** `8081-twins/qwen36-27b-nvidia-nvfp4:off`
 
 ## Authoritative evidence
 
 `independent-review-8081-twins-session.jsonl` is the raw Pi session for the review:
 
-- line 2 names `c02-8081-twins-preflight-review-attempt-2`;
+- line 2 names `c02-8081-twins-amendment-review`;
 - line 3 records provider `8081-twins` and model ID `qwen36-27b-nvidia-nvfp4`;
-- line 4 records thinking `off`;
-- line 12 contains the reviewer’s final `HEADLINE: PASS — no blocker found` and `BLOCKER: None` verdict.
+- line 4 records thinking `off`.
 
-The RLM child-output handoff remained zero bytes despite the completed session; its exact empty file is retained as `independent-review-attempt-2.empty-output.md`. The human-readable review at `independent-review-8081-twins.md` is extracted verbatim from the session’s final assistant message. The session, not reviewer prose or registry status, establishes execution identity and verdict completion.
+The raw reviewer output at `independent-review-8081-twins.md` concludes `**PASS**`, `**HEADLINE:** c02 ecd0fc9 amendment passes adversarial review`, and `**NOT FOUND:** No issues requiring correction.` The session, not reviewer prose or registry status, establishes execution identity.
 
-Attempt 1 remains separately preserved as invalid/no-verdict evidence.
+Attempt 1 remains invalid/no-verdict evidence. Attempt 2 and its session are preserved as pre-amendment review evidence and are not used for fresh preflight.

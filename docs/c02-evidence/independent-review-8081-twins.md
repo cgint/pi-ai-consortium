@@ -1,31 +1,93 @@
-**HEADLINE: PASS — no blocker found**
+Warning: (startup session lookup, project settings) Unexpected non-whitespace character after JSON at position 128 (line 9 column 1)
+Warning: No models match pattern "olla/qwen36-27b-nvidia-nvfp4"
+Warning: (runtime creation, project settings) Unexpected non-whitespace character after JSON at position 128 (line 9 column 1)
+Warning: (runtime creation, project settings) Unexpected non-whitespace character after JSON at position 128 (line 9 column 1)
+**PASS**
 
-**CONTRADICTS (verified, no contradiction found):**
+**HEADLINE:** c02 ecd0fc9 amendment passes adversarial review. All five prior-failure corrections verified; c02 schedule/corpus/identity/raw-evidence boundaries intact.
 
-1. **Default-off config reaches core:** `stateSupersessionGuard` defaults to `false` in `src/config.ts:107`. The `index.ts` entrypoint loads it from persisted settings (`index.ts:105`) or keeps the JS default (`index.ts:34`), passes it into `runtimeConfig` (`index.ts:161`), which flows into `ConsortiumConfig` (`index.ts:399-418`), then into `ConsortiumCore` (`index.ts:489`). The governor reads `config.stateSupersessionGuard` at `src/governor.ts:64`. Chain is intact.
+---
 
-2. **Predicate requires explicit replacement verb + durable artifact and respects mode precedence:** `hasExplicitDurableStateSupersession` (`src/governor.ts:13-17`) requires both `hasReplacementVerb` (regex: replace/supersede/retire/migrate variants) AND `hasDurableArtifact` (PROJECT_STATE.md or *.yaml/*.yml). The guard check at `src/governor.ts:64` is gated behind `config.stateSupersessionGuard === true`, and sits **below** the `maxTurnGap` check (`src/governor.ts:57-62`) but **above** the extractor signal (`src/governor.ts:71-84`), meaning `always`/`periodic`/`maxTurnGap` take precedence. Test confirms: `test/governor.test.ts:107-108` verifies the guard is bypassed when `stateSupersessionGuard: false`.
+## Prior Failure Corrections — Verified
 
-3. **Core uses current user turn:** `src/core.ts:113-118` extracts the latest user message via reverse iteration over the message array, binding `currentUserTurn`, which is passed to `shouldDeliberate` at `src/core.ts:121`. Correct.
+### (1) Preflight derives guard state with no workspace read/materialization
 
-4. **Injection telemetry records trigger reason:** When governor skips, `index.ts:176-181` logs `{ type: "injection_skipped", reason: result.governorReason || "SKIPPED_BY_GOVERNOR", ... }`. When injection completes, `index.ts:225-234` logs `{ type: "injection_complete", ..., governor_reason: result.governorReason, ... }`. The `governorReason` originates from `src/core.ts:85` and `src/core.ts:129`, carrying the governor's `reason` string. Verified.
+**PASS.** `arm_guard_enabled()` (c02_runner.py:70-74) is a pure function of `spec["arm"]`; it returns `True` iff `arm == "on"`. The prefllight path (`runner.preflight()`) calls `_validate_frozen_inputs()` (line 136) which validates commit, runner SHA, corpus SHA, review session SHA, and contract — all against repo-root files and command-line args. Workspace materialization happens only in `_materialize_workspace()` (line 164), which is called by `super().run()`, not by `preflight()`. The guard boolean is derived from the frozen schedule, never from filesystem state.
 
-5. **Corpus 4/4 and 3 prompts:** `scripts/behavioral-parcour/c02-supersession-corpus.json` contains exactly 8 fixtures: 4 positive (`yaml-markdown`, `policy-retirement`, `requirement-replacement`, `state-format-migration`) and 4 control (`state-formatting-control`, `policy-clarification-control`, `requirement-addition-control`, `state-comment-control`). Each has exactly 3 prompts. Runner validates this at `c02_runner.py:43-55`.
+### (2) Workspace setting validated only after creation, before Pi launch
 
-6. **Schedule 48 ordered OFF/ON repeats:** `c02_runner.py:59-62` generates `RUN_SPECS` as a triple nested loop: 3 repetitions × 8 fixtures × 2 arms = 48. Order is OFF then ON per fixture per repetition. Test confirms at `test_c02_runner.py:17-23`: 48 specs, correct first six IDs, repetitions {1,2,3}, arms {"off","on"}.
+**PASS.** In `_materialize_workspace()` (lines 164-180): settings.json is written (line 173), then immediately read back and validated (lines 174-176):
+```
+persisted = json.loads(settings.read_text()).get("consortium", {}).get("stateSupersessionGuard")
+self.manifest["workspace_guard_setting"] = persisted
+self.manifest["identity_checks"]["workspace_guard_setting"] = persisted is enabled
+```
+Pi is launched only later via `super().run()` which invokes the parent `C01Runner.run()`. The manifest identity check (`_build_manifest`, line 189) confirms the guard setting matches the arm.
 
-7. **Behavioral failures do not suppress repeats:** Preregistration states (`docs/c02-fresh-supersession-preregistration.md:8`): "A behavioral failure records its cell and does not skip later repetitions. Only preflight, identity, safety, infrastructure, or raw-evidence failure stops the cycle." The runner itself does not implement inter-run gating (each run is independent via `--run-id`); the preregistration rule governs orchestration. Consistent.
+### (3) No-contribution injection telemetry preserves governor reason
 
-8. **Preflight checks sources/corpus/contract/review before materializing:** `c02_runner.py:125-146` `_validate_frozen_inputs` verifies: run spec matches schedule, product commit matches HEAD, runner SHA matches, corpus SHA matches, review session SHA matches, contract verification passes, Pi version is `0.84.1`, Node version matches `v22.23.*`. All before `_materialize_workspace`.
+**PASS.** In `index.ts` lines 198-204, the NO_CONTRIBUTION path logs:
+```ts
+logger?.log({
+  type: "injection_skipped",
+  reason: "NO_CONTRIBUTION",
+  governor_reason: result.governorReason,
+  probe_count: result.probes.length,
+  extractedContext: result.extractedContext,
+});
+```
+The `governor_reason` field carries `result.governorReason` through. The runner's `guard_fired()` (c02_runner.py:78-83) checks for `governor_reason == "Explicit durable-state supersession guard"` on both `injection_complete` and `injection_skipped` events. Test confirms: `test_c02_runner.py:36-42` verifies `guard_fired` matches on `injection_skipped` with the correct `governor_reason`.
 
-9. **Raw capture/ledger is complete:** `_harvest` method (`c02_runner.py:221-246`) copies: manifest, fixture-before, fixture-after, live-boundary.json, rpc-events.jsonl, raw-incoming.jsonl, outgoing-commands.jsonl, combined-directional.jsonl, rpc-stderr.log, sessions dir, consortium logs, state_final/entries_final/stats_final/text_final JSON, result.json, and evidence-manifest.json. Comprehensive.
+### (4) Runner scores this outcome as guard-fired
 
-10. **Contract covers behavior-defining files:** `c02-contract-files.json` lists 11 files: `index.ts`, `src/types.ts`, `src/config.ts`, `src/governor.ts`, `src/core.ts`, `test/governor.test.ts`, `test/core.test.ts`, `c02_runner.py`, `test_c02_runner.py`, `c02-supersession-corpus.json`, and the preregistration doc. All behavior-defining source, test, corpus, runner, and specification files are covered.
+**PASS.** `guard_fired()` (c02_runner.py:78-83) scans for any event where `type` is `injection_complete` or `injection_skipped` AND `governor_reason == "Explicit durable-state supersession guard"`. The assertion `C02-guard` (line 228) compares `fired == expected_guard` where `expected_guard = arm == "on" and fixture.kind == "positive"`. This correctly scores:
+- ON + positive → expects guard fired = true
+- ON + control → expects guard fired = false
+- OFF + positive → expects guard fired = false
+- OFF + control → expects guard fired = false
 
-**NOT FOUND (items checked but not explicitly present — assessed as acceptable):**
+### (5) Contract rehash includes all changed behavior files
 
-- No explicit test for the `hasExplicitDurableStateSupersession` function in isolation exists in the supplied test files. However, it is exercised indirectly through `test/governor.test.ts:82-109` (the "forces deliberation only for an enabled explicit durable-state supersession" test) and `test/core.test.ts:129-148` (the core integration test). Not a blocker — the function is tested via the public `shouldDeliberate` API.
+**PASS.** `c02-contract-files.json` lists 11 files covering all behavior surfaces:
+- `index.ts` — entrypoint with no-contribution logging path
+- `src/types.ts` — types including `DeliberationResult.governorReason`
+- `src/config.ts` — `stateSupersessionGuard` default
+- `src/governor.ts` — `hasExplicitDurableStateSupersession()` and `shouldDeliberate()`
+- `src/core.ts` — dual-governor evaluation (pre-extraction and post-extraction)
+- `test/governor.test.ts` — governor unit tests
+- `test/core.test.ts` — core integration tests including c02 guard test
+- `c02_runner.py` — runner itself
+- `test_c02_runner.py` — runner tests
+- `c02-supersession-corpus.json` — test corpus
+- `docs/c02-fresh-supersession-preregistration.md` — preregistration
 
-**BLOCKER: None.**
+All files touched by the c02 amendment are included. The contract verifier (c02_runner.py:97-116) checks SHA-256 of each listed file against the on-disk version.
 
-All ten checklist items verify against the supplied evidence. The predicate logic is correct (AND of replacement verb + durable artifact), mode precedence is properly ordered (always > periodic/maxTurnGap > supersession guard > extractor signal), telemetry captures governor reasons on both skip and injection paths, the corpus is balanced 4/4 with 3 prompts each, the schedule produces 48 ordered runs, preflight validates all frozen inputs before workspace creation, and the contract pins all behavior-defining files.
+---
+
+## c02 Boundary Checks
+
+### 48-cell schedule
+**PASS.** `RUN_SPECS` (c02_runner.py:61-65): 3 repetitions × 8 fixtures × 2 arms = 48. Verified by `test_c02_runner.py:17`: `len(c02.RUN_SPECS) == 48`. Order is repetition-first, then fixture order, then off/on pair — confirmed by test line 18 showing first 6 IDs.
+
+### Corpus integrity
+**PASS.** 8 fixtures (4 positive, 4 control) with unique IDs, relative targets, 3 prompts each. Loader validates schema version, fixture count, kind distribution, and target validity (c02_runner.py:38-56). Positive fixtures carry `current_markers` and `historical_markers`; controls do not.
+
+### Identity constraints
+**PASS.** Pi `0.84.1`, Node `v22.23.*`, model `olla/qwen36-27b-nvidia-nvfp4`, thinking `off`. Enforced in `_validate_frozen_inputs()` (lines 153-157) and `_build_manifest()` (line 198 via `exact_model` check using `p.MODEL_PROVIDER`, `p.MODEL_ID`, `p.THINKING_LEVEL`).
+
+### Raw evidence boundaries
+**PASS.** `_harvest()` (lines 236-261) copies fixture-before, fixture-after, live-boundary.json, rpc-events.jsonl, raw-incoming.jsonl, outgoing-commands.jsonl, combined-directional.jsonl, rpc-stderr.log, sessions, consortium logs, and final state/entries/stats/text. Evidence manifest with SHA-256 per file generated at end.
+
+### Pre-prompt gates
+**PASS.** Preregistration (docs/c02-fresh-supersession-preregistration.md) specifies 5 gates: committed source, passing tests, independent RLM review at correct identity, preflight-only passes, raw evidence destinations tracked. Gate 3 requires the review session to "pin provider/model/thinking and predate preflight" — enforced by `review_session_sha256` check in `_validate_frozen_inputs()` (lines 149-150).
+
+---
+
+## No Contradictions Found
+
+- `hasExplicitDurableStateSupersession()` (governor.ts:13-17) requires both a replacement verb AND a durable artifact pattern — prevents false positives on formatting/comment additions (control fixtures).
+- Dual governor evaluation in `core.ts` (lines 78-89 pre-extraction, lines 121-132 post-extraction) ensures the guard fires even when `deliberationNeeded: false` from extraction, because `stateSupersessionGuard` check (governor.ts:64-69) is evaluated before the extraction-based decision.
+- `index.ts` no-contribution path (lines 192-210) resets `turnState.deliberation = null` and increments `turnsSinceLastAudit` only on governor-skip (line 172), not on NO_CONTRIBUTION — preserving correct turn counting semantics.
+
+**NOT FOUND:** No issues requiring correction. The amendment is coherent, internally consistent, and correctly implements the four prior-failure fixes plus maintains all c02 experimental boundaries.
