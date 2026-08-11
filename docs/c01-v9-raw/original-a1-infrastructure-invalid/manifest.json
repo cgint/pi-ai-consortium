@@ -1,0 +1,122 @@
+{
+  "schema_version": "c01-run-manifest-v1",
+  "run_id": "c01-prestagec-a1-r1",
+  "checkpoint": "pre-stage-c",
+  "cell": "A1",
+  "arm": "active",
+  "repetition": 1,
+  "started_at": "2026-07-26T13:48:01.206826Z",
+  "workspace": "/tmp/parcour-c01-prestagec-a1-r1/workspace",
+  "runtime_root": "/tmp/parcour-c01-prestagec-a1-r1",
+  "argv": [
+    "pi",
+    "--mode",
+    "rpc",
+    "--no-context-files",
+    "--no-skills",
+    "--no-prompt-templates",
+    "--no-extensions",
+    "--tools",
+    "read,edit,grep,find,ls",
+    "-e",
+    "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-olla-autodetect/index.ts",
+    "-e",
+    "/Users/cgint/dev-external/pi-ai-consortium/index.ts",
+    "-e",
+    "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-focus-guard/index.ts",
+    "--provider",
+    "olla",
+    "--model",
+    "qwen36-27b-nvidia-nvfp4",
+    "--thinking",
+    "off",
+    "--dm-off",
+    "--write-guard",
+    "/tmp/parcour-c01-prestagec-a1-r1/workspace",
+    "--approve",
+    "--session-dir",
+    "/tmp/parcour-c01-prestagec-a1-r1/sessions",
+    "--name",
+    "c01-c01-prestagec-a1-r1-rep1"
+  ],
+  "expected": {
+    "addendum_commit": "a95b945adcedecf281e024ee394553aa06714e6d",
+    "addendum_blob": "e2a83a0e0458a33cc0b4c149e4da73f7af3b5e93",
+    "addendum_sha256": "3d35f1840460e050859638e5a017c356ade121df00b197dec1897d2964156bf6",
+    "runner_sha256": "d6f4443c7916bd406dd5273fc2afe614691675795887b165ed1f313d182a7814",
+    "contract_sha256": "268ca54e08eae0d446b22674ecc3e78478e51d20cc9fabf666b345d4af580626",
+    "product_commit": "4ba411ed6296fc14e5734c8f2469e9886811cf4c"
+  },
+  "repository_status": {
+    "command": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "exit_code": 0,
+    "output": ""
+  },
+  "provider_status": {
+    "command": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "exit_code": 0,
+    "output": " M package-lock.json\n"
+  },
+  "focus_status": {
+    "command": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "exit_code": 0,
+    "output": " M package-lock.json\n"
+  },
+  "package_versions": {
+    "pi-ai": "0.81.1",
+    "pi-agent-core": "0.81.1",
+    "pi-coding-agent": "0.81.1",
+    "provider": "0.2.1",
+    "focus": "0.2.0"
+  },
+  "identity_checks": {
+    "frozen_product_commit": true,
+    "frozen_addendum_frozen_blob": true,
+    "frozen_addendum_HEAD_blob": true,
+    "frozen_addendum_sha256": true,
+    "frozen_runner_sha256": true,
+    "frozen_contract_sha256": true,
+    "frozen_scenario_blob": true,
+    "frozen_phase05_blob": true,
+    "frozen_phase05_sha256": true,
+    "implementation_clean": true,
+    "cell_mapping": true,
+    "provider_commit": true,
+    "provider_blob": true,
+    "provider_sha256": true,
+    "provider_dirty_state": true,
+    "provider_version": true,
+    "focus_commit": true,
+    "focus_blob": true,
+    "focus_sha256": true,
+    "focus_dirty_state": true,
+    "focus_version": true,
+    "consortium_index_matches_product_commit": true,
+    "template_tree": true,
+    "workspace_tree": true,
+    "content_manifest": true,
+    "pi_version": false,
+    "node_version": true,
+    "pi_package_versions": true,
+    "write_guard_absolute": true,
+    "dm_off": true,
+    "no_extensions": true,
+    "exact_tools": true,
+    "exact_model": true,
+    "extension_order": true
+  },
+  "template_content_manifest": "cdb2b78c4bce9464e217567ad630d9dff0f922b9f14727088a43c04520f6f989",
+  "workspace_content_manifest_before": "cdb2b78c4bce9464e217567ad630d9dff0f922b9f14727088a43c04520f6f989"
+}

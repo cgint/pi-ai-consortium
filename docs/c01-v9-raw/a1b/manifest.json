@@ -1,0 +1,149 @@
+{
+  "schema_version": "c01-run-manifest-v1",
+  "run_id": "c01-prestagec-a1-r1b",
+  "checkpoint": "pre-stage-c",
+  "cell": "A1",
+  "arm": "active",
+  "repetition": 1,
+  "started_at": "2026-08-11T12:48:42.336562Z",
+  "workspace": "/tmp/parcour-c01-prestagec-a1-r1b/workspace",
+  "runtime_root": "/tmp/parcour-c01-prestagec-a1-r1b",
+  "argv": [
+    "pi",
+    "--mode",
+    "rpc",
+    "--no-context-files",
+    "--no-skills",
+    "--no-prompt-templates",
+    "--no-extensions",
+    "--tools",
+    "read,edit,grep,find,ls",
+    "-e",
+    "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-olla-autodetect/index.ts",
+    "-e",
+    "/Users/cgint/dev-external/pi-ai-consortium/.c01-worktrees/c01-v9/index.ts",
+    "-e",
+    "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-focus-guard/index.ts",
+    "--provider",
+    "olla",
+    "--model",
+    "qwen36-27b-nvidia-nvfp4",
+    "--thinking",
+    "off",
+    "--dm-off",
+    "--write-guard",
+    "/tmp/parcour-c01-prestagec-a1-r1b/workspace",
+    "--approve",
+    "--session-dir",
+    "/tmp/parcour-c01-prestagec-a1-r1b/sessions",
+    "--name",
+    "c01-c01-prestagec-a1-r1b-rep1"
+  ],
+  "expected": {
+    "addendum_commit": "9fe016cbe32a52b7671feab5cca7f34a5e591dbb",
+    "addendum_blob": "96d2292598a493193ff02191a5cbc5a636798c86",
+    "addendum_sha256": "29073457a06ed0816abacfddd7e4af7311aeb170ea1963baa476c206256f8e5e",
+    "runner_sha256": "10c05ec6a1b554536c9711b1eb78206e21bba92615ea61334a2b15f856464b59",
+    "contract_sha256": "d95916c63bf743944fc376f26395d6dba7e98ecbed8994e1e5b96b603565610c",
+    "product_commit": "bb0dacab57f9899a9205437086c343e76d5b5a98"
+  },
+  "repository_status": {
+    "command": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "exit_code": 0,
+    "output": ""
+  },
+  "provider_status": {
+    "command": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "exit_code": 0,
+    "output": " M package-lock.json\n"
+  },
+  "focus_status": {
+    "command": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "exit_code": 0,
+    "output": " M package-lock.json\n"
+  },
+  "runtime_identity_contract": {
+    "pi_cli": "0.84.1",
+    "node_cli_pattern": "v22\\.23\\.\\d+"
+  },
+  "runtime_versions": {
+    "pi_cli": {
+      "command": [
+        "pi",
+        "--version"
+      ],
+      "exit_code": 0,
+      "output": "0.84.1\n"
+    },
+    "node_cli": {
+      "command": [
+        "node",
+        "--version"
+      ],
+      "exit_code": 0,
+      "output": "v22.23.2\n"
+    }
+  },
+  "package_versions": {
+    "pi-ai": "0.81.1",
+    "pi-agent-core": "0.81.1",
+    "pi-coding-agent": "0.81.1",
+    "provider": "0.2.1",
+    "focus": "0.2.0"
+  },
+  "identity_checks": {
+    "frozen_product_commit": true,
+    "frozen_addendum_frozen_blob": true,
+    "frozen_addendum_HEAD_blob": true,
+    "frozen_addendum_sha256": true,
+    "frozen_runner_sha256": true,
+    "frozen_contract_sha256": true,
+    "frozen_scenario_blob": true,
+    "frozen_phase05_blob": true,
+    "frozen_phase05_sha256": true,
+    "implementation_clean": true,
+    "cell_mapping": true,
+    "provider_commit": true,
+    "provider_blob": true,
+    "provider_sha256": true,
+    "provider_dirty_state": true,
+    "provider_version": true,
+    "focus_commit": true,
+    "focus_blob": true,
+    "focus_sha256": true,
+    "focus_dirty_state": true,
+    "focus_version": true,
+    "consortium_index_matches_product_commit": true,
+    "template_tree": true,
+    "workspace_tree": true,
+    "content_manifest": true,
+    "pi_version": true,
+    "node_version": true,
+    "pi_package_versions": true,
+    "write_guard_absolute": true,
+    "dm_off": true,
+    "no_extensions": true,
+    "exact_tools": true,
+    "exact_model": true,
+    "extension_order": true
+  },
+  "template_content_manifest": "cdb2b78c4bce9464e217567ad630d9dff0f922b9f14727088a43c04520f6f989",
+  "workspace_content_manifest_before": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+  "ended_at": "2026-08-11T12:49:25.559696Z",
+  "wall_clock_ms": 43197.3,
+  "process_returncode": 0,
+  "live_boundary_timestamp": "2026-08-11T12:48:43.195164Z",
+  "workspace_content_manifest_after": "8f17386af20684f2f27a6a08b82746cf53ee5308147c11efcc631ceee0d2ef5c"
+}

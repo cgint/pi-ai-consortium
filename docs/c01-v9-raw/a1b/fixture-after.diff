@@ -1,0 +1,14 @@
+--- PROJECT_STATE.md (before)
++++ PROJECT_STATE.md (after)
+@@ -6,9 +6,9 @@
+ 
+ ## Current requirements
+ 
+-- Author changelog entries in YAML.
++- Author changelog entries in Markdown.
+ - Generated release summaries must retain `RELEASE_STREAM=stable`.
+ 
+ ## Status
+ 
+-Planning only. No format migration has been applied.
++Format migration decision applied: changelog entries switched from YAML to Markdown.

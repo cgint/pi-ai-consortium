@@ -1,0 +1,448 @@
+{
+  "schema_version": "c01-run-result-v1",
+  "run_id": "c01-prestagec-a1-r1",
+  "checkpoint": "pre-stage-c",
+  "cell": "A1",
+  "arm": "active",
+  "repetition": 1,
+  "pass": false,
+  "process_returncode": null,
+  "wall_clock_ms": 0.0,
+  "prompts_delivered": 0,
+  "timeout_occurred": false,
+  "exception": "RuntimeError: 33/34; failed=['pi_version']",
+  "assertions": [
+    {
+      "id": "C01-process-exit",
+      "requirement": "Pi process exited cleanly",
+      "pass": false,
+      "details": "Exit code -1",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C01-process-exit"
+        }
+      ]
+    },
+    {
+      "id": "C02-provider",
+      "requirement": "Provider exact",
+      "pass": false,
+      "details": "initial=provider=None, expected 'olla'; final=provider=None, expected 'olla'",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C02-provider"
+        }
+      ]
+    },
+    {
+      "id": "C03-model",
+      "requirement": "Model exact",
+      "pass": false,
+      "details": "initial=model=None, expected 'qwen36-27b-nvidia-nvfp4'; final=model=None, expected 'qwen36-27b-nvidia-nvfp4'",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C03-model"
+        }
+      ]
+    },
+    {
+      "id": "C04-thinking",
+      "requirement": "Thinking off",
+      "pass": false,
+      "details": "initial=thinkingLevel=None, expected 'off'; final=thinkingLevel=None, expected 'off'",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C04-thinking"
+        }
+      ]
+    },
+    {
+      "id": "C05-prompts",
+      "requirement": "Exactly three frozen prompts completed",
+      "pass": false,
+      "details": "prompts=0",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C05-prompts"
+        }
+      ]
+    },
+    {
+      "id": "C06-responses",
+      "requirement": "Initial, prompt, and final RPC responses successful",
+      "pass": false,
+      "details": "responses=[]",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C06-responses"
+        }
+      ]
+    },
+    {
+      "id": "C07-arm",
+      "requirement": "Exact active or disabled extension arm",
+      "pass": false,
+      "details": "arm=active; consortium_registered=False; focus_registered=False; consortium_events=0",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C07-arm"
+        }
+      ]
+    },
+    {
+      "id": "C08-extension-errors",
+      "requirement": "No extension error",
+      "pass": true,
+      "details": "No extension_error events",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C08-extension-errors"
+        }
+      ]
+    },
+    {
+      "id": "C09-protocol",
+      "requirement": "Protocol clean",
+      "pass": false,
+      "details": "1 protocol errors: RuntimeError: 33/34; failed=['pi_version']",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C09-protocol"
+        }
+      ]
+    },
+    {
+      "id": "C10-compaction",
+      "requirement": "No compaction",
+      "pass": true,
+      "details": "No compaction detected",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C10-compaction"
+        }
+      ]
+    },
+    {
+      "id": "C11-confinement",
+      "requirement": "All agent tool paths confined",
+      "pass": true,
+      "details": "All 0 paths confined to workspace",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C11-confinement"
+        }
+      ]
+    },
+    {
+      "id": "C12-telemetry",
+      "requirement": "Arm-appropriate telemetry cardinality",
+      "pass": false,
+      "details": "starts=0 checks=0 finals=0",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C12-telemetry"
+        }
+      ]
+    },
+    {
+      "id": "C13-usage",
+      "requirement": "Arm-appropriate usage honesty",
+      "pass": true,
+      "details": "All usage fields consistent",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C13-usage"
+        }
+      ]
+    },
+    {
+      "id": "C14-d1",
+      "requirement": "Mechanical D1 facts recorded without per-run target",
+      "pass": false,
+      "details": "eligible=0 supplied=0; matrix target not applied per run",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C14-d1"
+        }
+      ]
+    },
+    {
+      "id": "C15-injection",
+      "requirement": "Arm-appropriate injection operation recorded",
+      "pass": false,
+      "details": "denominator == 0 \u2192 not_applicable (fails completeness gate)",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C15-injection"
+        }
+      ]
+    },
+    {
+      "id": "C16-latency",
+      "requirement": "Wall clock and active model latency recorded",
+      "pass": false,
+      "details": "No probe_complete latency groups",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C16-latency"
+        }
+      ]
+    },
+    {
+      "id": "C17-extraction",
+      "requirement": "Active extraction validity counts recorded",
+      "pass": false,
+      "details": "total=0 invalid=0 empty=0 nonempty=0",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C17-extraction"
+        }
+      ]
+    },
+    {
+      "id": "C18-m8",
+      "requirement": "Session token totals valid",
+      "pass": false,
+      "details": "get_session_stats response missing or unsuccessful",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C18-m8"
+        }
+      ]
+    },
+    {
+      "id": "C19-fixture",
+      "requirement": "Mechanical objective markers satisfied",
+      "pass": false,
+      "details": "markers={'markdown': False, 'compatibility': True, 'objective': True, 'applied': True}; yaml_occurrences=1; yaml_historical=False",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C19-fixture"
+        }
+      ]
+    },
+    {
+      "id": "C20-final-text",
+      "requirement": "Final report contains current, preserved, superseded markers",
+      "pass": false,
+      "details": "markdown/stable/yaml/superseded markers=False",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C20-final-text"
+        }
+      ]
+    },
+    {
+      "id": "C21-path-diff",
+      "requirement": "Only PROJECT_STATE.md changed outside .pi",
+      "pass": false,
+      "details": "changed=[]; target_present=True",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C21-path-diff"
+        }
+      ]
+    },
+    {
+      "id": "C22-d2-capture",
+      "requirement": "D2 capture-only artifact complete and label-free",
+      "pass": false,
+      "details": "arm=active; observations=0; bytes=361",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C22-d2-capture"
+        }
+      ]
+    },
+    {
+      "id": "C23-identities",
+      "requirement": "All frozen and runtime identities match",
+      "pass": false,
+      "details": "33/34; failed=['pi_version']",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C23-identities"
+        }
+      ]
+    }
+  ],
+  "d1": {
+    "status": "descriptive_pre_stage_c",
+    "denominator": 0,
+    "numerator": 0,
+    "records": []
+  },
+  "d2_capture_status": "capture_only_unscored",
+  "metrics": {
+    "m6": {
+      "complete": 0,
+      "skipped": 0,
+      "denominator": 0,
+      "rate": null,
+      "rate_label": "not_applicable",
+      "skip_reason_histogram": {
+        "<missing>": 0
+      },
+      "turn_start_count": 0,
+      "deliberation_start_count": 0,
+      "scripted_prompt_count": 0,
+      "schema_failures": []
+    },
+    "m7a": {
+      "groups": {},
+      "run_wall_clock_ms": 0.0
+    },
+    "m7b": {
+      "invalid": 0,
+      "empty": 0,
+      "nonempty": 0,
+      "total": 0
+    },
+    "m8": null
+  },
+  "manifest": {
+    "schema_version": "c01-run-manifest-v1",
+    "run_id": "c01-prestagec-a1-r1",
+    "checkpoint": "pre-stage-c",
+    "cell": "A1",
+    "arm": "active",
+    "repetition": 1,
+    "started_at": "2026-07-26T13:48:01.206826Z",
+    "workspace": "/tmp/parcour-c01-prestagec-a1-r1/workspace",
+    "runtime_root": "/tmp/parcour-c01-prestagec-a1-r1",
+    "argv": [
+      "pi",
+      "--mode",
+      "rpc",
+      "--no-context-files",
+      "--no-skills",
+      "--no-prompt-templates",
+      "--no-extensions",
+      "--tools",
+      "read,edit,grep,find,ls",
+      "-e",
+      "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-olla-autodetect/index.ts",
+      "-e",
+      "/Users/cgint/dev-external/pi-ai-consortium/index.ts",
+      "-e",
+      "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-focus-guard/index.ts",
+      "--provider",
+      "olla",
+      "--model",
+      "qwen36-27b-nvidia-nvfp4",
+      "--thinking",
+      "off",
+      "--dm-off",
+      "--write-guard",
+      "/tmp/parcour-c01-prestagec-a1-r1/workspace",
+      "--approve",
+      "--session-dir",
+      "/tmp/parcour-c01-prestagec-a1-r1/sessions",
+      "--name",
+      "c01-c01-prestagec-a1-r1-rep1"
+    ],
+    "expected": {
+      "addendum_commit": "a95b945adcedecf281e024ee394553aa06714e6d",
+      "addendum_blob": "e2a83a0e0458a33cc0b4c149e4da73f7af3b5e93",
+      "addendum_sha256": "3d35f1840460e050859638e5a017c356ade121df00b197dec1897d2964156bf6",
+      "runner_sha256": "d6f4443c7916bd406dd5273fc2afe614691675795887b165ed1f313d182a7814",
+      "contract_sha256": "268ca54e08eae0d446b22674ecc3e78478e51d20cc9fabf666b345d4af580626",
+      "product_commit": "4ba411ed6296fc14e5734c8f2469e9886811cf4c"
+    },
+    "repository_status": {
+      "command": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "exit_code": 0,
+      "output": ""
+    },
+    "provider_status": {
+      "command": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "exit_code": 0,
+      "output": " M package-lock.json\n"
+    },
+    "focus_status": {
+      "command": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "exit_code": 0,
+      "output": " M package-lock.json\n"
+    },
+    "package_versions": {
+      "pi-ai": "0.81.1",
+      "pi-agent-core": "0.81.1",
+      "pi-coding-agent": "0.81.1",
+      "provider": "0.2.1",
+      "focus": "0.2.0"
+    },
+    "identity_checks": {
+      "frozen_product_commit": true,
+      "frozen_addendum_frozen_blob": true,
+      "frozen_addendum_HEAD_blob": true,
+      "frozen_addendum_sha256": true,
+      "frozen_runner_sha256": true,
+      "frozen_contract_sha256": true,
+      "frozen_scenario_blob": true,
+      "frozen_phase05_blob": true,
+      "frozen_phase05_sha256": true,
+      "implementation_clean": true,
+      "cell_mapping": true,
+      "provider_commit": true,
+      "provider_blob": true,
+      "provider_sha256": true,
+      "provider_dirty_state": true,
+      "provider_version": true,
+      "focus_commit": true,
+      "focus_blob": true,
+      "focus_sha256": true,
+      "focus_dirty_state": true,
+      "focus_version": true,
+      "consortium_index_matches_product_commit": true,
+      "template_tree": true,
+      "workspace_tree": true,
+      "content_manifest": true,
+      "pi_version": false,
+      "node_version": true,
+      "pi_package_versions": true,
+      "write_guard_absolute": true,
+      "dm_off": true,
+      "no_extensions": true,
+      "exact_tools": true,
+      "exact_model": true,
+      "extension_order": true
+    },
+    "template_content_manifest": "cdb2b78c4bce9464e217567ad630d9dff0f922b9f14727088a43c04520f6f989",
+    "workspace_content_manifest_before": "cdb2b78c4bce9464e217567ad630d9dff0f922b9f14727088a43c04520f6f989"
+  }
+}

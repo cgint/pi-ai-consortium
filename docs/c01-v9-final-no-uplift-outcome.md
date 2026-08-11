@@ -9,7 +9,7 @@
 
 ## Published evidence
 
-- A1b raw result and manifest are tracked snapshots at `docs/c01-v9-evidence/a1b-result.json` and `a1b-manifest.json`. Their originals remain immutable under `.c01-worktrees/c01-v9/.parcour-runs/c01-prestagec-a1-r1b/`.
+- Full immutable raw bundles are tracked at `docs/c01-v9-raw/original-a1-infrastructure-invalid/`, `docs/c01-v9-raw/a1b/`, and `docs/c01-v9-raw/position-zero-twins-20260811T1135Z/`; ignored originals remain preserved in place. The A1b result and manifest snapshots remain at `docs/c01-v9-evidence/a1b-result.json` and `a1b-manifest.json`.
 - The `8081-twins/qwen36-27b-nvidia-nvfp4:off` review PASS is tracked at `docs/c01-v9-evidence/independent-review-8081-twins.md`; the original zero-prompt A1 record is tracked at `docs/c01-v9-evidence/original-a1-infrastructure-invalid.md`.
 - A1b delivered three prompts, exited 0, passed frozen/runtime identities 34/34, and failed C19 only: `yaml_historical=False`. See the tracked result snapshot.
 - The c01 identity amendment is integrated on `main`: `33d8440`, `eac131b`, and `b376b9b`, limited to the runner, contract, alias map, and matching tests. `npm run precommit` passed after integration; the c01 contract manifest verifies.
@@ -38,7 +38,7 @@ Both candidates occurred only after the C19 hard-gate pause and explicit user au
 
 ## Separate Twins position-zero replication
 
-The tracked `findings-position-zero.md` reports the completed six-process/30-request replication at `http://twins:8081/v1`, model `qwen36-27b-nvidia-nvfp4`. Its immutable checksum ledger is tracked at `docs/c01-v9-evidence/position-zero-twins-SHA256SUMS.txt`.
+The tracked `findings-position-zero.md` reports the completed six-process/30-request replication at `http://twins:8081/v1`, model `qwen36-27b-nvidia-nvfp4`. Its immutable checksum ledger is tracked at `docs/c01-v9-evidence/position-zero-twins-SHA256SUMS.txt`, with all raw process artifacts at `docs/c01-v9-raw/position-zero-twins-20260811T1135Z/`.
 
 Twins push warm medians were 2.666–2.950s and splice 17.841–18.192s; one 49-token push response is retained as a qualification. No cache-token telemetry was emitted. This is endpoint/model-specific latency evidence only; it cannot compensate for c01’s C19 governance failure and is not pooled with the preserved `127.0.0.1:4321` attempts.
 

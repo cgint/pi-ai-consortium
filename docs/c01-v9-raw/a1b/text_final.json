@@ -1,0 +1,9 @@
+{
+  "id": "text_final",
+  "type": "response",
+  "command": "get_last_assistant_text",
+  "success": true,
+  "data": {
+    "text": "- **Current format requirement:** Author changelog entries in **Markdown**.\n- **Preserved compatibility constraint:** Generated release summaries must retain `RELEASE_STREAM=stable` (downstream release summaries remain compatible).\n- **Superseded requirement:** The prior requirement to author changelog entries in **YAML** has been replaced."
+  }
+}

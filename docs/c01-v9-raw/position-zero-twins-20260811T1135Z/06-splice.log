@@ -1,0 +1,32 @@
+started_at=2026-08-11T12:04:24Z
+Position-0 Splice Benchmark
+Model:     qwen36-27b-nvidia-nvfp4
+Endpoint:  http://twins:8081/v1
+Context:   ~60000 tokens padded
+Runs:      5 per phase
+Phase:     splice
+
+═══ PHASE A: splice(0,0) — deliberation FIRST ═══
+(Consortium synthesis is the first user message after system prompt)
+
+Run 1/5... 18114ms
+Run 2/5... 17878ms
+Run 3/5... 18225ms
+Run 4/5... 18248ms
+Run 5/5... 18158ms
+Summary A (splice):
+  Runs:            5
+  Avg time:        18.12s (min=17.88s, max=18.25s)
+  Avg prompt tok:  47529
+  Avg gen tok:     128
+  Avg throughput:  7.1 tok/s
+
+  Run 0: 18114ms | 47529 prompt | 128 gen | 7.1 tok/s
+  Run 1: 17878ms | 47529 prompt | 128 gen | 7.2 tok/s
+  Run 2: 18225ms | 47529 prompt | 128 gen | 7.0 tok/s
+  Run 3: 18248ms | 47529 prompt | 128 gen | 7.0 tok/s
+  Run 4: 18158ms | 47529 prompt | 128 gen | 7.0 tok/s
+
+(Single phase run — observe vLLM inference behavior for this configuration.)
+exit_code=0
+ended_at=2026-08-11T12:06:00Z

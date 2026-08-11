@@ -1,0 +1,18 @@
+{
+  "schema_version": "c01-d2-capture-v1",
+  "status": "capture_only_unscored",
+  "prohibited_labels": [
+    "transition_observed",
+    "silent_transition",
+    "stale_transition_missed",
+    "unsupported_transition"
+  ],
+  "pairing": {
+    "deliberation_start_count": 0,
+    "baseline_check_count": 0,
+    "outcome_count": 0,
+    "deliberation_telemetry_count": 0,
+    "one_to_one": false
+  },
+  "observations": []
+}

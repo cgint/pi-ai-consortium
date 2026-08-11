@@ -1,0 +1,8 @@
+run_id=position-zero-twins-20260811T1135Z
+endpoint=http://twins:8081/v1
+model=qwen36-27b-nvidia-nvfp4
+context_size=60000
+max_tokens=128
+phase_order=push,splice,splice,push,push,splice
+script_sha256=4dbb4551a5761d48c25ed651cd938c28302b0a42e510858c9433249e7338823a
+started_at=2026-08-11T11:59:31Z

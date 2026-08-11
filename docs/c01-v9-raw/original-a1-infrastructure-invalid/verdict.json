@@ -1,0 +1,278 @@
+[
+  {
+    "id": "C01-process-exit",
+    "requirement": "Pi process exited cleanly",
+    "pass": false,
+    "details": "Exit code -1",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C01-process-exit"
+      }
+    ]
+  },
+  {
+    "id": "C02-provider",
+    "requirement": "Provider exact",
+    "pass": false,
+    "details": "initial=provider=None, expected 'olla'; final=provider=None, expected 'olla'",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C02-provider"
+      }
+    ]
+  },
+  {
+    "id": "C03-model",
+    "requirement": "Model exact",
+    "pass": false,
+    "details": "initial=model=None, expected 'qwen36-27b-nvidia-nvfp4'; final=model=None, expected 'qwen36-27b-nvidia-nvfp4'",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C03-model"
+      }
+    ]
+  },
+  {
+    "id": "C04-thinking",
+    "requirement": "Thinking off",
+    "pass": false,
+    "details": "initial=thinkingLevel=None, expected 'off'; final=thinkingLevel=None, expected 'off'",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C04-thinking"
+      }
+    ]
+  },
+  {
+    "id": "C05-prompts",
+    "requirement": "Exactly three frozen prompts completed",
+    "pass": false,
+    "details": "prompts=0",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C05-prompts"
+      }
+    ]
+  },
+  {
+    "id": "C06-responses",
+    "requirement": "Initial, prompt, and final RPC responses successful",
+    "pass": false,
+    "details": "responses=[]",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C06-responses"
+      }
+    ]
+  },
+  {
+    "id": "C07-arm",
+    "requirement": "Exact active or disabled extension arm",
+    "pass": false,
+    "details": "arm=active; consortium_registered=False; focus_registered=False; consortium_events=0",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C07-arm"
+      }
+    ]
+  },
+  {
+    "id": "C08-extension-errors",
+    "requirement": "No extension error",
+    "pass": true,
+    "details": "No extension_error events",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C08-extension-errors"
+      }
+    ]
+  },
+  {
+    "id": "C09-protocol",
+    "requirement": "Protocol clean",
+    "pass": false,
+    "details": "1 protocol errors: RuntimeError: 33/34; failed=['pi_version']",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C09-protocol"
+      }
+    ]
+  },
+  {
+    "id": "C10-compaction",
+    "requirement": "No compaction",
+    "pass": true,
+    "details": "No compaction detected",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C10-compaction"
+      }
+    ]
+  },
+  {
+    "id": "C11-confinement",
+    "requirement": "All agent tool paths confined",
+    "pass": true,
+    "details": "All 0 paths confined to workspace",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C11-confinement"
+      }
+    ]
+  },
+  {
+    "id": "C12-telemetry",
+    "requirement": "Arm-appropriate telemetry cardinality",
+    "pass": false,
+    "details": "starts=0 checks=0 finals=0",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C12-telemetry"
+      }
+    ]
+  },
+  {
+    "id": "C13-usage",
+    "requirement": "Arm-appropriate usage honesty",
+    "pass": true,
+    "details": "All usage fields consistent",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C13-usage"
+      }
+    ]
+  },
+  {
+    "id": "C14-d1",
+    "requirement": "Mechanical D1 facts recorded without per-run target",
+    "pass": false,
+    "details": "eligible=0 supplied=0; matrix target not applied per run",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C14-d1"
+      }
+    ]
+  },
+  {
+    "id": "C15-injection",
+    "requirement": "Arm-appropriate injection operation recorded",
+    "pass": false,
+    "details": "denominator == 0 \u2192 not_applicable (fails completeness gate)",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C15-injection"
+      }
+    ]
+  },
+  {
+    "id": "C16-latency",
+    "requirement": "Wall clock and active model latency recorded",
+    "pass": false,
+    "details": "No probe_complete latency groups",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C16-latency"
+      }
+    ]
+  },
+  {
+    "id": "C17-extraction",
+    "requirement": "Active extraction validity counts recorded",
+    "pass": false,
+    "details": "total=0 invalid=0 empty=0 nonempty=0",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C17-extraction"
+      }
+    ]
+  },
+  {
+    "id": "C18-m8",
+    "requirement": "Session token totals valid",
+    "pass": false,
+    "details": "get_session_stats response missing or unsuccessful",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C18-m8"
+      }
+    ]
+  },
+  {
+    "id": "C19-fixture",
+    "requirement": "Mechanical objective markers satisfied",
+    "pass": false,
+    "details": "markers={'markdown': False, 'compatibility': True, 'objective': True, 'applied': True}; yaml_occurrences=1; yaml_historical=False",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C19-fixture"
+      }
+    ]
+  },
+  {
+    "id": "C20-final-text",
+    "requirement": "Final report contains current, preserved, superseded markers",
+    "pass": false,
+    "details": "markdown/stable/yaml/superseded markers=False",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C20-final-text"
+      }
+    ]
+  },
+  {
+    "id": "C21-path-diff",
+    "requirement": "Only PROJECT_STATE.md changed outside .pi",
+    "pass": false,
+    "details": "changed=[]; target_present=True",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C21-path-diff"
+      }
+    ]
+  },
+  {
+    "id": "C22-d2-capture",
+    "requirement": "D2 capture-only artifact complete and label-free",
+    "pass": false,
+    "details": "arm=active; observations=0; bytes=361",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C22-d2-capture"
+      }
+    ]
+  },
+  {
+    "id": "C23-identities",
+    "requirement": "All frozen and runtime identities match",
+    "pass": false,
+    "details": "33/34; failed=['pi_version']",
+    "evidence": [
+      {
+        "file": "result.json",
+        "assertion": "C23-identities"
+      }
+    ]
+  }
+]

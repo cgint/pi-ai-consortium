@@ -1,0 +1,519 @@
+{
+  "schema_version": "c01-d2-capture-v1",
+  "status": "capture_only_unscored",
+  "prohibited_labels": [
+    "transition_observed",
+    "silent_transition",
+    "stale_transition_missed",
+    "unsupported_transition"
+  ],
+  "pairing": {
+    "deliberation_start_count": 6,
+    "baseline_check_count": 6,
+    "outcome_count": 6,
+    "deliberation_telemetry_count": 6,
+    "one_to_one": true
+  },
+  "observations": [
+    {
+      "ordinal": 1,
+      "source": {
+        "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+        "line": 7,
+        "event_type": "injection_skipped"
+      },
+      "deliberation_start": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 2
+        }
+      },
+      "baseline_check": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 3
+        },
+        "baseline_available": false,
+        "baseline_supplied": false
+      },
+      "deliberation_telemetry": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 6
+        },
+        "baseline_available": false,
+        "baseline_supplied": false,
+        "usage_status": "complete"
+      },
+      "parsed_extracted_context": {
+        "available": true,
+        "value": {
+          "userRequirements": [
+            "Read and analyze the content of PROJECT_STATE.md",
+            "Summarize four specific elements: durable objective, current format requirement, compatibility constraint, and status",
+            "Strictly read-only operation; do not modify any files"
+          ],
+          "deliverables": [
+            "A concise summary text containing the requested four elements from PROJECT_STATE.md"
+          ],
+          "revisedOrSupersededDirection": [],
+          "userDecisions": [],
+          "questionsAndInformationGaps": [],
+          "controlBoundaries": [
+            "No file modifications allowed",
+            "Strict-Discuss mode is disabled via startup flag"
+          ],
+          "observedWork": [],
+          "observedCriticalFacts": [],
+          "relevantLearnings": [],
+          "deliberationNeeded": false,
+          "deliberationReason": "The request is a straightforward read-and-summarize task with clear constraints and no ambiguity regarding the immediate action."
+        },
+        "canonical_json": "{\"controlBoundaries\":[\"No file modifications allowed\",\"Strict-Discuss mode is disabled via startup flag\"],\"deliberationNeeded\":false,\"deliberationReason\":\"The request is a straightforward read-and-summarize task with clear constraints and no ambiguity regarding the immediate action.\",\"deliverables\":[\"A concise summary text containing the requested four elements from PROJECT_STATE.md\"],\"observedCriticalFacts\":[],\"observedWork\":[],\"questionsAndInformationGaps\":[],\"relevantLearnings\":[],\"revisedOrSupersededDirection\":[],\"userDecisions\":[],\"userRequirements\":[\"Read and analyze the content of PROJECT_STATE.md\",\"Summarize four specific elements: durable objective, current format requirement, compatibility constraint, and status\",\"Strictly read-only operation; do not modify any files\"]}",
+        "sha256": "5672fd6250dd3ddd814da47ad8c3d80e77a5af59f209dd2e3b8de1fd5bfa15ba"
+      },
+      "raw_extraction_model_text": {
+        "available": false,
+        "reason": "not emitted by frozen production telemetry"
+      },
+      "exact_supplied_baseline_payload": {
+        "available": false,
+        "reason": "not emitted by frozen production telemetry"
+      },
+      "governor_reason": {
+        "available": true,
+        "value": "The request is a straightforward read-and-summarize task with clear constraints and no ambiguity regarding the immediate action."
+      }
+    },
+    {
+      "ordinal": 2,
+      "source": {
+        "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+        "line": 13,
+        "event_type": "injection_skipped"
+      },
+      "deliberation_start": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 8
+        }
+      },
+      "baseline_check": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 9
+        },
+        "baseline_available": true,
+        "baseline_supplied": false
+      },
+      "deliberation_telemetry": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 12
+        },
+        "baseline_available": true,
+        "baseline_supplied": false,
+        "usage_status": "complete"
+      },
+      "parsed_extracted_context": {
+        "available": true,
+        "value": {
+          "userRequirements": [
+            "Author changelog entries in YAML format",
+            "Ensure generated release summaries retain the 'RELEASE_STREAM=stable' flag",
+            "Maintain compatibility with downstream release summaries during migration"
+          ],
+          "deliverables": [],
+          "revisedOrSupersededDirection": [],
+          "userDecisions": [],
+          "questionsAndInformationGaps": [],
+          "controlBoundaries": [
+            "Do not modify any files",
+            "Strict-Discuss mode disabled"
+          ],
+          "observedWork": [
+            "Read and analyzed PROJECT_STATE.md to summarize project objectives and constraints"
+          ],
+          "observedCriticalFacts": [
+            "Project status is currently 'Planning only'",
+            "No format migration has been applied yet"
+          ],
+          "relevantLearnings": [],
+          "deliberationNeeded": false,
+          "deliberationReason": "The user requested a summary of existing state without modification; no ambiguous requirements or failed operations detected."
+        },
+        "canonical_json": "{\"controlBoundaries\":[\"Do not modify any files\",\"Strict-Discuss mode disabled\"],\"deliberationNeeded\":false,\"deliberationReason\":\"The user requested a summary of existing state without modification; no ambiguous requirements or failed operations detected.\",\"deliverables\":[],\"observedCriticalFacts\":[\"Project status is currently 'Planning only'\",\"No format migration has been applied yet\"],\"observedWork\":[\"Read and analyzed PROJECT_STATE.md to summarize project objectives and constraints\"],\"questionsAndInformationGaps\":[],\"relevantLearnings\":[],\"revisedOrSupersededDirection\":[],\"userDecisions\":[],\"userRequirements\":[\"Author changelog entries in YAML format\",\"Ensure generated release summaries retain the 'RELEASE_STREAM=stable' flag\",\"Maintain compatibility with downstream release summaries during migration\"]}",
+        "sha256": "7d3f9fc9b0b7bf2006e01ece17a7e86b01286982aab07ea63d2098d2efe99559"
+      },
+      "raw_extraction_model_text": {
+        "available": false,
+        "reason": "not emitted by frozen production telemetry"
+      },
+      "exact_supplied_baseline_payload": {
+        "available": false,
+        "reason": "not emitted by frozen production telemetry"
+      },
+      "governor_reason": {
+        "available": true,
+        "value": "The user requested a summary of existing state without modification; no ambiguous requirements or failed operations detected."
+      }
+    },
+    {
+      "ordinal": 3,
+      "source": {
+        "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+        "line": 20,
+        "event_type": "injection_skipped"
+      },
+      "deliberation_start": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 15
+        }
+      },
+      "baseline_check": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 16
+        },
+        "baseline_available": true,
+        "baseline_supplied": false
+      },
+      "deliberation_telemetry": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 19
+        },
+        "baseline_available": true,
+        "baseline_supplied": false,
+        "usage_status": "complete"
+      },
+      "parsed_extracted_context": {
+        "available": true,
+        "value": {
+          "userRequirements": [
+            "Migrate the release-note workflow while maintaining downstream compatibility.",
+            "Generated release summaries must retain RELEASE_STREAM=stable.",
+            "Changelog entries must be authored in Markdown instead of YAML."
+          ],
+          "deliverables": [
+            "Updated PROJECT_STATE.md reflecting the new Markdown format requirement and marking the decision as applied."
+          ],
+          "revisedOrSupersededDirection": [
+            "The previous requirement to author changelog entries in YAML has been superseded by the decision to use Markdown."
+          ],
+          "userDecisions": [
+            "Replace the YAML changelog format requirement with Markdown.",
+            "Keep the release-note migration objective and RELEASE_STREAM=stable compatibility requirement unchanged."
+          ],
+          "questionsAndInformationGaps": [],
+          "controlBoundaries": [],
+          "observedWork": [
+            "Summarized initial PROJECT_STATE.md contents.",
+            "Received directive to update format from YAML to Markdown."
+          ],
+          "observedCriticalFacts": [
+            "Current status was 'Planning only' with no format migration applied prior to this request.",
+            "Downstream compatibility requires RELEASE_STREAM=stable to be retained."
+          ],
+          "relevantLearnings": [
+            "User prefers Markdown for changelog authoring over YAML for the release-note workflow."
+          ],
+          "deliberationNeeded": false,
+          "deliberationReason": "The user provided a clear, explicit instruction to update a specific file with defined content changes. No ambiguity or architectural complexity requires further probing."
+        },
+        "canonical_json": "{\"controlBoundaries\":[],\"deliberationNeeded\":false,\"deliberationReason\":\"The user provided a clear, explicit instruction to update a specific file with defined content changes. No ambiguity or architectural complexity requires further probing.\",\"deliverables\":[\"Updated PROJECT_STATE.md reflecting the new Markdown format requirement and marking the decision as applied.\"],\"observedCriticalFacts\":[\"Current status was 'Planning only' with no format migration applied prior to this request.\",\"Downstream compatibility requires RELEASE_STREAM=stable to be retained.\"],\"observedWork\":[\"Summarized initial PROJECT_STATE.md contents.\",\"Received directive to update format from YAML to Markdown.\"],\"questionsAndInformationGaps\":[],\"relevantLearnings\":[\"User prefers Markdown for changelog authoring over YAML for the release-note workflow.\"],\"revisedOrSupersededDirection\":[\"The previous requirement to author changelog entries in YAML has been superseded by the decision to use Markdown.\"],\"userDecisions\":[\"Replace the YAML changelog format requirement with Markdown.\",\"Keep the release-note migration objective and RELEASE_STREAM=stable compatibility requirement unchanged.\"],\"userRequirements\":[\"Migrate the release-note workflow while maintaining downstream compatibility.\",\"Generated release summaries must retain RELEASE_STREAM=stable.\",\"Changelog entries must be authored in Markdown instead of YAML.\"]}",
+        "sha256": "b8146a9a5a78fac753e82c5693c479f169bab1e0188b667f304cb73660fed314"
+      },
+      "raw_extraction_model_text": {
+        "available": false,
+        "reason": "not emitted by frozen production telemetry"
+      },
+      "exact_supplied_baseline_payload": {
+        "available": false,
+        "reason": "not emitted by frozen production telemetry"
+      },
+      "governor_reason": {
+        "available": true,
+        "value": "The user provided a clear, explicit instruction to update a specific file with defined content changes. No ambiguity or architectural complexity requires further probing."
+      }
+    },
+    {
+      "ordinal": 4,
+      "source": {
+        "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+        "line": 26,
+        "event_type": "injection_skipped"
+      },
+      "deliberation_start": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 21
+        }
+      },
+      "baseline_check": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 22
+        },
+        "baseline_available": true,
+        "baseline_supplied": false
+      },
+      "deliberation_telemetry": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 25
+        },
+        "baseline_available": true,
+        "baseline_supplied": false,
+        "usage_status": "complete"
+      },
+      "parsed_extracted_context": {
+        "available": true,
+        "value": {
+          "userRequirements": [
+            "Migrate the release-note workflow while maintaining downstream compatibility.",
+            "Changelog entries must be authored in Markdown (superseding previous YAML requirement).",
+            "Generated release summaries must retain `RELEASE_STREAM=stable`."
+          ],
+          "deliverables": [
+            "Updated PROJECT_STATE.md reflecting the new Markdown format requirement and applied status."
+          ],
+          "revisedOrSupersededDirection": [
+            "Previous requirement to author changelog entries in YAML has been superseded by Markdown.",
+            "Project status updated from 'Planning only' to 'Format migration decision applied'."
+          ],
+          "userDecisions": [
+            "Selected Markdown over YAML for changelog entry authoring.",
+            "Confirmed retention of the original migration objective and `RELEASE_STREAM=stable` compatibility constraint."
+          ],
+          "questionsAndInformationGaps": [],
+          "controlBoundaries": [
+            "Strict-Discuss mode is disabled.",
+            "Initial interaction was restricted to read-only analysis, but subsequent instructions allowed modification of PROJECT_STATE.md."
+          ],
+          "observedWork": [
+            "Summarized initial project state from PROJECT_STATE.md.",
+            "Updated PROJECT_STATE.md to reflect the switch from YAML to Markdown for changelogs and marked the decision as applied."
+          ],
+          "observedCriticalFacts": [
+            "The project involves a release-note migration workflow.",
+            "Downstream compatibility requires `RELEASE_STREAM=stable` in generated summaries.",
+            "The format migration decision has been formally recorded in the project state file."
+          ],
+          "relevantLearnings": [
+            "The user prioritizes Markdown for human-readable changelog authoring over YAML.",
+            "Compatibility constraints are strict regarding the release stream identifier."
+          ],
+          "deliberationNeeded": false,
+          "deliberationReason": "The user provided clear, explicit instructions to update the project state file, which was successfully executed without ambiguity or failure."
+        },
+        "canonical_json": "{\"controlBoundaries\":[\"Strict-Discuss mode is disabled.\",\"Initial interaction was restricted to read-only analysis, but subsequent instructions allowed modification of PROJECT_STATE.md.\"],\"deliberationNeeded\":false,\"deliberationReason\":\"The user provided clear, explicit instructions to update the project state file, which was successfully executed without ambiguity or failure.\",\"deliverables\":[\"Updated PROJECT_STATE.md reflecting the new Markdown format requirement and applied status.\"],\"observedCriticalFacts\":[\"The project involves a release-note migration workflow.\",\"Downstream compatibility requires `RELEASE_STREAM=stable` in generated summaries.\",\"The format migration decision has been formally recorded in the project state file.\"],\"observedWork\":[\"Summarized initial project state from PROJECT_STATE.md.\",\"Updated PROJECT_STATE.md to reflect the switch from YAML to Markdown for changelogs and marked the decision as applied.\"],\"questionsAndInformationGaps\":[],\"relevantLearnings\":[\"The user prioritizes Markdown for human-readable changelog authoring over YAML.\",\"Compatibility constraints are strict regarding the release stream identifier.\"],\"revisedOrSupersededDirection\":[\"Previous requirement to author changelog entries in YAML has been superseded by Markdown.\",\"Project status updated from 'Planning only' to 'Format migration decision applied'.\"],\"userDecisions\":[\"Selected Markdown over YAML for changelog entry authoring.\",\"Confirmed retention of the original migration objective and `RELEASE_STREAM=stable` compatibility constraint.\"],\"userRequirements\":[\"Migrate the release-note workflow while maintaining downstream compatibility.\",\"Changelog entries must be authored in Markdown (superseding previous YAML requirement).\",\"Generated release summaries must retain `RELEASE_STREAM=stable`.\"]}",
+        "sha256": "332d45dc96e1e9e2123cf8256b8b8bf28cc37769c9210e5a3843ecbb6a1db046"
+      },
+      "raw_extraction_model_text": {
+        "available": false,
+        "reason": "not emitted by frozen production telemetry"
+      },
+      "exact_supplied_baseline_payload": {
+        "available": false,
+        "reason": "not emitted by frozen production telemetry"
+      },
+      "governor_reason": {
+        "available": true,
+        "value": "The user provided clear, explicit instructions to update the project state file, which was successfully executed without ambiguity or failure."
+      }
+    },
+    {
+      "ordinal": 5,
+      "source": {
+        "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+        "line": 33,
+        "event_type": "injection_skipped"
+      },
+      "deliberation_start": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 28
+        }
+      },
+      "baseline_check": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 29
+        },
+        "baseline_available": true,
+        "baseline_supplied": false
+      },
+      "deliberation_telemetry": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 32
+        },
+        "baseline_available": true,
+        "baseline_supplied": false,
+        "usage_status": "complete"
+      },
+      "parsed_extracted_context": {
+        "available": true,
+        "value": {
+          "userRequirements": [
+            "Changelog entries must be authored in Markdown.",
+            "Generated release summaries must retain RELEASE_STREAM=stable.",
+            "Downstream release summaries must remain compatible (no breaking changes)."
+          ],
+          "deliverables": [
+            "Updated PROJECT_STATE.md reflecting the format change and status update."
+          ],
+          "revisedOrSupersededDirection": [
+            "Requirement to author changelog entries in YAML was superseded by the decision to use Markdown."
+          ],
+          "userDecisions": [
+            "Replace YAML changelog requirement with Markdown.",
+            "Keep release-note migration objective and RELEASE_STREAM=stable compatibility requirement unchanged.",
+            "Mark the format migration decision as applied in PROJECT_STATE.md."
+          ],
+          "questionsAndInformationGaps": [],
+          "controlBoundaries": [
+            "Strict-Discuss mode disabled.",
+            "Read-only mode requested for the final verification step (Do not make further edits)."
+          ],
+          "observedWork": [
+            "Initial PROJECT_STATE.md analysis completed.",
+            "PROJECT_STATE.md edited to switch changelog format from YAML to Markdown.",
+            "Status field in PROJECT_STATE.md updated to reflect applied format migration."
+          ],
+          "observedCriticalFacts": [
+            "Original changelog format was YAML.",
+            "New changelog format is Markdown.",
+            "RELEASE_STREAM=stable constraint remains active.",
+            "Project status is 'Format migration decision applied'."
+          ],
+          "relevantLearnings": [
+            "User prefers explicit confirmation of state changes via re-reading and reporting specific fields."
+          ],
+          "deliberationNeeded": false,
+          "deliberationReason": "The user request is a straightforward verification task to confirm previous edits were successful. No ambiguity or architectural complexity exists."
+        },
+        "canonical_json": "{\"controlBoundaries\":[\"Strict-Discuss mode disabled.\",\"Read-only mode requested for the final verification step (Do not make further edits).\"],\"deliberationNeeded\":false,\"deliberationReason\":\"The user request is a straightforward verification task to confirm previous edits were successful. No ambiguity or architectural complexity exists.\",\"deliverables\":[\"Updated PROJECT_STATE.md reflecting the format change and status update.\"],\"observedCriticalFacts\":[\"Original changelog format was YAML.\",\"New changelog format is Markdown.\",\"RELEASE_STREAM=stable constraint remains active.\",\"Project status is 'Format migration decision applied'.\"],\"observedWork\":[\"Initial PROJECT_STATE.md analysis completed.\",\"PROJECT_STATE.md edited to switch changelog format from YAML to Markdown.\",\"Status field in PROJECT_STATE.md updated to reflect applied format migration.\"],\"questionsAndInformationGaps\":[],\"relevantLearnings\":[\"User prefers explicit confirmation of state changes via re-reading and reporting specific fields.\"],\"revisedOrSupersededDirection\":[\"Requirement to author changelog entries in YAML was superseded by the decision to use Markdown.\"],\"userDecisions\":[\"Replace YAML changelog requirement with Markdown.\",\"Keep release-note migration objective and RELEASE_STREAM=stable compatibility requirement unchanged.\",\"Mark the format migration decision as applied in PROJECT_STATE.md.\"],\"userRequirements\":[\"Changelog entries must be authored in Markdown.\",\"Generated release summaries must retain RELEASE_STREAM=stable.\",\"Downstream release summaries must remain compatible (no breaking changes).\"]}",
+        "sha256": "add3da3db7ae29b4e97e5605ec320167595dff0011d211267ece9fb886dc5c24"
+      },
+      "raw_extraction_model_text": {
+        "available": false,
+        "reason": "not emitted by frozen production telemetry"
+      },
+      "exact_supplied_baseline_payload": {
+        "available": false,
+        "reason": "not emitted by frozen production telemetry"
+      },
+      "governor_reason": {
+        "available": true,
+        "value": "The user request is a straightforward verification task to confirm previous edits were successful. No ambiguity or architectural complexity exists."
+      }
+    },
+    {
+      "ordinal": 6,
+      "source": {
+        "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+        "line": 39,
+        "event_type": "injection_skipped"
+      },
+      "deliberation_start": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 34
+        }
+      },
+      "baseline_check": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 35
+        },
+        "baseline_available": true,
+        "baseline_supplied": false
+      },
+      "deliberation_telemetry": {
+        "paired_by_ordinal": true,
+        "source": {
+          "file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+          "line": 38
+        },
+        "baseline_available": true,
+        "baseline_supplied": false,
+        "usage_status": "complete"
+      },
+      "parsed_extracted_context": {
+        "available": true,
+        "value": {
+          "userRequirements": [
+            "Migrate the release-note workflow while ensuring downstream release summaries remain compatible.",
+            "Author changelog entries in Markdown format.",
+            "Generated release summaries must strictly retain `RELEASE_STREAM=stable`."
+          ],
+          "deliverables": [
+            "Updated PROJECT_STATE.md reflecting the new format requirement and status."
+          ],
+          "revisedOrSupersededDirection": [
+            "Requirement to author changelog entries in YAML was superseded by the decision to use Markdown.",
+            "Status 'Planning only' was superseded by 'Format migration decision applied'."
+          ],
+          "userDecisions": [
+            "Switched changelog entry format from YAML to Markdown.",
+            "Confirmed that the release-note migration objective and RELEASE_STREAM=stable compatibility constraint remain unchanged."
+          ],
+          "questionsAndInformationGaps": [],
+          "controlBoundaries": [
+            "Strict-Discuss mode disabled.",
+            "User requested no further edits after the last update."
+          ],
+          "observedWork": [
+            "Read initial PROJECT_STATE.md to summarize objectives and constraints.",
+            "Edited PROJECT_STATE.md to reflect the switch from YAML to Markdown and update status.",
+            "Re-read and reported the final state of PROJECT_STATE.md confirming the updates."
+          ],
+          "observedCriticalFacts": [
+            "Changelog entries are now required to be in Markdown.",
+            "Release stream stability (`RELEASE_STREAM=stable`) is a non-negotiable compatibility constraint.",
+            "The format migration decision is marked as applied in the project state."
+          ],
+          "relevantLearnings": [
+            "Project state management involves explicit tracking of format migrations and their application status."
+          ],
+          "deliberationNeeded": false,
+          "deliberationReason": "The task involved clear administrative updates to a project state file based on explicit user instructions, which have been completed and verified. No ambiguous requirements or code modifications requiring testing are present."
+        },
+        "canonical_json": "{\"controlBoundaries\":[\"Strict-Discuss mode disabled.\",\"User requested no further edits after the last update.\"],\"deliberationNeeded\":false,\"deliberationReason\":\"The task involved clear administrative updates to a project state file based on explicit user instructions, which have been completed and verified. No ambiguous requirements or code modifications requiring testing are present.\",\"deliverables\":[\"Updated PROJECT_STATE.md reflecting the new format requirement and status.\"],\"observedCriticalFacts\":[\"Changelog entries are now required to be in Markdown.\",\"Release stream stability (`RELEASE_STREAM=stable`) is a non-negotiable compatibility constraint.\",\"The format migration decision is marked as applied in the project state.\"],\"observedWork\":[\"Read initial PROJECT_STATE.md to summarize objectives and constraints.\",\"Edited PROJECT_STATE.md to reflect the switch from YAML to Markdown and update status.\",\"Re-read and reported the final state of PROJECT_STATE.md confirming the updates.\"],\"questionsAndInformationGaps\":[],\"relevantLearnings\":[\"Project state management involves explicit tracking of format migrations and their application status.\"],\"revisedOrSupersededDirection\":[\"Requirement to author changelog entries in YAML was superseded by the decision to use Markdown.\",\"Status 'Planning only' was superseded by 'Format migration decision applied'.\"],\"userDecisions\":[\"Switched changelog entry format from YAML to Markdown.\",\"Confirmed that the release-note migration objective and RELEASE_STREAM=stable compatibility constraint remain unchanged.\"],\"userRequirements\":[\"Migrate the release-note workflow while ensuring downstream release summaries remain compatible.\",\"Author changelog entries in Markdown format.\",\"Generated release summaries must strictly retain `RELEASE_STREAM=stable`.\"]}",
+        "sha256": "2aa7c688d9ab7289d91b1067e79b3ae0bb84b309e0b5be1d67c121b701bf7241"
+      },
+      "raw_extraction_model_text": {
+        "available": false,
+        "reason": "not emitted by frozen production telemetry"
+      },
+      "exact_supplied_baseline_payload": {
+        "available": false,
+        "reason": "not emitted by frozen production telemetry"
+      },
+      "governor_reason": {
+        "available": true,
+        "value": "The task involved clear administrative updates to a project state file based on explicit user instructions, which have been completed and verified. No ambiguous requirements or code modifications requiring testing are present."
+      }
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "run_id": "c01-prestagec-a1-r1",
+  "files": [
+    {
+      "path": "c01-scenario-metadata.json",
+      "sha256": "a9f1ceeca665a5186b07e2983b6adc48485c050fa55862ff62a808db8d8dd80b",
+      "size": 633
+    },
+    {
+      "path": "combined-directional.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "d1-facts.json",
+      "sha256": "74c1a32bf3ffb57b95b0ff3f26116aadbeec5bbeb7519ad4df1460d79a2d1f26",
+      "size": 97
+    },
+    {
+      "path": "d2-capture.json",
+      "sha256": "9ab86c17bc75d51c30f09fd4e996afc4ca54a11e564ec324bbdb3bd97ecbbe0a",
+      "size": 418
+    },
+    {
+      "path": "fixture-after/PROJECT_STATE.md",
+      "sha256": "97b9cf745d6fe55dab5d2fd3516f239ddbb63cb127ee0e7864b13d1e183e67a0",
+      "size": 323
+    },
+    {
+      "path": "fixture-after.diff",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "fixture-before/PROJECT_STATE.md",
+      "sha256": "97b9cf745d6fe55dab5d2fd3516f239ddbb63cb127ee0e7864b13d1e183e67a0",
+      "size": 323
+    },
+    {
+      "path": "manifest.json",
+      "sha256": "0e6babbd86d9dab948efc6ef97cd033cec79d413c246c117e6e8cbd863e12571",
+      "size": 3504
+    },
+    {
+      "path": "outgoing-commands.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-incoming.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "result.json",
+      "sha256": "6985949efca9e6573060c91ed5247f69a1bb81e5df0aedcf6ffe65a804d951c7",
+      "size": 11907
+    },
+    {
+      "path": "rpc-stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "verdict.json",
+      "sha256": "75a274164eb2b176adf012c7c027a072d22367b2be5fe819f07abdda9608afd3",
+      "size": 6523
+    }
+  ],
+  "coverage": {
+    "total_files": 13,
+    "total_bytes": 23728
+  }
+}

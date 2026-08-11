@@ -1,0 +1,39 @@
+{
+  "id": "state_final",
+  "type": "response",
+  "command": "get_state",
+  "success": true,
+  "data": {
+    "model": {
+      "id": "qwen36-27b-nvidia-nvfp4",
+      "name": "qwen36-27b-nvidia-nvfp4",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1048576,
+      "maxTokens": 32768,
+      "api": "openai-completions",
+      "provider": "olla",
+      "baseUrl": "http://pluto:40114/olla/openai/v1"
+    },
+    "thinkingLevel": "off",
+    "isStreaming": false,
+    "isCompacting": false,
+    "steeringMode": "one-at-a-time",
+    "followUpMode": "one-at-a-time",
+    "sessionFile": "/tmp/parcour-c01-prestagec-a1-r1b/sessions/2026-08-11T12-48-42-768Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+    "sessionId": "019ff0de-3710-7ddd-9e9e-1843bda8d102",
+    "sessionName": "c01-c01-prestagec-a1-r1b-rep1",
+    "autoCompactionEnabled": true,
+    "messageCount": 13,
+    "pendingMessageCount": 0
+  }
+}
