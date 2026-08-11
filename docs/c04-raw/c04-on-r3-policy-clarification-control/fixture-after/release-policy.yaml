@@ -1,0 +1,4 @@
+# legacy-yaml-approval: All releases must pass manual YAML review
+# and sign-off from the release manager before merging.
+current_policy: legacy-yaml-approval
+compatibility: RELEASE_STREAM=stable

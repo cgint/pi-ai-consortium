@@ -1,0 +1,9 @@
+{
+  "id": "text_final",
+  "type": "response",
+  "command": "get_last_assistant_text",
+  "success": true,
+  "data": {
+    "text": "The current policy remains:\n\n- **Policy:** `legacy-yaml-approval`\n- **Compatibility:** `RELEASE_STREAM=stable`\n\nThe clarifying comments added earlier are now present alongside the unchanged policy settings."
+  }
+}

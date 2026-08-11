@@ -1,0 +1,7 @@
+# Historical context: legacy-yaml-approval was retired and replaced by markdown-reviewed-approval.
+retired_policy:
+  name: legacy-yaml-approval
+  status: retired
+
+current_policy: markdown-reviewed-approval
+compatibility: RELEASE_STREAM=stable

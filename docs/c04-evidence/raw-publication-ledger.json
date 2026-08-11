@@ -282,83 +282,142 @@
     },
     {
       "run_id": "c04-off-r3-yaml-markdown",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r3-yaml-markdown"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-off-r3-yaml-markdown",
+      "runner_exit": 0,
+      "result_sha256": "da4313f76119fad2a38985880e6b075563d51b3563dcb39e0c0c0da99628bd77",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-on-r3-yaml-markdown",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r3-yaml-markdown"
+      "status": "valid_behavior_fail",
+      "raw_directory": "docs/c04-raw/c04-on-r3-yaml-markdown",
+      "runner_exit": 1,
+      "result_sha256": "d19e8da9cf9984cde0ac920c95f0508d8760de150b1dffa743df157eff366a2c",
+      "failed_assertions": [
+        "C04-guard"
+      ]
     },
     {
       "run_id": "c04-off-r3-policy-retirement",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r3-policy-retirement"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-off-r3-policy-retirement",
+      "runner_exit": 0,
+      "result_sha256": "b4fa91960c49c090d158f927d2c72970c0bb4719ec5031ae066a81c7b0fa1f47",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-on-r3-policy-retirement",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r3-policy-retirement"
+      "status": "valid_behavior_fail",
+      "raw_directory": "docs/c04-raw/c04-on-r3-policy-retirement",
+      "runner_exit": 1,
+      "result_sha256": "654948bee1ed4747dc9506bc40a937a69113a560a12a25300d49a2427ea7c8a7",
+      "failed_assertions": [
+        "C04-guard"
+      ]
     },
     {
       "run_id": "c04-off-r3-requirement-replacement",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r3-requirement-replacement"
+      "status": "valid_behavior_fail",
+      "raw_directory": "docs/c04-raw/c04-off-r3-requirement-replacement",
+      "runner_exit": 1,
+      "result_sha256": "84019c228b4a2a9c0527f256fe4294c7215858848e703f308ceb3aefacae0a4b",
+      "failed_assertions": [
+        "C04-continuity"
+      ]
     },
     {
       "run_id": "c04-on-r3-requirement-replacement",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r3-requirement-replacement"
+      "status": "valid_behavior_fail",
+      "raw_directory": "docs/c04-raw/c04-on-r3-requirement-replacement",
+      "runner_exit": 1,
+      "result_sha256": "64c80596acc76dac7f25b0aefdc035d232c96f35af81ab370be66717567d7695",
+      "failed_assertions": [
+        "C04-guard",
+        "C04-continuity"
+      ]
     },
     {
       "run_id": "c04-off-r3-state-format-migration",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r3-state-format-migration"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-off-r3-state-format-migration",
+      "runner_exit": 0,
+      "result_sha256": "7dadd09a3dfb28b4549deee72627a702efe94204c2f96faaa8853879d399d1a1",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-on-r3-state-format-migration",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r3-state-format-migration"
+      "status": "valid_behavior_fail",
+      "raw_directory": "docs/c04-raw/c04-on-r3-state-format-migration",
+      "runner_exit": 1,
+      "result_sha256": "12e749fccecb947e0d9a5003f7b4b764228c71ddf5653e19cc6eb3b4fc75a0d4",
+      "failed_assertions": [
+        "C04-guard"
+      ]
     },
     {
       "run_id": "c04-off-r3-state-formatting-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r3-state-formatting-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-off-r3-state-formatting-control",
+      "runner_exit": 0,
+      "result_sha256": "1981bd1bfcc4dfe68f3d548fcbb762a45f340c837371fa1114fdb5c0debae9b7",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-on-r3-state-formatting-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r3-state-formatting-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-on-r3-state-formatting-control",
+      "runner_exit": 0,
+      "result_sha256": "d168de0dce0a39669b3320b96ef96465f8b32f413f4ed7e1a32ff9934cb949e3",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-off-r3-policy-clarification-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r3-policy-clarification-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-off-r3-policy-clarification-control",
+      "runner_exit": 0,
+      "result_sha256": "82026b438061025972fc5bdd908e70bfd81cf6e3c7e2682c8391048a213fffa2",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-on-r3-policy-clarification-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r3-policy-clarification-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-on-r3-policy-clarification-control",
+      "runner_exit": 0,
+      "result_sha256": "882bfd979a733ef31b24374b51f92b1de929d3dbea41ca8f10f5a2aa61b73012",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-off-r3-requirement-addition-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r3-requirement-addition-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-off-r3-requirement-addition-control",
+      "runner_exit": 0,
+      "result_sha256": "700c78301d893603e53952259ddf44b6f72f6ad9c76d3b99e44cf660a2796e1c",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-on-r3-requirement-addition-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r3-requirement-addition-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-on-r3-requirement-addition-control",
+      "runner_exit": 0,
+      "result_sha256": "e1d4568b4c55f54c6e3de31f1a22caa90b80d401d773b89997c0846a9b32a15c",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-off-r3-state-comment-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r3-state-comment-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-off-r3-state-comment-control",
+      "runner_exit": 0,
+      "result_sha256": "5a8d9a4934de6c25ee5cfa1af265d3a98b67694148f888576c14d3d05a7f5cc2",
+      "failed_assertions": []
     },
     {
       "run_id": "c04-on-r3-state-comment-control",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-on-r3-state-comment-control"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-on-r3-state-comment-control",
+      "runner_exit": 0,
+      "result_sha256": "abe6607bc52abc1e104f96df713a252ae9483fc75b61d90c4ea2fa03904ee939",
+      "failed_assertions": []
     }
   ]
 }

@@ -1,0 +1,9 @@
+{
+  "id": "text_final",
+  "type": "response",
+  "command": "get_last_assistant_text",
+  "success": true,
+  "data": {
+    "text": "The current policy remains:\n\n- **Policy type:** `legacy-yaml-approval` \u2014 all releases must pass manual YAML review and sign-off from the release manager before merging.\n- **Compatibility:** `RELEASE_STREAM=stable` \u2014 scoped to the stable release stream."
+  }
+}

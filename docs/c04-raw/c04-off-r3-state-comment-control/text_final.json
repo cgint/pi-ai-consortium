@@ -1,0 +1,9 @@
+{
+  "id": "text_final",
+  "type": "response",
+  "command": "get_last_assistant_text",
+  "success": true,
+  "data": {
+    "text": "The current format is **`yaml-state-v1`**, described in the comment as \"the first YAML-based state format, used for stable releases.\" Compatibility remains set to `RELEASE_STREAM=stable`."
+  }
+}

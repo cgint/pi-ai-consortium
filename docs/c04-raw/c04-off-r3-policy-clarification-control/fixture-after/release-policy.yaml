@@ -1,0 +1,4 @@
+# legacy-yaml-approval: Uses a legacy YAML-based manual approval gate for releases.
+# All changes must pass review and explicit sign-off before merging to the stable branch.
+current_policy: legacy-yaml-approval
+compatibility: RELEASE_STREAM=stable

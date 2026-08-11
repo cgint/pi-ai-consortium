@@ -1,0 +1,5 @@
+# Historical context (no longer active):
+# yaml-state-v1 was the previous state format.
+
+current_format: markdown-state-v2
+compatibility: RELEASE_STREAM=stable

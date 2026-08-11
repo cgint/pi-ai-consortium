@@ -1,0 +1,6 @@
+# yaml-state-v1: The initial YAML-based state format used for serializing
+# agent workspace state. It provides a human-readable representation of the
+# current session context, including conversation history, file references,
+# and tool invocation records.
+current_format: yaml-state-v1
+compatibility: RELEASE_STREAM=stable
