@@ -3,8 +3,9 @@
   "runs": [
     {
       "run_id": "c04-off-r1-yaml-markdown",
-      "status": "unconsumed",
-      "raw_directory": "docs/c04-raw/c04-off-r1-yaml-markdown"
+      "status": "valid_pass",
+      "raw_directory": "docs/c04-raw/c04-off-r1-yaml-markdown",
+      "result_sha256": "279db4d387c19e35c918169c839e37d9d48774d73ba7ca35892a4a70c54fa650"
     },
     {
       "run_id": "c04-on-r1-yaml-markdown",
