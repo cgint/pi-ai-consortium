@@ -23,6 +23,14 @@ class C01RunnerTests(unittest.TestCase):
         self.assertEqual(len(runner.PROMPTS), 3)
         self.assertIn("replace the YAML changelog requirement with Markdown", runner.PROMPTS[1])
 
+    def test_amended_a1_replacement_and_runtime_contract(self):
+        self.assertEqual(runner.CELL_SPECS["A1"]["run_id"], "c01-prestagec-a1-r1b")
+        self.assertEqual(runner.C01_PI_VERSION, "0.84.1")
+        self.assertTrue(runner.is_allowed_c01_node_version("v22.23.1"))
+        self.assertTrue(runner.is_allowed_c01_node_version("v22.23.2"))
+        self.assertFalse(runner.is_allowed_c01_node_version("v22.24.0"))
+        self.assertFalse(runner.is_allowed_c01_node_version("v22.23"))
+
     def test_alias_map_covers_every_frozen_checkpoint_run_path(self):
         alias_path = runner.HERE / "alias-maps" / "c01-revision-continuity.json"
         literals = json.loads(alias_path.read_text())["literals"]

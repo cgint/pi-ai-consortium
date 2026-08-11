@@ -72,6 +72,20 @@ for _checkpoint, _cells in CHECKPOINT_SCHEDULES.items():
             "repetition": _repetition,
             "run_id": f"c01-{CHECKPOINT_SLUGS[_checkpoint]}-{_cell.lower()}-r{_repetition}",
         }
+# The original A1 was infrastructure-invalid before prompt delivery; its replacement
+# keeps the A1 arm/repetition while making path reuse impossible.
+RUN_SPECS["pre-stage-c"]["A1"]["run_id"] = "c01-prestagec-a1-r1b"
+
+# C01 owns this prospective runtime envelope.  Phase 0.5 remains frozen as an
+# imported helper and is not reinterpreted by this amendment.
+C01_PI_VERSION = "0.84.1"
+C01_NODE_VERSION_PATTERN = r"v22\.23\.\d+"
+
+
+def is_allowed_c01_node_version(version: str) -> bool:
+    return re.fullmatch(C01_NODE_VERSION_PATTERN, version) is not None
+
+
 # Compatibility name for pre-Stage-C tests and reporting.
 CELL_SPECS = RUN_SPECS["pre-stage-c"]
 
@@ -514,8 +528,8 @@ class C01Runner(p.Phase05Runner):
             "template_tree": p._git_tree(REPO_ROOT, ".parcour-runs-templates/c01-revision-continuity") == TEMPLATE_TREE,
             "workspace_tree": p._git_tree(REPO_ROOT, ".parcour-runs-templates/c01-revision-continuity/workspace") == WORKSPACE_TREE,
             "content_manifest": p._content_manifest(TEMPLATE_WORKSPACE) == CONTENT_MANIFEST,
-            "pi_version": pi_version["exit_code"] == 0 and pi_version["output"].strip() == p.PI_VERSION,
-            "node_version": node_version["exit_code"] == 0 and node_version["output"].strip() == p.NODE_VERSION,
+            "pi_version": pi_version["exit_code"] == 0 and pi_version["output"].strip() == C01_PI_VERSION,
+            "node_version": node_version["exit_code"] == 0 and is_allowed_c01_node_version(node_version["output"].strip()),
             "pi_package_versions": all(package_versions[name] == p.PI_PACKAGE_VERSION for name in ("pi-ai", "pi-agent-core", "pi-coding-agent")),
             "write_guard_absolute": Path(command[command.index("--write-guard") + 1]).is_absolute(),
             "dm_off": "--dm-off" in command,
@@ -534,6 +548,8 @@ class C01Runner(p.Phase05Runner):
                 "contract_sha256": self.expected_contract_sha, "product_commit": self.product_commit,
             },
             "repository_status": status, "provider_status": provider_status, "focus_status": focus_status,
+            "runtime_identity_contract": {"pi_cli": C01_PI_VERSION, "node_cli_pattern": C01_NODE_VERSION_PATTERN},
+            "runtime_versions": {"pi_cli": pi_version, "node_cli": node_version},
             "package_versions": package_versions,
             "identity_checks": checks, "template_content_manifest": p._content_manifest(TEMPLATE_WORKSPACE),
             "workspace_content_manifest_before": p._content_manifest(self.workspace),

@@ -15,7 +15,7 @@
     },
     {
       "path": "scripts/behavioral-parcour/alias-maps/c01-revision-continuity.json",
-      "sha256": "e53812fa5e6f6dc9be8c4644377e8cb3bb5115f441a65141a9eb27d9a1211c45"
+      "sha256": "0e58f0ab7e80ca9f1305debf32fcfcb43b7bf2c2dd500e5dffeab51c834a4f34"
     },
     {
       "path": "scripts/behavioral-parcour/c01-fixtures/negative.session.jsonl",
@@ -47,7 +47,7 @@
     },
     {
       "path": "scripts/behavioral-parcour/test_c01_runner.py",
-      "sha256": "90cf2a45d62ab5de0c32ca7882652958fa732f1d9c8956e3495fd54fe8ff5a44"
+      "sha256": "d9355b483dad1e094968c0482f95255cf54bc0aa6586ea5dff224764898fdf2a"
     }
   ]
 }
