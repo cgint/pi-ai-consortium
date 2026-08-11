@@ -3,8 +3,9 @@
   "runs": [
     {
       "run_id": "c03-off-r1-yaml-markdown",
-      "status": "unconsumed",
-      "raw_directory": "docs/c03-raw/c03-off-r1-yaml-markdown"
+      "status": "harness_invalid_consumed",
+      "raw_directory": "docs/c03-raw/c03-off-r1-yaml-markdown",
+      "reason": "frozen validator expected get_state.data.provider/modelId but Pi 0.84.1 returned get_state.data.model.provider/id"
     },
     {
       "run_id": "c03-on-r1-yaml-markdown",

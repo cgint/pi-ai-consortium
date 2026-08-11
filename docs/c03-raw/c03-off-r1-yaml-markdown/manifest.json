@@ -1,0 +1,90 @@
+{
+  "schema_version": "c03-run-manifest-v1",
+  "run_id": "c03-off-r1-yaml-markdown",
+  "arm": "off",
+  "repetition": 1,
+  "fixture_id": "yaml-markdown",
+  "fixture_kind": "positive",
+  "started_at": "2026-08-11T18:27:41.132984+00:00",
+  "workspace": "/tmp/parcour-c03-off-r1-yaml-markdown/workspace",
+  "runtime_root": "/tmp/parcour-c03-off-r1-yaml-markdown",
+  "argv": [
+    "pi",
+    "--mode",
+    "rpc",
+    "--no-context-files",
+    "--no-skills",
+    "--no-prompt-templates",
+    "--no-extensions",
+    "--tools",
+    "read,edit,grep,find,ls",
+    "-e",
+    "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-olla-autodetect/index.ts",
+    "-e",
+    "/Users/cgint/dev-external/pi-ai-consortium/index.ts",
+    "-e",
+    "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-focus-guard/index.ts",
+    "--provider",
+    "8081-twins",
+    "--model",
+    "qwen36-27b-nvidia-nvfp4",
+    "--thinking",
+    "off",
+    "--dm-off",
+    "--write-guard",
+    "/tmp/parcour-c03-off-r1-yaml-markdown/workspace",
+    "--approve",
+    "--session-dir",
+    "/tmp/parcour-c03-off-r1-yaml-markdown/sessions",
+    "--name",
+    "c03-off-r1-yaml-markdown"
+  ],
+  "expected": {
+    "freeze_commit": "486882ab8ebdad7b64fe62afec63e3a0064660a3",
+    "runner_sha256": "154d980124e2ad3c35d981d5b075b756bee4943acd62da0fb5e8b3c361644a80",
+    "corpus_sha256": "d8d5063903bef6d3e6b27c3b90bc17bed5e895b20443d01829bce58571829a82",
+    "contract_sha256": "174fa2b807a093b20bc5314d4e2a9543192c805af14d74e2d28e299dae785030",
+    "review_session_sha256": "5bc2560a69bf15284dba6a8005b9fb0c66eaa2781f3d67c4497c018c64493faa"
+  },
+  "runtime_versions": {
+    "pi_cli": {
+      "command": [
+        "pi",
+        "--version"
+      ],
+      "exit_code": 0,
+      "output": "0.84.1\n"
+    },
+    "node_cli": {
+      "command": [
+        "node",
+        "--version"
+      ],
+      "exit_code": 0,
+      "output": "v22.23.2\n"
+    }
+  },
+  "child_environment": {
+    "CONSORTIUM_MODEL": "8081-twins/qwen36-27b-nvidia-nvfp4",
+    "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "identity_checks": {
+    "contract_nonempty": true,
+    "review_identity_and_verdict": true,
+    "review_after_freeze_before_preflight": true,
+    "pi_version": true,
+    "node_version": true,
+    "executor_provider": true,
+    "executor_model": true,
+    "executor_thinking": true,
+    "effective_consortium_model": true,
+    "extension_order": true,
+    "publication_ledger": true,
+    "workspace_guard_setting": true
+  },
+  "workspace_guard_setting": false,
+  "ended_at": "2026-08-11T18:28:18.245021+00:00",
+  "wall_clock_ms": 37106.7,
+  "process_returncode": 0,
+  "live_boundary_timestamp": "2026-08-11T18:27:42.743477+00:00"
+}
