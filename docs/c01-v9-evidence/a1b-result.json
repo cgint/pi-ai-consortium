@@ -1,0 +1,531 @@
+{
+  "schema_version": "c01-run-result-v1",
+  "run_id": "c01-prestagec-a1-r1b",
+  "checkpoint": "pre-stage-c",
+  "cell": "A1",
+  "arm": "active",
+  "repetition": 1,
+  "pass": false,
+  "process_returncode": 0,
+  "wall_clock_ms": 43197.3,
+  "prompts_delivered": 3,
+  "timeout_occurred": false,
+  "exception": null,
+  "assertions": [
+    {
+      "id": "C01-process-exit",
+      "requirement": "Pi process exited cleanly",
+      "pass": true,
+      "details": "Exit code 0",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C01-process-exit"
+        }
+      ]
+    },
+    {
+      "id": "C02-provider",
+      "requirement": "Provider exact",
+      "pass": true,
+      "details": "initial=provider=olla; final=provider=olla",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C02-provider"
+        }
+      ]
+    },
+    {
+      "id": "C03-model",
+      "requirement": "Model exact",
+      "pass": true,
+      "details": "initial=model=qwen36-27b-nvidia-nvfp4; final=model=qwen36-27b-nvidia-nvfp4",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C03-model"
+        }
+      ]
+    },
+    {
+      "id": "C04-thinking",
+      "requirement": "Thinking off",
+      "pass": true,
+      "details": "initial=thinkingLevel=off; final=thinkingLevel=off",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C04-thinking"
+        }
+      ]
+    },
+    {
+      "id": "C05-prompts",
+      "requirement": "Exactly three frozen prompts completed",
+      "pass": true,
+      "details": "prompts=3",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C05-prompts"
+        }
+      ]
+    },
+    {
+      "id": "C06-responses",
+      "requirement": "Initial, prompt, and final RPC responses successful",
+      "pass": true,
+      "details": "responses=['entries_final', 'get_commands', 'get_state', 'prompt_0', 'prompt_1', 'prompt_2', 'state_final', 'stats_final', 'text_final']",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C06-responses"
+        }
+      ]
+    },
+    {
+      "id": "C07-arm",
+      "requirement": "Exact active or disabled extension arm",
+      "pass": true,
+      "details": "arm=active; consortium_registered=True; focus_registered=True; consortium_events=39",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C07-arm"
+        }
+      ]
+    },
+    {
+      "id": "C08-extension-errors",
+      "requirement": "No extension error",
+      "pass": true,
+      "details": "No extension_error events",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C08-extension-errors"
+        }
+      ]
+    },
+    {
+      "id": "C09-protocol",
+      "requirement": "Protocol clean",
+      "pass": true,
+      "details": "Protocol clean",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C09-protocol"
+        }
+      ]
+    },
+    {
+      "id": "C10-compaction",
+      "requirement": "No compaction",
+      "pass": true,
+      "details": "No compaction detected",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C10-compaction"
+        }
+      ]
+    },
+    {
+      "id": "C11-confinement",
+      "requirement": "All agent tool paths confined",
+      "pass": true,
+      "details": "All 3 paths confined to workspace",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C11-confinement"
+        }
+      ]
+    },
+    {
+      "id": "C12-telemetry",
+      "requirement": "Arm-appropriate telemetry cardinality",
+      "pass": true,
+      "details": "starts=6 checks=6 finals=6",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C12-telemetry"
+        }
+      ]
+    },
+    {
+      "id": "C13-usage",
+      "requirement": "Arm-appropriate usage honesty",
+      "pass": true,
+      "details": "All usage fields consistent",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C13-usage"
+        }
+      ]
+    },
+    {
+      "id": "C14-d1",
+      "requirement": "Mechanical D1 facts recorded without per-run target",
+      "pass": true,
+      "details": "eligible=5 supplied=0; matrix target not applied per run",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C14-d1"
+        }
+      ]
+    },
+    {
+      "id": "C15-injection",
+      "requirement": "Arm-appropriate injection operation recorded",
+      "pass": true,
+      "details": "M6 = 0/6 = 0.0",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C15-injection"
+        }
+      ]
+    },
+    {
+      "id": "C16-latency",
+      "requirement": "Wall clock and active model latency recorded",
+      "pass": true,
+      "details": "1 modelKey groups validated",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C16-latency"
+        }
+      ]
+    },
+    {
+      "id": "C17-extraction",
+      "requirement": "Active extraction validity counts recorded",
+      "pass": true,
+      "details": "total=6 invalid=0 empty=0 nonempty=6",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C17-extraction"
+        }
+      ]
+    },
+    {
+      "id": "C18-m8",
+      "requirement": "Session token totals valid",
+      "pass": true,
+      "details": "total=13778.0 = input+output+cacheRead+cacheWrite",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C18-m8"
+        }
+      ]
+    },
+    {
+      "id": "C19-fixture",
+      "requirement": "Mechanical objective markers satisfied",
+      "pass": false,
+      "details": "markers={'markdown': True, 'compatibility': True, 'objective': True, 'applied': True}; yaml_occurrences=1; yaml_historical=False",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C19-fixture"
+        }
+      ]
+    },
+    {
+      "id": "C20-final-text",
+      "requirement": "Final report contains current, preserved, superseded markers",
+      "pass": true,
+      "details": "markdown/stable/yaml/superseded markers=True",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C20-final-text"
+        }
+      ]
+    },
+    {
+      "id": "C21-path-diff",
+      "requirement": "Only PROJECT_STATE.md changed outside .pi",
+      "pass": true,
+      "details": "changed=['PROJECT_STATE.md']; target_present=True",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C21-path-diff"
+        }
+      ]
+    },
+    {
+      "id": "C22-d2-capture",
+      "requirement": "D2 capture-only artifact complete and label-free",
+      "pass": true,
+      "details": "arm=active; observations=6; bytes=25384",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C22-d2-capture"
+        }
+      ]
+    },
+    {
+      "id": "C23-identities",
+      "requirement": "All frozen and runtime identities match",
+      "pass": true,
+      "details": "34/34; failed=[]",
+      "evidence": [
+        {
+          "file": "result.json",
+          "assertion": "C23-identities"
+        }
+      ]
+    }
+  ],
+  "d1": {
+    "status": "descriptive_pre_stage_c",
+    "denominator": 5,
+    "numerator": 0,
+    "records": [
+      {
+        "source_file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+        "source_line": 3,
+        "baseline_available": false,
+        "baseline_supplied": false
+      },
+      {
+        "source_file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+        "source_line": 9,
+        "baseline_available": true,
+        "baseline_supplied": false
+      },
+      {
+        "source_file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+        "source_line": 16,
+        "baseline_available": true,
+        "baseline_supplied": false
+      },
+      {
+        "source_file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+        "source_line": 22,
+        "baseline_available": true,
+        "baseline_supplied": false
+      },
+      {
+        "source_file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+        "source_line": 29,
+        "baseline_available": true,
+        "baseline_supplied": false
+      },
+      {
+        "source_file": "2026-08-11T12-48-43-201Z_019ff0de-3710-7ddd-9e9e-1843bda8d102.jsonl",
+        "source_line": 35,
+        "baseline_available": true,
+        "baseline_supplied": false
+      }
+    ]
+  },
+  "d2_capture_status": "capture_only_unscored",
+  "metrics": {
+    "m6": {
+      "complete": 0,
+      "skipped": 6,
+      "denominator": 6,
+      "rate": 0.0,
+      "rate_label": "0/6",
+      "skip_reason_histogram": {
+        "The request is a straightforward read-and-summarize task with clear constraints and no ambiguity regarding the immediate action.": 1,
+        "The user requested a summary of existing state without modification; no ambiguous requirements or failed operations detected.": 1,
+        "The user provided a clear, explicit instruction to update a specific file with defined content changes. No ambiguity or architectural complexity requires further probing.": 1,
+        "The user provided clear, explicit instructions to update the project state file, which was successfully executed without ambiguity or failure.": 1,
+        "The user request is a straightforward verification task to confirm previous edits were successful. No ambiguity or architectural complexity exists.": 1,
+        "The task involved clear administrative updates to a project state file based on explicit user instructions, which have been completed and verified. No ambiguous requirements or code modifications requiring testing are present.": 1
+      },
+      "turn_start_count": 3,
+      "deliberation_start_count": 6,
+      "scripted_prompt_count": 3,
+      "schema_failures": []
+    },
+    "m7a": {
+      "groups": {
+        "extraction": {
+          "n": 6,
+          "min": 3618.0,
+          "max": 7034.0,
+          "p50": 6278.0,
+          "p95": 7034.0
+        }
+      },
+      "run_wall_clock_ms": 43197.3
+    },
+    "m7b": {
+      "invalid": 0,
+      "empty": 0,
+      "nonempty": 6,
+      "total": 6
+    },
+    "m8": {
+      "input": 13354.0,
+      "output": 424.0,
+      "cacheRead": 0.0,
+      "cacheWrite": 0.0,
+      "total": 13778.0
+    }
+  },
+  "manifest": {
+    "schema_version": "c01-run-manifest-v1",
+    "run_id": "c01-prestagec-a1-r1b",
+    "checkpoint": "pre-stage-c",
+    "cell": "A1",
+    "arm": "active",
+    "repetition": 1,
+    "started_at": "2026-08-11T12:48:42.336562Z",
+    "workspace": "/tmp/parcour-c01-prestagec-a1-r1b/workspace",
+    "runtime_root": "/tmp/parcour-c01-prestagec-a1-r1b",
+    "argv": [
+      "pi",
+      "--mode",
+      "rpc",
+      "--no-context-files",
+      "--no-skills",
+      "--no-prompt-templates",
+      "--no-extensions",
+      "--tools",
+      "read,edit,grep,find,ls",
+      "-e",
+      "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-olla-autodetect/index.ts",
+      "-e",
+      "/Users/cgint/dev-external/pi-ai-consortium/.c01-worktrees/c01-v9/index.ts",
+      "-e",
+      "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-focus-guard/index.ts",
+      "--provider",
+      "olla",
+      "--model",
+      "qwen36-27b-nvidia-nvfp4",
+      "--thinking",
+      "off",
+      "--dm-off",
+      "--write-guard",
+      "/tmp/parcour-c01-prestagec-a1-r1b/workspace",
+      "--approve",
+      "--session-dir",
+      "/tmp/parcour-c01-prestagec-a1-r1b/sessions",
+      "--name",
+      "c01-c01-prestagec-a1-r1b-rep1"
+    ],
+    "expected": {
+      "addendum_commit": "9fe016cbe32a52b7671feab5cca7f34a5e591dbb",
+      "addendum_blob": "96d2292598a493193ff02191a5cbc5a636798c86",
+      "addendum_sha256": "29073457a06ed0816abacfddd7e4af7311aeb170ea1963baa476c206256f8e5e",
+      "runner_sha256": "10c05ec6a1b554536c9711b1eb78206e21bba92615ea61334a2b15f856464b59",
+      "contract_sha256": "d95916c63bf743944fc376f26395d6dba7e98ecbed8994e1e5b96b603565610c",
+      "product_commit": "bb0dacab57f9899a9205437086c343e76d5b5a98"
+    },
+    "repository_status": {
+      "command": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "exit_code": 0,
+      "output": ""
+    },
+    "provider_status": {
+      "command": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "exit_code": 0,
+      "output": " M package-lock.json\n"
+    },
+    "focus_status": {
+      "command": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "exit_code": 0,
+      "output": " M package-lock.json\n"
+    },
+    "runtime_identity_contract": {
+      "pi_cli": "0.84.1",
+      "node_cli_pattern": "v22\\.23\\.\\d+"
+    },
+    "runtime_versions": {
+      "pi_cli": {
+        "command": [
+          "pi",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "0.84.1\n"
+      },
+      "node_cli": {
+        "command": [
+          "node",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "v22.23.2\n"
+      }
+    },
+    "package_versions": {
+      "pi-ai": "0.81.1",
+      "pi-agent-core": "0.81.1",
+      "pi-coding-agent": "0.81.1",
+      "provider": "0.2.1",
+      "focus": "0.2.0"
+    },
+    "identity_checks": {
+      "frozen_product_commit": true,
+      "frozen_addendum_frozen_blob": true,
+      "frozen_addendum_HEAD_blob": true,
+      "frozen_addendum_sha256": true,
+      "frozen_runner_sha256": true,
+      "frozen_contract_sha256": true,
+      "frozen_scenario_blob": true,
+      "frozen_phase05_blob": true,
+      "frozen_phase05_sha256": true,
+      "implementation_clean": true,
+      "cell_mapping": true,
+      "provider_commit": true,
+      "provider_blob": true,
+      "provider_sha256": true,
+      "provider_dirty_state": true,
+      "provider_version": true,
+      "focus_commit": true,
+      "focus_blob": true,
+      "focus_sha256": true,
+      "focus_dirty_state": true,
+      "focus_version": true,
+      "consortium_index_matches_product_commit": true,
+      "template_tree": true,
+      "workspace_tree": true,
+      "content_manifest": true,
+      "pi_version": true,
+      "node_version": true,
+      "pi_package_versions": true,
+      "write_guard_absolute": true,
+      "dm_off": true,
+      "no_extensions": true,
+      "exact_tools": true,
+      "exact_model": true,
+      "extension_order": true
+    },
+    "template_content_manifest": "cdb2b78c4bce9464e217567ad630d9dff0f922b9f14727088a43c04520f6f989",
+    "workspace_content_manifest_before": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "ended_at": "2026-08-11T12:49:25.559696Z",
+    "wall_clock_ms": 43197.3,
+    "process_returncode": 0,
+    "live_boundary_timestamp": "2026-08-11T12:48:43.195164Z",
+    "workspace_content_manifest_after": "8f17386af20684f2f27a6a08b82746cf53ee5308147c11efcc631ceee0d2ef5c"
+  }
+}

@@ -1,0 +1,14 @@
+direction: down
+
+original: "Original A1\nzero-prompt infrastructure-invalid"
+amendment: "v9 amendment\nidentity preflight + independent review PASS"
+a1b: "A1b\nvalid runtime; C19 hard-gate FAIL"
+remaining: "D1, A2, D2, A3, D3\nnot run; D5/D7 incomplete"
+no_uplift: "No governance uplift\nno retained adaptation"
+twins: "Twins position-zero\nseparate latency evidence only"
+
+original -> amendment
+amendment -> a1b
+a1b -> remaining
+remaining -> no_uplift
+twins -> no_uplift: "cannot compensate"
