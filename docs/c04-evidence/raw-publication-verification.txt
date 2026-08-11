@@ -1,0 +1,2 @@
+bundles=48 source_files=1008 failures=0
+PASS all source files tracked and byte-identical; all evidence manifests verify
