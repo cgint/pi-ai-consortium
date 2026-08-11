@@ -10,7 +10,7 @@
 ## Published evidence
 
 - Full immutable raw bundles are tracked at `docs/c01-v9-raw/original-a1-infrastructure-invalid/`, `docs/c01-v9-raw/a1b/`, and `docs/c01-v9-raw/position-zero-twins-20260811T1135Z/`; ignored originals remain preserved in place. The A1b result and manifest snapshots remain at `docs/c01-v9-evidence/a1b-result.json` and `a1b-manifest.json`.
-- The `8081-twins/qwen36-27b-nvidia-nvfp4:off` review PASS is tracked at `docs/c01-v9-evidence/independent-review-8081-twins.md`; the original zero-prompt A1 record is tracked at `docs/c01-v9-evidence/original-a1-infrastructure-invalid.md`.
+- The mandated review PASS and its authoritative Pi session identity are tracked at `docs/c01-v9-evidence/independent-review-8081-twins.md` and `independent-review-8081-twins-identity.md`; the original zero-prompt A1 record is tracked at `docs/c01-v9-evidence/original-a1-infrastructure-invalid.md`.
 - A1b delivered three prompts, exited 0, passed frozen/runtime identities 34/34, and failed C19 only: `yaml_historical=False`. See the tracked result snapshot.
 - The c01 identity amendment is integrated on `main`: `33d8440`, `eac131b`, and `b376b9b`, limited to the runner, contract, alias map, and matching tests. `npm run precommit` passed after integration; the c01 contract manifest verifies.
 - The original `c01-prestagec-a1-r1` is retained as a zero-prompt infrastructure-invalid predecessor; it is not behavior evidence and is not retried.
