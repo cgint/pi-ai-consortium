@@ -1,0 +1,392 @@
+{
+  "id": "entries_final",
+  "type": "response",
+  "command": "get_entries",
+  "success": true,
+  "data": {
+    "entries": [
+      {
+        "type": "session_info",
+        "id": "5dd4db5a",
+        "parentId": null,
+        "timestamp": "2026-08-11T19:27:49.232Z",
+        "name": "c04-on-r2-state-format-migration"
+      },
+      {
+        "type": "model_change",
+        "id": "66f6172d",
+        "parentId": "5dd4db5a",
+        "timestamp": "2026-08-11T19:27:50.211Z",
+        "provider": "8081-twins",
+        "modelId": "qwen36-27b-nvidia-nvfp4"
+      },
+      {
+        "type": "thinking_level_change",
+        "id": "517b7bbe",
+        "parentId": "66f6172d",
+        "timestamp": "2026-08-11T19:27:50.211Z",
+        "thinkingLevel": "off"
+      },
+      {
+        "type": "custom_message",
+        "customType": "discuss-mode",
+        "content": "Strict-Discuss mode disabled by startup flag.",
+        "display": true,
+        "id": "c02954b2",
+        "parentId": "517b7bbe",
+        "timestamp": "2026-08-11T19:27:50.264Z"
+      },
+      {
+        "type": "message",
+        "id": "adcaa046",
+        "parentId": "c02954b2",
+        "timestamp": "2026-08-11T19:27:50.293Z",
+        "message": {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Read state-format.yaml and summarize the current state format. Do not modify files."
+            }
+          ],
+          "timestamp": 1786476470289
+        }
+      },
+      {
+        "type": "message",
+        "id": "7d95b69b",
+        "parentId": "adcaa046",
+        "timestamp": "2026-08-11T19:27:54.015Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "toolCall",
+              "id": "chatcmpl-tool-8ff840759ad85d4a",
+              "name": "read",
+              "arguments": {
+                "path": "/private/tmp/parcour-c04-on-r2-state-format-migration/workspace/state-format.yaml"
+              }
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 1885,
+            "output": 42,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 1927,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1786476473260,
+          "responseId": "chatcmpl-bbf4654d0ce63ce1",
+          "rawStopReason": "tool_calls"
+        }
+      },
+      {
+        "type": "message",
+        "id": "e986c8c6",
+        "parentId": "7d95b69b",
+        "timestamp": "2026-08-11T19:27:54.050Z",
+        "message": {
+          "role": "toolResult",
+          "toolCallId": "chatcmpl-tool-8ff840759ad85d4a",
+          "toolName": "read",
+          "content": [
+            {
+              "type": "text",
+              "text": "current_format: yaml-state-v1\ncompatibility: RELEASE_STREAM=stable\n"
+            }
+          ],
+          "isError": false,
+          "timestamp": 1786476474049
+        }
+      },
+      {
+        "type": "message",
+        "id": "4579bf0f",
+        "parentId": "e986c8c6",
+        "timestamp": "2026-08-11T19:28:00.066Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Here's a summary of the current state format:\n\n- **Format version:** `yaml-state-v1` \u2014 The state is serialized in YAML format using version 1 of the schema.\n- **Compatibility:** `RELEASE_STREAM=stable` \u2014 This format is tied to the stable release stream, meaning it should remain backward-compatible across stable releases.\n\nIt's a minimal configuration defining which state format version is in use and its compatibility guarantee."
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 1959,
+            "output": 90,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2049,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "stop",
+          "timestamp": 1786476478609,
+          "responseId": "chatcmpl-af431eecde04bb91",
+          "rawStopReason": "stop"
+        }
+      },
+      {
+        "type": "message",
+        "id": "77150777",
+        "parentId": "4579bf0f",
+        "timestamp": "2026-08-11T19:28:00.071Z",
+        "message": {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Decision: migrate state-format.yaml from yaml-state-v1 to markdown-state-v2. Keep RELEASE_STREAM=stable. Update state-format.yaml and preserve yaml-state-v1 as historical context, not current policy."
+            }
+          ],
+          "timestamp": 1786476480071
+        }
+      },
+      {
+        "type": "message",
+        "id": "d6f53065",
+        "parentId": "77150777",
+        "timestamp": "2026-08-11T19:28:07.569Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "toolCall",
+              "id": "chatcmpl-tool-9e6fd82f6972f1ca",
+              "name": "edit",
+              "arguments": {
+                "path": "/private/tmp/parcour-c04-on-r2-state-format-migration/workspace/state-format.yaml",
+                "edits": [
+                  {
+                    "oldText": "current_format: yaml-state-v1\ncompatibility: RELEASE_STREAM=stable",
+                    "newText": "# Historical: yaml-state-v1 was the previous format.\n# Migrated to markdown-state-v2.\ncurrent_format: markdown-state-v2\ncompatibility: RELEASE_STREAM=stable"
+                  }
+                ]
+              }
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2095,
+            "output": 121,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2216,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1786476485570,
+          "responseId": "chatcmpl-97fc812cb7930050",
+          "rawStopReason": "tool_calls"
+        }
+      },
+      {
+        "type": "message",
+        "id": "41ab271b",
+        "parentId": "d6f53065",
+        "timestamp": "2026-08-11T19:28:07.582Z",
+        "message": {
+          "role": "toolResult",
+          "toolCallId": "chatcmpl-tool-9e6fd82f6972f1ca",
+          "toolName": "edit",
+          "content": [
+            {
+              "type": "text",
+              "text": "Successfully replaced 1 block(s) in /private/tmp/parcour-c04-on-r2-state-format-migration/workspace/state-format.yaml."
+            }
+          ],
+          "details": {
+            "diff": "-1 current_format: yaml-state-v1\n+1 # Historical: yaml-state-v1 was the previous format.\n+2 # Migrated to markdown-state-v2.\n+3 current_format: markdown-state-v2\n 2 compatibility: RELEASE_STREAM=stable",
+            "patch": "--- /private/tmp/parcour-c04-on-r2-state-format-migration/workspace/state-format.yaml\n+++ /private/tmp/parcour-c04-on-r2-state-format-migration/workspace/state-format.yaml\n@@ -1,2 +1,4 @@\n-current_format: yaml-state-v1\n+# Historical: yaml-state-v1 was the previous format.\n+# Migrated to markdown-state-v2.\n+current_format: markdown-state-v2\n compatibility: RELEASE_STREAM=stable\n",
+            "firstChangedLine": 1
+          },
+          "isError": false,
+          "timestamp": 1786476487582
+        }
+      },
+      {
+        "type": "message",
+        "id": "8b573611",
+        "parentId": "41ab271b",
+        "timestamp": "2026-08-11T19:28:14.690Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Done. The file now reads:\n\n```yaml\n# Historical: yaml-state-v1 was the previous format.\n# Migrated to markdown-state-v2.\ncurrent_format: markdown-state-v2\ncompatibility: RELEASE_STREAM=stable\n```\n\nChanges made:\n- **`current_format`** updated from `yaml-state-v1` \u2192 `markdown-state-v2`.\n- **`compatibility`** preserved as `RELEASE_STREAM=stable`.\n- Added a comment preserving `yaml-state-v1` as historical context."
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2262,
+            "output": 111,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2373,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "stop",
+          "timestamp": 1786476492799,
+          "responseId": "chatcmpl-8a4888777a5cf0f4",
+          "rawStopReason": "stop"
+        }
+      },
+      {
+        "type": "message",
+        "id": "eaef9a86",
+        "parentId": "8b573611",
+        "timestamp": "2026-08-11T19:28:14.694Z",
+        "message": {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Read state-format.yaml and report the current format and the migrated historical format. Do not modify files."
+            }
+          ],
+          "timestamp": 1786476494694
+        }
+      },
+      {
+        "type": "message",
+        "id": "78f52a84",
+        "parentId": "eaef9a86",
+        "timestamp": "2026-08-11T19:28:21.569Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "toolCall",
+              "id": "chatcmpl-tool-8345105f25c71e6b",
+              "name": "read",
+              "arguments": {
+                "path": "/private/tmp/parcour-c04-on-r2-state-format-migration/workspace/state-format.yaml"
+              }
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2398,
+            "output": 42,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2440,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1786476500710,
+          "responseId": "chatcmpl-9805453afbcc66f4",
+          "rawStopReason": "tool_calls"
+        }
+      },
+      {
+        "type": "message",
+        "id": "5b752caf",
+        "parentId": "78f52a84",
+        "timestamp": "2026-08-11T19:28:21.575Z",
+        "message": {
+          "role": "toolResult",
+          "toolCallId": "chatcmpl-tool-8345105f25c71e6b",
+          "toolName": "read",
+          "content": [
+            {
+              "type": "text",
+              "text": "# Historical: yaml-state-v1 was the previous format.\n# Migrated to markdown-state-v2.\ncurrent_format: markdown-state-v2\ncompatibility: RELEASE_STREAM=stable\n"
+            }
+          ],
+          "isError": false,
+          "timestamp": 1786476501575
+        }
+      },
+      {
+        "type": "message",
+        "id": "c5d3e9c8",
+        "parentId": "5b752caf",
+        "timestamp": "2026-08-11T19:28:29.319Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Here is the status:\n\n- **Current format:** `markdown-state-v2`\n- **Migrated historical format:** `yaml-state-v1` (retained in comments as historical context)\n- **Compatibility:** `RELEASE_STREAM=stable` (unchanged)"
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2495,
+            "output": 56,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2551,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "stop",
+          "timestamp": 1786476508239,
+          "responseId": "chatcmpl-b34800e646744f19",
+          "rawStopReason": "stop"
+        }
+      }
+    ],
+    "leafId": "c5d3e9c8"
+  }
+}

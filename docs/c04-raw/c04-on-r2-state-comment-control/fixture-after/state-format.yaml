@@ -1,0 +1,5 @@
+# yaml-state-v1 is the primary YAML-based serialization format for agent state.
+# It encodes conversation history, tool results, and internal context as a flat
+# YAML document for easy inspection and round-trip fidelity.
+current_format: yaml-state-v1
+compatibility: RELEASE_STREAM=stable

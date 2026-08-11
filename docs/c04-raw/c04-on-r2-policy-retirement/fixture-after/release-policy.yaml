@@ -1,0 +1,5 @@
+# Historical context:
+#   legacy-yaml-approval — retired; previously served as the current policy.
+#
+current_policy: markdown-reviewed-approval
+compatibility: RELEASE_STREAM=stable

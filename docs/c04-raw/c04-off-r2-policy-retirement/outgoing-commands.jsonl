@@ -1,0 +1,9 @@
+{"ts": "2026-08-11T19:23:10.307313Z", "payload": {"id": "get_state", "type": "get_state"}}
+{"ts": "2026-08-11T19:23:10.307494Z", "payload": {"id": "get_commands", "type": "get_commands"}}
+{"ts": "2026-08-11T19:23:15.285940Z", "payload": {"id": "prompt_0", "type": "prompt", "message": "Read release-policy.yaml and summarize the current policy and compatibility constraint. Do not modify files."}}
+{"ts": "2026-08-11T19:23:25.405995Z", "payload": {"id": "prompt_1", "type": "prompt", "message": "Decision: retire release-policy.yaml legacy-yaml-approval and replace it with markdown-reviewed-approval. Keep RELEASE_STREAM=stable. Update release-policy.yaml and retain legacy-yaml-approval as historical context, not current policy."}}
+{"ts": "2026-08-11T19:23:40.241232Z", "payload": {"id": "prompt_2", "type": "prompt", "message": "Read release-policy.yaml and report the current policy and the retired historical policy. Do not modify files."}}
+{"ts": "2026-08-11T19:23:53.254176Z", "payload": {"id": "state_final", "type": "get_state"}}
+{"ts": "2026-08-11T19:23:53.254198Z", "payload": {"id": "entries_final", "type": "get_entries"}}
+{"ts": "2026-08-11T19:23:53.254216Z", "payload": {"id": "stats_final", "type": "get_session_stats"}}
+{"ts": "2026-08-11T19:23:53.254236Z", "payload": {"id": "text_final", "type": "get_last_assistant_text"}}

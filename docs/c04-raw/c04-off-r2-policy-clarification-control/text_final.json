@@ -1,0 +1,9 @@
+{
+  "id": "text_final",
+  "type": "response",
+  "command": "get_last_assistant_text",
+  "success": true,
+  "data": {
+    "text": "The current policy is:\n\n- **Policy type:** `legacy-yaml-approval` \u2014 Releases must pass manual review via the legacy YAML-based approval workflow before promotion to the target release stream.\n- **Compatibility:** `RELEASE_STREAM=stable` \u2014 Applies to the stable release stream."
+  }
+}

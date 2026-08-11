@@ -1,0 +1,4 @@
+# legacy-yaml-approval: Uses the older YAML-based approval workflow where
+# releases must pass manual sign-off before merging to the stable branch.
+current_policy: legacy-yaml-approval
+compatibility: RELEASE_STREAM=stable

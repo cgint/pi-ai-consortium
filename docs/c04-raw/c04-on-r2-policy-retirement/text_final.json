@@ -1,0 +1,9 @@
+{
+  "id": "text_final",
+  "type": "response",
+  "command": "get_last_assistant_text",
+  "success": true,
+  "data": {
+    "text": "**Current Policy:** `markdown-reviewed-approval`\n\n**Retired Historical Policy:** `legacy-yaml-approval` \u2014 previously served as the current policy, now retired and retained as historical context.\n\n**Compatibility:** `RELEASE_STREAM=stable` (unchanged)."
+  }
+}

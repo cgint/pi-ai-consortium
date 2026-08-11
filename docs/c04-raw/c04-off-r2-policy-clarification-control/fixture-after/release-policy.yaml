@@ -1,0 +1,4 @@
+# legacy-yaml-approval: Releases must pass manual review via the legacy YAML-based
+# approval workflow before they can be promoted to the target release stream.
+current_policy: legacy-yaml-approval
+compatibility: RELEASE_STREAM=stable

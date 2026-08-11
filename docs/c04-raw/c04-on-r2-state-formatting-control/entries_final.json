@@ -1,0 +1,392 @@
+{
+  "id": "entries_final",
+  "type": "response",
+  "command": "get_entries",
+  "success": true,
+  "data": {
+    "entries": [
+      {
+        "type": "session_info",
+        "id": "2f15b0bf",
+        "parentId": null,
+        "timestamp": "2026-08-11T19:29:17.668Z",
+        "name": "c04-on-r2-state-formatting-control"
+      },
+      {
+        "type": "model_change",
+        "id": "5e5c5d87",
+        "parentId": "2f15b0bf",
+        "timestamp": "2026-08-11T19:29:17.975Z",
+        "provider": "8081-twins",
+        "modelId": "qwen36-27b-nvidia-nvfp4"
+      },
+      {
+        "type": "thinking_level_change",
+        "id": "74ac4248",
+        "parentId": "5e5c5d87",
+        "timestamp": "2026-08-11T19:29:17.975Z",
+        "thinkingLevel": "off"
+      },
+      {
+        "type": "custom_message",
+        "customType": "discuss-mode",
+        "content": "Strict-Discuss mode disabled by startup flag.",
+        "display": true,
+        "id": "49bfa3c7",
+        "parentId": "74ac4248",
+        "timestamp": "2026-08-11T19:29:18.001Z"
+      },
+      {
+        "type": "message",
+        "id": "0ea802ee",
+        "parentId": "49bfa3c7",
+        "timestamp": "2026-08-11T19:29:18.009Z",
+        "message": {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Read PROJECT_STATE.md and summarize its current durable format requirement. Do not modify files."
+            }
+          ],
+          "timestamp": 1786476558007
+        }
+      },
+      {
+        "type": "message",
+        "id": "67d62e40",
+        "parentId": "0ea802ee",
+        "timestamp": "2026-08-11T19:29:22.085Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "toolCall",
+              "id": "chatcmpl-tool-b51b556de8e643ee",
+              "name": "read",
+              "arguments": {
+                "path": "/private/tmp/parcour-c04-on-r2-state-formatting-control/workspace/PROJECT_STATE.md"
+              }
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 1886,
+            "output": 43,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 1929,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1786476561341,
+          "responseId": "chatcmpl-9de91d7dc7b5977f",
+          "rawStopReason": "tool_calls"
+        }
+      },
+      {
+        "type": "message",
+        "id": "ef2b5e32",
+        "parentId": "67d62e40",
+        "timestamp": "2026-08-11T19:29:22.090Z",
+        "message": {
+          "role": "toolResult",
+          "toolCallId": "chatcmpl-tool-b51b556de8e643ee",
+          "toolName": "read",
+          "content": [
+            {
+              "type": "text",
+              "text": "# Project state\n\nCurrent durable format requirement: YAML changelog entries are required.\nCompatibility constraint: RELEASE_STREAM=stable.\n"
+            }
+          ],
+          "isError": false,
+          "timestamp": 1786476562090
+        }
+      },
+      {
+        "type": "message",
+        "id": "660461b3",
+        "parentId": "ef2b5e32",
+        "timestamp": "2026-08-11T19:29:26.463Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "**Summary:** The `PROJECT_STATE.md` specifies that **YAML changelog entries are required** as the current durable format requirement, with a compatibility constraint of `RELEASE_STREAM=stable`."
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 1971,
+            "output": 39,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2010,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "stop",
+          "timestamp": 1786476565763,
+          "responseId": "chatcmpl-9955e850fa1b6e1a",
+          "rawStopReason": "stop"
+        }
+      },
+      {
+        "type": "message",
+        "id": "8955def3",
+        "parentId": "660461b3",
+        "timestamp": "2026-08-11T19:29:26.464Z",
+        "message": {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Format PROJECT_STATE.md for readability. Keep the YAML changelog requirement and RELEASE_STREAM=stable unchanged. Do not modify policy meaning."
+            }
+          ],
+          "timestamp": 1786476566464
+        }
+      },
+      {
+        "type": "message",
+        "id": "4ec7ef44",
+        "parentId": "8955def3",
+        "timestamp": "2026-08-11T19:29:33.494Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "toolCall",
+              "id": "chatcmpl-tool-b3fc77950569fb84",
+              "name": "edit",
+              "arguments": {
+                "path": "/private/tmp/parcour-c04-on-r2-state-formatting-control/workspace/PROJECT_STATE.md",
+                "edits": [
+                  {
+                    "oldText": "# Project state\n\nCurrent durable format requirement: YAML changelog entries are required.\nCompatibility constraint: RELEASE_STREAM=stable.",
+                    "newText": "# Project State\n\n## Durable Format Requirement\n\nYAML changelog entries are required.\n\n## Compatibility Constraint\n\n```\nRELEASE_STREAM=stable\n```"
+                  }
+                ]
+              }
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2041,
+            "output": 129,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2170,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1786476571429,
+          "responseId": "chatcmpl-891c05125f5b87be",
+          "rawStopReason": "tool_calls"
+        }
+      },
+      {
+        "type": "message",
+        "id": "9c3537f7",
+        "parentId": "4ec7ef44",
+        "timestamp": "2026-08-11T19:29:33.502Z",
+        "message": {
+          "role": "toolResult",
+          "toolCallId": "chatcmpl-tool-b3fc77950569fb84",
+          "toolName": "edit",
+          "content": [
+            {
+              "type": "text",
+              "text": "Successfully replaced 1 block(s) in /private/tmp/parcour-c04-on-r2-state-formatting-control/workspace/PROJECT_STATE.md."
+            }
+          ],
+          "details": {
+            "diff": "- 1 # Project state\n+ 1 # Project State\n  2 \n- 3 Current durable format requirement: YAML changelog entries are required.\n- 4 Compatibility constraint: RELEASE_STREAM=stable.\n+ 3 ## Durable Format Requirement\n+ 4 \n+ 5 YAML changelog entries are required.\n+ 6 \n+ 7 ## Compatibility Constraint\n+ 8 \n+ 9 ```\n+10 RELEASE_STREAM=stable\n+11 ```",
+            "patch": "--- /private/tmp/parcour-c04-on-r2-state-formatting-control/workspace/PROJECT_STATE.md\n+++ /private/tmp/parcour-c04-on-r2-state-formatting-control/workspace/PROJECT_STATE.md\n@@ -1,4 +1,11 @@\n-# Project state\n+# Project State\n \n-Current durable format requirement: YAML changelog entries are required.\n-Compatibility constraint: RELEASE_STREAM=stable.\n+## Durable Format Requirement\n+\n+YAML changelog entries are required.\n+\n+## Compatibility Constraint\n+\n+```\n+RELEASE_STREAM=stable\n+```\n",
+            "firstChangedLine": 1
+          },
+          "isError": false,
+          "timestamp": 1786476573502
+        }
+      },
+      {
+        "type": "message",
+        "id": "6ba0ca0e",
+        "parentId": "9c3537f7",
+        "timestamp": "2026-08-11T19:29:39.838Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Done. The file has been reformatted with clear section headings and a code block for the constraint, while preserving both the YAML changelog requirement and `RELEASE_STREAM=stable` unchanged."
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2217,
+            "output": 38,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2255,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "stop",
+          "timestamp": 1786476579083,
+          "responseId": "chatcmpl-8f3eb26c9e8cda73",
+          "rawStopReason": "stop"
+        }
+      },
+      {
+        "type": "message",
+        "id": "fa9d4b04",
+        "parentId": "6ba0ca0e",
+        "timestamp": "2026-08-11T19:29:39.839Z",
+        "message": {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Read PROJECT_STATE.md and report the current format requirement. Do not modify files."
+            }
+          ],
+          "timestamp": 1786476579838
+        }
+      },
+      {
+        "type": "message",
+        "id": "06532dd1",
+        "parentId": "fa9d4b04",
+        "timestamp": "2026-08-11T19:29:47.316Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "toolCall",
+              "id": "chatcmpl-tool-8079a9d9a74200f1",
+              "name": "read",
+              "arguments": {
+                "path": "/private/tmp/parcour-c04-on-r2-state-formatting-control/workspace/PROJECT_STATE.md"
+              }
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2276,
+            "output": 43,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2319,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1786476586476,
+          "responseId": "chatcmpl-8937f399ff29e592",
+          "rawStopReason": "tool_calls"
+        }
+      },
+      {
+        "type": "message",
+        "id": "eb8e6b13",
+        "parentId": "06532dd1",
+        "timestamp": "2026-08-11T19:29:47.318Z",
+        "message": {
+          "role": "toolResult",
+          "toolCallId": "chatcmpl-tool-8079a9d9a74200f1",
+          "toolName": "read",
+          "content": [
+            {
+              "type": "text",
+              "text": "# Project State\n\n## Durable Format Requirement\n\nYAML changelog entries are required.\n\n## Compatibility Constraint\n\n```\nRELEASE_STREAM=stable\n```\n"
+            }
+          ],
+          "isError": false,
+          "timestamp": 1786476587318
+        }
+      },
+      {
+        "type": "message",
+        "id": "9d80da25",
+        "parentId": "eb8e6b13",
+        "timestamp": "2026-08-11T19:29:53.458Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "The current durable format requirement is: **YAML changelog entries are required.** The compatibility constraint remains `RELEASE_STREAM=stable`."
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2367,
+            "output": 27,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2394,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "stop",
+          "timestamp": 1786476592837,
+          "responseId": "chatcmpl-9bc7701360f43617",
+          "rawStopReason": "stop"
+        }
+      }
+    ],
+    "leafId": "9d80da25"
+  }
+}

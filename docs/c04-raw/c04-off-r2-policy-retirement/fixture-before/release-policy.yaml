@@ -1,0 +1,2 @@
+current_policy: legacy-yaml-approval
+compatibility: RELEASE_STREAM=stable

@@ -1,0 +1,45 @@
+{
+  "id": "state_final",
+  "type": "response",
+  "command": "get_state",
+  "success": true,
+  "data": {
+    "model": {
+      "id": "qwen36-27b-nvidia-nvfp4",
+      "name": "qwen36-27b-nvidia-nvfp4",
+      "api": "openai-completions",
+      "provider": "8081-twins",
+      "baseUrl": "http://twins:8081/v1",
+      "reasoning": true,
+      "thinkingLevelMap": {
+        "off": "none"
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "contextWindow": 262144,
+      "maxTokens": 32768,
+      "compat": {
+        "thinkingFormat": "openai"
+      }
+    },
+    "thinkingLevel": "off",
+    "isStreaming": false,
+    "isCompacting": false,
+    "steeringMode": "one-at-a-time",
+    "followUpMode": "one-at-a-time",
+    "sessionFile": "/tmp/parcour-c04-off-r2-requirement-replacement/sessions/2026-08-11T19-25-00-952Z_019ff249-0a98-72fa-8bcf-cbc3f7d0e423.jsonl",
+    "sessionId": "019ff249-0a98-72fa-8bcf-cbc3f7d0e423",
+    "sessionName": "c04-off-r2-requirement-replacement",
+    "autoCompactionEnabled": true,
+    "messageCount": 13,
+    "pendingMessageCount": 0
+  }
+}

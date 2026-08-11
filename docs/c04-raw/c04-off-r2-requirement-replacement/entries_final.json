@@ -1,0 +1,392 @@
+{
+  "id": "entries_final",
+  "type": "response",
+  "command": "get_entries",
+  "success": true,
+  "data": {
+    "entries": [
+      {
+        "type": "session_info",
+        "id": "c0227199",
+        "parentId": null,
+        "timestamp": "2026-08-11T19:25:00.954Z",
+        "name": "c04-off-r2-requirement-replacement"
+      },
+      {
+        "type": "model_change",
+        "id": "09f7cf87",
+        "parentId": "c0227199",
+        "timestamp": "2026-08-11T19:25:01.501Z",
+        "provider": "8081-twins",
+        "modelId": "qwen36-27b-nvidia-nvfp4"
+      },
+      {
+        "type": "thinking_level_change",
+        "id": "424af1aa",
+        "parentId": "09f7cf87",
+        "timestamp": "2026-08-11T19:25:01.501Z",
+        "thinkingLevel": "off"
+      },
+      {
+        "type": "custom_message",
+        "customType": "discuss-mode",
+        "content": "Strict-Discuss mode disabled by startup flag.",
+        "display": true,
+        "id": "14eb0161",
+        "parentId": "424af1aa",
+        "timestamp": "2026-08-11T19:25:01.542Z"
+      },
+      {
+        "type": "message",
+        "id": "5ca55270",
+        "parentId": "14eb0161",
+        "timestamp": "2026-08-11T19:25:01.558Z",
+        "message": {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Read PROJECT_STATE.md and summarize the current durable requirement. Do not modify files."
+            }
+          ],
+          "timestamp": 1786476301555
+        }
+      },
+      {
+        "type": "message",
+        "id": "fe57c897",
+        "parentId": "5ca55270",
+        "timestamp": "2026-08-11T19:25:06.542Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "toolCall",
+              "id": "chatcmpl-tool-b699a815c6935424",
+              "name": "read",
+              "arguments": {
+                "path": "/private/tmp/parcour-c04-off-r2-requirement-replacement/workspace/PROJECT_STATE.md"
+              }
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 1886,
+            "output": 44,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 1930,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1786476305778,
+          "responseId": "chatcmpl-86f4c5443ddb351d",
+          "rawStopReason": "tool_calls"
+        }
+      },
+      {
+        "type": "message",
+        "id": "d88cabf8",
+        "parentId": "fe57c897",
+        "timestamp": "2026-08-11T19:25:06.550Z",
+        "message": {
+          "role": "toolResult",
+          "toolCallId": "chatcmpl-tool-b699a815c6935424",
+          "toolName": "read",
+          "content": [
+            {
+              "type": "text",
+              "text": "# Project state\n\nCurrent durable requirement: YAML release notes are required.\nCompatibility constraint: RELEASE_STREAM=stable.\n"
+            }
+          ],
+          "isError": false,
+          "timestamp": 1786476306549
+        }
+      },
+      {
+        "type": "message",
+        "id": "12451e71",
+        "parentId": "d88cabf8",
+        "timestamp": "2026-08-11T19:25:10.452Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "**Summary:**\n\nThe current durable requirement is that **YAML release notes are required**. Additionally, there is a compatibility constraint specifying `RELEASE_STREAM=stable`."
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 1970,
+            "output": 33,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2003,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "stop",
+          "timestamp": 1786476309848,
+          "responseId": "chatcmpl-be7be41e55280126",
+          "rawStopReason": "stop"
+        }
+      },
+      {
+        "type": "message",
+        "id": "bbc61afe",
+        "parentId": "12451e71",
+        "timestamp": "2026-08-11T19:25:10.456Z",
+        "message": {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Decision: supersede the PROJECT_STATE.md YAML release-notes requirement with a Markdown release-notes requirement. Keep RELEASE_STREAM=stable. Update PROJECT_STATE.md and retain the superseded YAML requirement as historical context, not current policy."
+            }
+          ],
+          "timestamp": 1786476310456
+        }
+      },
+      {
+        "type": "message",
+        "id": "d67c2ab1",
+        "parentId": "bbc61afe",
+        "timestamp": "2026-08-11T19:25:17.523Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "toolCall",
+              "id": "chatcmpl-tool-be795d914eff1262",
+              "name": "edit",
+              "arguments": {
+                "path": "/private/tmp/parcour-c04-off-r2-requirement-replacement/workspace/PROJECT_STATE.md",
+                "edits": [
+                  {
+                    "oldText": "# Project state\n\nCurrent durable requirement: YAML release notes are required.\nCompatibility constraint: RELEASE_STREAM=stable.",
+                    "newText": "# Project state\n\n## Current durable requirement\nMarkdown release notes are required.\n\nCompatibility constraint: RELEASE_STREAM=stable.\n\n## Historical context\n~~Superseded: YAML release notes were required.~~\nReplaced by the Markdown release-notes requirement."
+                  }
+                ]
+              }
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2052,
+            "output": 146,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2198,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1786476315207,
+          "responseId": "chatcmpl-b81cf3faf59fd72f",
+          "rawStopReason": "tool_calls"
+        }
+      },
+      {
+        "type": "message",
+        "id": "f5d2c592",
+        "parentId": "d67c2ab1",
+        "timestamp": "2026-08-11T19:25:17.546Z",
+        "message": {
+          "role": "toolResult",
+          "toolCallId": "chatcmpl-tool-be795d914eff1262",
+          "toolName": "edit",
+          "content": [
+            {
+              "type": "text",
+              "text": "Successfully replaced 1 block(s) in /private/tmp/parcour-c04-off-r2-requirement-replacement/workspace/PROJECT_STATE.md."
+            }
+          ],
+          "details": {
+            "diff": "  1 # Project state\n  2 \n- 3 Current durable requirement: YAML release notes are required.\n+ 3 ## Current durable requirement\n+ 4 Markdown release notes are required.\n+ 5 \n  4 Compatibility constraint: RELEASE_STREAM=stable.\n+ 7 \n+ 8 ## Historical context\n+ 9 ~~Superseded: YAML release notes were required.~~\n+10 Replaced by the Markdown release-notes requirement.",
+            "patch": "--- /private/tmp/parcour-c04-off-r2-requirement-replacement/workspace/PROJECT_STATE.md\n+++ /private/tmp/parcour-c04-off-r2-requirement-replacement/workspace/PROJECT_STATE.md\n@@ -1,4 +1,10 @@\n # Project state\n \n-Current durable requirement: YAML release notes are required.\n+## Current durable requirement\n+Markdown release notes are required.\n+\n Compatibility constraint: RELEASE_STREAM=stable.\n+\n+## Historical context\n+~~Superseded: YAML release notes were required.~~\n+Replaced by the Markdown release-notes requirement.\n",
+            "firstChangedLine": 3
+          },
+          "isError": false,
+          "timestamp": 1786476317546
+        }
+      },
+      {
+        "type": "message",
+        "id": "d4e0d3ce",
+        "parentId": "f5d2c592",
+        "timestamp": "2026-08-11T19:25:24.041Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Done. Updated `PROJECT_STATE.md`:\n\n- **Current requirement** changed from YAML to **Markdown** release notes.\n- `RELEASE_STREAM=stable` retained.\n- The superseded YAML requirement preserved under a **Historical context** section with strikethrough formatting to indicate it's no longer active policy."
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2246,
+            "output": 66,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2312,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "stop",
+          "timestamp": 1786476322841,
+          "responseId": "chatcmpl-a815281675ae8865",
+          "rawStopReason": "stop"
+        }
+      },
+      {
+        "type": "message",
+        "id": "2f9ccad3",
+        "parentId": "d4e0d3ce",
+        "timestamp": "2026-08-11T19:25:24.045Z",
+        "message": {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Read PROJECT_STATE.md and report the current requirement and the superseded historical requirement. Do not modify files."
+            }
+          ],
+          "timestamp": 1786476324044
+        }
+      },
+      {
+        "type": "message",
+        "id": "ab0e41fb",
+        "parentId": "2f9ccad3",
+        "timestamp": "2026-08-11T19:25:30.382Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "toolCall",
+              "id": "chatcmpl-tool-a6a3a2a71d24769d",
+              "name": "read",
+              "arguments": {
+                "path": "/private/tmp/parcour-c04-off-r2-requirement-replacement/workspace/PROJECT_STATE.md"
+              }
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2338,
+            "output": 44,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2382,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1786476329490,
+          "responseId": "chatcmpl-9d5f030f1fb27acf",
+          "rawStopReason": "tool_calls"
+        }
+      },
+      {
+        "type": "message",
+        "id": "b115c54f",
+        "parentId": "ab0e41fb",
+        "timestamp": "2026-08-11T19:25:30.385Z",
+        "message": {
+          "role": "toolResult",
+          "toolCallId": "chatcmpl-tool-a6a3a2a71d24769d",
+          "toolName": "read",
+          "content": [
+            {
+              "type": "text",
+              "text": "# Project state\n\n## Current durable requirement\nMarkdown release notes are required.\n\nCompatibility constraint: RELEASE_STREAM=stable.\n\n## Historical context\n~~Superseded: YAML release notes were required.~~\nReplaced by the Markdown release-notes requirement.\n"
+            }
+          ],
+          "isError": false,
+          "timestamp": 1786476330385
+        }
+      },
+      {
+        "type": "message",
+        "id": "df8c2602",
+        "parentId": "b115c54f",
+        "timestamp": "2026-08-11T19:25:36.933Z",
+        "message": {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "**Current requirement:** Markdown release notes are required. (`RELEASE_STREAM=stable`)\n\n**Superseded historical requirement:** YAML release notes were required \u2014 replaced by the Markdown release-notes requirement."
+            }
+          ],
+          "api": "openai-completions",
+          "provider": "8081-twins",
+          "model": "qwen36-27b-nvidia-nvfp4",
+          "usage": {
+            "input": 2450,
+            "output": 39,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "reasoning": 0,
+            "totalTokens": 2489,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "total": 0
+            }
+          },
+          "stopReason": "stop",
+          "timestamp": 1786476336099,
+          "responseId": "chatcmpl-b11e06f4f3c5a79a",
+          "rawStopReason": "stop"
+        }
+      }
+    ],
+    "leafId": "df8c2602"
+  }
+}

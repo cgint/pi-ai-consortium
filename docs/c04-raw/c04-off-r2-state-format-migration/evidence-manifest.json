@@ -1,0 +1,109 @@
+{
+  "run_id": "c04-off-r2-state-format-migration",
+  "files": [
+    {
+      "path": "combined-directional.jsonl",
+      "sha256": "af5cda8cc847f684c3ca6921ce9fe36533b987a50d650b78fc86f6a4d4c1e502",
+      "size": 111065
+    },
+    {
+      "path": "consortium/2026-08-11T19-26-47-803Z_019ff24a-a8c5-7a79-89ce-020317fdc271.jsonl",
+      "sha256": "51088edc90059a1c40e94a4a0ed39e9a03097907fde1680e10025ea9b509cf02",
+      "size": 49199
+    },
+    {
+      "path": "consortium/2026-08-11T19-26-47-803Z_019ff24a-a8c5-7a79-89ce-020317fdc271.md",
+      "sha256": "86062e1b9d6249bdf8a33ed97da57911b079146f9ac842f3f7ee2b2ec060578c",
+      "size": 7386
+    },
+    {
+      "path": "entries_final.json",
+      "sha256": "4adeca0f570009cd800040730ca8f8576b2389bda5c0ceb7e7ccd510850533b0",
+      "size": 12710
+    },
+    {
+      "path": "fixture-after/.pi/consortium/2026-08-11T19-26-47-803Z_019ff24a-a8c5-7a79-89ce-020317fdc271.jsonl",
+      "sha256": "51088edc90059a1c40e94a4a0ed39e9a03097907fde1680e10025ea9b509cf02",
+      "size": 49199
+    },
+    {
+      "path": "fixture-after/.pi/consortium/2026-08-11T19-26-47-803Z_019ff24a-a8c5-7a79-89ce-020317fdc271.md",
+      "sha256": "86062e1b9d6249bdf8a33ed97da57911b079146f9ac842f3f7ee2b2ec060578c",
+      "size": 7386
+    },
+    {
+      "path": "fixture-after/.pi/settings.json",
+      "sha256": "922c254632820b3b16ae76d927a93777a36d136fa9b130eddb79081732e4ce55",
+      "size": 122
+    },
+    {
+      "path": "fixture-after/state-format.yaml",
+      "sha256": "35b4249ccbcfa100c7020384d565c742ef074ad5d831869856242868e80f4f5c",
+      "size": 153
+    },
+    {
+      "path": "fixture-before/state-format.yaml",
+      "sha256": "ff7804b4be83e82114526d9efaa4eea18153f067e21905827e18d1ab3b6162bc",
+      "size": 67
+    },
+    {
+      "path": "live-boundary.json",
+      "sha256": "9c37ca5874607696ef0347e9c711bc00f2e4244676ae22aee831a9b2ba9a6163",
+      "size": 96
+    },
+    {
+      "path": "manifest.json",
+      "sha256": "ea83ecb5e505923651f0b14ec42c91ec6154fc2d9d595581f952e140b66be4c1",
+      "size": 2781
+    },
+    {
+      "path": "outgoing-commands.jsonl",
+      "sha256": "c8b62d746309b0dd0249f66a893af6e5753dd0fd06efe87eba2e35e786d9aa0b",
+      "size": 1282
+    },
+    {
+      "path": "raw-incoming.jsonl",
+      "sha256": "9ff74e53d3d132eb16b786f2a23b9b3b404a64e5e4a8e2d50c5c0ba5222492dd",
+      "size": 78621
+    },
+    {
+      "path": "result.json",
+      "sha256": "867ab0ec8ef26c44b7770adb08dbdf42c54a60877b66cd14eff7d4e5eb42fe48",
+      "size": 7118
+    },
+    {
+      "path": "rpc-events.jsonl",
+      "sha256": "9ff74e53d3d132eb16b786f2a23b9b3b404a64e5e4a8e2d50c5c0ba5222492dd",
+      "size": 78621
+    },
+    {
+      "path": "rpc-stderr.log",
+      "sha256": "2fa6a5a22ad43a411f2631a6ed5b1815f828bb67cbb267baeb2668715baeb76c",
+      "size": 68
+    },
+    {
+      "path": "sessions/2026-08-11T19-26-46-981Z_019ff24a-a8c5-7a79-89ce-020317fdc271.jsonl",
+      "sha256": "e46185524c425b61ad8c7697d23fa735fc75f3c6cf89a4e39b7d42749dcb44db",
+      "size": 8109
+    },
+    {
+      "path": "state_final.json",
+      "sha256": "9fcb9b8d6d30b4f9c3e41967bdefca535c0a695d2a9362c493569c415aef6c41",
+      "size": 1196
+    },
+    {
+      "path": "stats_final.json",
+      "sha256": "9f264ffffb74cd3ddd9d41777784bdda0062f5152ccf0b8a7735caa45ec296a7",
+      "size": 702
+    },
+    {
+      "path": "text_final.json",
+      "sha256": "0a78684a715649fd51c9409f6b400b8128fc7f89e9fa2cc94ee36ace6d04063d",
+      "size": 280
+    }
+  ],
+  "coverage": {
+    "total_files": 20,
+    "total_bytes": 416161
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "id": "text_final",
+  "type": "response",
+  "command": "get_last_assistant_text",
+  "success": true,
+  "data": {
+    "text": "The current requirement is: **YAML release notes are required.**\n\nAdditional context:\n- Compatibility constraint: `RELEASE_STREAM=stable`\n- Note: Owners should review YAML release notes weekly."
+  }
+}

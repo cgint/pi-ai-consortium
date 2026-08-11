@@ -1,0 +1,9 @@
+{
+  "id": "text_final",
+  "type": "response",
+  "command": "get_last_assistant_text",
+  "success": true,
+  "data": {
+    "text": "Here is the status:\n\n- **Current format:** `markdown-state-v2`\n- **Migrated historical format:** `yaml-state-v1` (retained in comments as historical context)\n- **Compatibility:** `RELEASE_STREAM=stable` (unchanged)"
+  }
+}

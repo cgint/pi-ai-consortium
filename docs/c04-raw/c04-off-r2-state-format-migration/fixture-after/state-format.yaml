@@ -1,0 +1,4 @@
+# Historical formats:
+# - yaml-state-v1 (deprecated; retained here for reference)
+current_format: markdown-state-v2
+compatibility: RELEASE_STREAM=stable

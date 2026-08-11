@@ -1,0 +1,28 @@
+{
+  "id": "stats_final",
+  "type": "response",
+  "command": "get_session_stats",
+  "success": true,
+  "data": {
+    "sessionFile": "/tmp/parcour-c04-on-r2-requirement-addition-control/sessions/2026-08-11T19-32-03-244Z_019ff24f-7c2c-7550-86e2-d77d2e113823.jsonl",
+    "sessionId": "019ff24f-7c2c-7550-86e2-d77d2e113823",
+    "userMessages": 3,
+    "assistantMessages": 6,
+    "toolCalls": 3,
+    "toolResults": 3,
+    "totalMessages": 12,
+    "tokens": {
+      "input": 12619,
+      "output": 284,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "total": 12903
+    },
+    "cost": 0,
+    "contextUsage": {
+      "tokens": 2363,
+      "contextWindow": 262144,
+      "percent": 0.9014129638671875
+    }
+  }
+}

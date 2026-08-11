@@ -1,0 +1,9 @@
+{"ts": "2026-08-11T19:24:59.068933Z", "payload": {"id": "get_state", "type": "get_state"}}
+{"ts": "2026-08-11T19:24:59.068999Z", "payload": {"id": "get_commands", "type": "get_commands"}}
+{"ts": "2026-08-11T19:25:01.552820Z", "payload": {"id": "prompt_0", "type": "prompt", "message": "Read PROJECT_STATE.md and summarize the current durable requirement. Do not modify files."}}
+{"ts": "2026-08-11T19:25:10.455284Z", "payload": {"id": "prompt_1", "type": "prompt", "message": "Decision: supersede the PROJECT_STATE.md YAML release-notes requirement with a Markdown release-notes requirement. Keep RELEASE_STREAM=stable. Update PROJECT_STATE.md and retain the superseded YAML requirement as historical context, not current policy."}}
+{"ts": "2026-08-11T19:25:24.043977Z", "payload": {"id": "prompt_2", "type": "prompt", "message": "Read PROJECT_STATE.md and report the current requirement and the superseded historical requirement. Do not modify files."}}
+{"ts": "2026-08-11T19:25:36.934970Z", "payload": {"id": "state_final", "type": "get_state"}}
+{"ts": "2026-08-11T19:25:36.934990Z", "payload": {"id": "entries_final", "type": "get_entries"}}
+{"ts": "2026-08-11T19:25:36.935008Z", "payload": {"id": "stats_final", "type": "get_session_stats"}}
+{"ts": "2026-08-11T19:25:36.935025Z", "payload": {"id": "text_final", "type": "get_last_assistant_text"}}

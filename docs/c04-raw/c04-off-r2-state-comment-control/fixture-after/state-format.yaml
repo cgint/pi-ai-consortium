@@ -1,0 +1,5 @@
+# yaml-state-v1: the current YAML-based state serialization format.
+# It provides a human-readable representation of the application's runtime state,
+# enabling easy inspection, debugging, and version control integration.
+current_format: yaml-state-v1
+compatibility: RELEASE_STREAM=stable
