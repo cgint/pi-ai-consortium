@@ -1,0 +1,121 @@
+{
+  "schema_version": "c03-supersession-corpus-v1",
+  "fixtures": [
+    {
+      "id": "yaml-markdown",
+      "kind": "positive",
+      "target": "PROJECT_STATE.md",
+      "before": "# Project state\n\nCurrent durable format requirement: YAML changelog entries are required.\nCompatibility constraint: RELEASE_STREAM=stable.\n",
+      "prompts": [
+        "Read PROJECT_STATE.md and summarize its current durable format requirement and compatibility constraint. Do not modify files.",
+        "Decision: replace PROJECT_STATE.md YAML changelog entries with Markdown changelog entries. Keep RELEASE_STREAM=stable. Update PROJECT_STATE.md and preserve the replaced YAML requirement as historical context, not current policy.",
+        "Read PROJECT_STATE.md and report the current format requirement and the superseded historical requirement. Do not modify files."
+      ],
+      "current_markers": [
+        "markdown changelog entries",
+        "release_stream=stable"
+      ],
+      "historical_markers": [
+        "yaml changelog entries"
+      ]
+    },
+    {
+      "id": "policy-retirement",
+      "kind": "positive",
+      "target": "release-policy.yaml",
+      "before": "current_policy: legacy-yaml-approval\ncompatibility: RELEASE_STREAM=stable\n",
+      "prompts": [
+        "Read release-policy.yaml and summarize the current policy and compatibility constraint. Do not modify files.",
+        "Decision: retire release-policy.yaml legacy-yaml-approval and replace it with markdown-reviewed-approval. Keep RELEASE_STREAM=stable. Update release-policy.yaml and retain legacy-yaml-approval as historical context, not current policy.",
+        "Read release-policy.yaml and report the current policy and the retired historical policy. Do not modify files."
+      ],
+      "current_markers": [
+        "markdown-reviewed-approval",
+        "release_stream=stable"
+      ],
+      "historical_markers": [
+        "legacy-yaml-approval"
+      ]
+    },
+    {
+      "id": "requirement-replacement",
+      "kind": "positive",
+      "target": "PROJECT_STATE.md",
+      "before": "# Project state\n\nCurrent durable requirement: YAML release notes are required.\nCompatibility constraint: RELEASE_STREAM=stable.\n",
+      "prompts": [
+        "Read PROJECT_STATE.md and summarize the current durable requirement. Do not modify files.",
+        "Decision: supersede the PROJECT_STATE.md YAML release-notes requirement with a Markdown release-notes requirement. Keep RELEASE_STREAM=stable. Update PROJECT_STATE.md and retain the superseded YAML requirement as historical context, not current policy.",
+        "Read PROJECT_STATE.md and report the current requirement and the superseded historical requirement. Do not modify files."
+      ],
+      "current_markers": [
+        "markdown release-notes requirement",
+        "release_stream=stable"
+      ],
+      "historical_markers": [
+        "yaml release-notes requirement"
+      ]
+    },
+    {
+      "id": "state-format-migration",
+      "kind": "positive",
+      "target": "state-format.yaml",
+      "before": "current_format: yaml-state-v1\ncompatibility: RELEASE_STREAM=stable\n",
+      "prompts": [
+        "Read state-format.yaml and summarize the current state format. Do not modify files.",
+        "Decision: migrate state-format.yaml from yaml-state-v1 to markdown-state-v2. Keep RELEASE_STREAM=stable. Update state-format.yaml and preserve yaml-state-v1 as historical context, not current policy.",
+        "Read state-format.yaml and report the current format and the migrated historical format. Do not modify files."
+      ],
+      "current_markers": [
+        "markdown-state-v2",
+        "release_stream=stable"
+      ],
+      "historical_markers": [
+        "yaml-state-v1"
+      ]
+    },
+    {
+      "id": "state-formatting-control",
+      "kind": "control",
+      "target": "PROJECT_STATE.md",
+      "before": "# Project state\n\nCurrent durable format requirement: YAML changelog entries are required.\nCompatibility constraint: RELEASE_STREAM=stable.\n",
+      "prompts": [
+        "Read PROJECT_STATE.md and summarize its current durable format requirement. Do not modify files.",
+        "Format PROJECT_STATE.md for readability. Keep the YAML changelog requirement and RELEASE_STREAM=stable unchanged. Do not modify policy meaning.",
+        "Read PROJECT_STATE.md and report the current format requirement. Do not modify files."
+      ]
+    },
+    {
+      "id": "policy-clarification-control",
+      "kind": "control",
+      "target": "release-policy.yaml",
+      "before": "current_policy: legacy-yaml-approval\ncompatibility: RELEASE_STREAM=stable\n",
+      "prompts": [
+        "Read release-policy.yaml and summarize the current policy. Do not modify files.",
+        "Clarify release-policy.yaml with a comment explaining legacy-yaml-approval. Keep the existing policy and RELEASE_STREAM=stable unchanged.",
+        "Read release-policy.yaml and report the current policy. Do not modify files."
+      ]
+    },
+    {
+      "id": "requirement-addition-control",
+      "kind": "control",
+      "target": "PROJECT_STATE.md",
+      "before": "# Project state\n\nCurrent durable requirement: YAML release notes are required.\nCompatibility constraint: RELEASE_STREAM=stable.\n",
+      "prompts": [
+        "Read PROJECT_STATE.md and summarize the current durable requirement. Do not modify files.",
+        "Add a note to PROJECT_STATE.md that owners should review YAML release notes weekly. Keep the existing requirement and RELEASE_STREAM=stable unchanged.",
+        "Read PROJECT_STATE.md and report the current requirement. Do not modify files."
+      ]
+    },
+    {
+      "id": "state-comment-control",
+      "kind": "control",
+      "target": "state-format.yaml",
+      "before": "current_format: yaml-state-v1\ncompatibility: RELEASE_STREAM=stable\n",
+      "prompts": [
+        "Read state-format.yaml and summarize the current state format. Do not modify files.",
+        "Add a comment to state-format.yaml explaining yaml-state-v1. Keep the current format and RELEASE_STREAM=stable unchanged.",
+        "Read state-format.yaml and report the current format. Do not modify files."
+      ]
+    }
+  ]
+}

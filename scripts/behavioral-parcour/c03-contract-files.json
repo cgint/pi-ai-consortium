@@ -1,0 +1,19 @@
+{
+  "schema_version": "c03-contract-files-v1",
+  "files": [
+    {"path": "index.ts", "sha256": "ea8420ee1ca5bf41bda5865c6ea23f05754bcd69d2c0c9ef6ca32d6dfec1173c"},
+    {"path": "src/types.ts", "sha256": "3dc4e4485c71cc216eed0dd05c6c17f262e41e66d2518994d3a40e70c2df7bf7"},
+    {"path": "src/config.ts", "sha256": "7036066fb53cfd413dfbd90f55e15e2d6fa43c052bbb393b12bcc0c52068a8d8"},
+    {"path": "src/governor.ts", "sha256": "80be29f6592702d9d5a008f9013677911ea17bb0704d7058cb72efe748aeb32d"},
+    {"path": "src/core.ts", "sha256": "e64c6c3dfbf4f6f65dd22067147836a9e2fe720b0991a8aea95aecb36e50279d"},
+    {"path": "test/governor.test.ts", "sha256": "59031aa2e6b88c5751ea352f27096c7dd18494f2731bc51a08c492f8845dd96f"},
+    {"path": "test/core.test.ts", "sha256": "6d42e1b9a114fdf4294f790c6aed95f8154d6f4ad1d9450a8ea87a4821fb5eb7"},
+    {"path": "scripts/behavioral-parcour/phase05_runner.py", "sha256": "8297eecf3854b21dca63f72d04c4217ff81b2129f92a173c9865db5506493ab2"},
+    {"path": "scripts/behavioral-parcour/c03_runner.py", "sha256": "154d980124e2ad3c35d981d5b075b756bee4943acd62da0fb5e8b3c361644a80"},
+    {"path": "scripts/behavioral-parcour/test_c03_runner.py", "sha256": "fda4f3452d2b396d53c0f6e6ff037b1e3b966b18a1e01337ee772d749452ea13"},
+    {"path": "scripts/behavioral-parcour/c03-supersession-corpus.json", "sha256": "d8d5063903bef6d3e6b27c3b90bc17bed5e895b20443d01829bce58571829a82"},
+    {"path": "docs/c03-supersession-preregistration.md", "sha256": "289a75b8a55817c4b20c96e33ea7283554a56dd4729c685c28373bd5b6f724a1"},
+    {"path": "docs/c03-supersession-preregistration.d2", "sha256": "e59d19e01e8797442c9d6e925739d5a848cb6380396ad9e5c60a6dc556e939a6"},
+    {"path": "docs/c03-supersession-preregistration.svg", "sha256": "fe1eea5d4ff9fff072f753895cb615f02a6111349dfaa7873fd3e0aa2c1b7722"}
+  ]
+}

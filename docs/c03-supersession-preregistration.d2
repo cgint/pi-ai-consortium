@@ -1,0 +1,32 @@
+direction: down
+
+freeze: "**c03 freeze**\nrunner · tests · corpus · contract\n48 fresh IDs and evidence paths" {
+  style.fill: "#FFF3CD"
+}
+
+review: "**Exact prospective review**\n8081-twins/qwen36-27b-nvidia-nvfp4:off\nsession-backed PASS" {
+  style.fill: "#DDEBF7"
+}
+
+preflight: "**Zero-materialization preflight**\nexecutor + CONSORTIUM_MODEL identities\nreview timing and frozen hashes" {
+  style.fill: "#DDEBF7"
+}
+
+matrix: "**Frozen c03 matrix**\n8 fixtures × OFF/ON × 3 repeats\n48 cells in serial order" {
+  style.fill: "#D9EAD3"
+}
+
+identity_stop: "**Identity / infrastructure stop**\npreserve invalid cell\nleave later IDs unconsumed" {
+  style.fill: "#FCE8E6"
+}
+
+result: "**Publish bounded result**\nall gates pass → bounded uplift\notherwise no-uplift classification" {
+  style.fill: "#D9EAD3"
+}
+
+freeze -> review -> preflight
+preflight -> matrix: "all prospective gates pass"
+preflight -> identity_stop: "any mismatch"
+matrix -> identity_stop: "trace/infrastructure failure"
+matrix -> result: "behavioral outcomes continue"
+identity_stop -> result
