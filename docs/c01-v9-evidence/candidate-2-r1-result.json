@@ -1,0 +1,73 @@
+{
+  "run_id": "c01-adaptation-2-history-gate-r1",
+  "pass": false,
+  "prompts_delivered": 3,
+  "process_returncode": 0,
+  "process_clean": true,
+  "protocol_errors": [],
+  "responses_complete": true,
+  "checks": {
+    "C19_fixture": true,
+    "C20_final_text": true
+  },
+  "effective_deliberation_models": [
+    "olla/qwen36-27b-nvidia-nvfp4",
+    "olla/qwen36-27b-nvidia-nvfp4",
+    "olla/qwen36-27b-nvidia-nvfp4",
+    "olla/qwen36-27b-nvidia-nvfp4",
+    "olla/qwen36-27b-nvidia-nvfp4",
+    "olla/qwen36-27b-nvidia-nvfp4"
+  ],
+  "local_deliberation_only": true,
+  "state_change_injected": false,
+  "identity": {
+    "candidate_head": {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "output": "49028bf55146842d0bc3a554f2ec5ea4b531c804\n"
+    },
+    "candidate_config_commit_ancestor": {
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "c92c963863b0a47a3bf745832dd902ebba098100",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "output": ""
+    },
+    "implementation_clean": {
+      "command": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "exit_code": 0,
+      "output": ""
+    },
+    "pi_version": {
+      "command": [
+        "pi",
+        "--version"
+      ],
+      "exit_code": 0,
+      "output": "0.84.1\n"
+    },
+    "node_version": {
+      "command": [
+        "node",
+        "--version"
+      ],
+      "exit_code": 0,
+      "output": "v22.23.2\n"
+    },
+    "config_sha256": "9ecf2163b6a7937148917b235242d1d40c5b89a55228432e47487744970f6af1",
+    "test_sha256": "96e35fe72678f77972d49fcc2467d1a33001c53ecf938e47a51a1004be8ab8c6"
+  },
+  "ended_at": "2026-08-11T13:59:41.240091Z"
+}
