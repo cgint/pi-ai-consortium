@@ -17,4 +17,6 @@
 
 `npm run precommit` passed after integrating the c01 amendment. After independent audit exposed two non-hermetic path-absence tests, they were made temporary-target-isolated and the contract manifest rehashed; the runner, scenario, raw A1b evidence, and A1b’s original manifest remain unchanged. The current c01 Python suite and current contract manifest pass with preserved A1b paths present.
 
+Full raw-publication verification compared every original A1, A1b, and Twins file with its tracked copy: every source file is tracked and every copy is byte-identical. The event-stream JSONL files are explicitly force-tracked because repository ignore rules would otherwise exclude them.
+
 No product adaptation is retained. The evidence supports the stop outcome required by the hard-gate rule, not a governance-performance or transfer claim.
