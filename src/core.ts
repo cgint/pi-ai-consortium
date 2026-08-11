@@ -110,8 +110,15 @@ export class ConsortiumCore {
       userContext = input;
     }
 
+    const currentUserMessage = Array.isArray(input)
+      ? [...input].reverse().find((message) => message.role === "user" && "content" in message && typeof message.content === "string")
+      : undefined;
+    const currentUserTurn = currentUserMessage && "content" in currentUserMessage && typeof currentUserMessage.content === "string"
+      ? currentUserMessage.content
+      : "";
+
     // Phase 0.5 (Post-extraction): Re-evaluate governor gate with extracted context (e.g. for smart_extractor mode)
-    const governorDecision = shouldDeliberate(this.config, extractedContext, turnsSinceLastAudit);
+    const governorDecision = shouldDeliberate(this.config, extractedContext, turnsSinceLastAudit, currentUserTurn);
     if (!governorDecision.shouldDeliberate) {
       onProgress?.("complete", 0, 0);
       return {
@@ -137,6 +144,7 @@ export class ConsortiumCore {
         probes: probeResults,
         synthesis: "NO_CONTRIBUTION",
         extractedContext,
+        governorReason: governorDecision.reason,
         errors: errors.length > 0 ? errors : undefined,
       };
     }
@@ -151,6 +159,7 @@ export class ConsortiumCore {
       probes: probeResults,
       synthesis,
       extractedContext,
+      governorReason: governorDecision.reason,
       errors: errors.length > 0 ? errors : undefined,
     };
   }

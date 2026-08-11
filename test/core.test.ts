@@ -126,6 +126,27 @@ describe("ConsortiumCore", () => {
     expect(probeExecuted).toBe(false);
   });
 
+  it("uses the enabled c02 guard for the current explicit durable-state replacement", async () => {
+    const callKeys: string[] = [];
+    const callFn: ModelCallFn = async (modelKey) => {
+      callKeys.push(modelKey);
+      if (modelKey === "extraction") {
+        return JSON.stringify({
+          userRequirements: ["Replace state requirement"], deliverables: [], revisedOrSupersededDirection: [], userDecisions: [],
+          questionsAndInformationGaps: [], controlBoundaries: [], observedWork: [], observedCriticalFacts: [], relevantLearnings: [],
+          deliberationNeeded: false, deliberationReason: "Routine status query",
+        });
+      }
+      return modelKey === "synthesis" ? "WARN Preserve the replaced YAML requirement as historical." : "WARN Supersession requires a historical record.";
+    };
+    const core = new ConsortiumCore({ ...baseConfig, governorMode: "smart_extractor", stateSupersessionGuard: true }, callFn);
+    const result = await core.deliberate([{ role: "user" as const, content: "Decision: replace PROJECT_STATE.md YAML with Markdown.", timestamp: Date.now() }]);
+
+    expect(callKeys).toContain("probe:0:clarifier");
+    expect(result.skippedByGovernor).toBeUndefined();
+    expect(result.governorReason).toBe("Explicit durable-state supersession guard");
+  });
+
   it("runs full deliberation cycle (diverge → converge)", async () => {
     const callFn = createMockCallFn({
       "probe:0:clarifier": "WARN Hidden assumptions about auth strategy.",

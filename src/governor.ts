@@ -10,10 +10,17 @@ export interface GovernorDecision {
 }
 
 /** Evaluate whether deliberation should run based on configuration, context, and turn state. */
+export function hasExplicitDurableStateSupersession(currentUserTurn: string): boolean {
+  const hasReplacementVerb = /\b(?:replace|replaces|replaced|replacing|supersede|supersedes|superseded|superseding|retire|retires|retired|retiring|migrate|migrates|migrated|migrating)\b/i.test(currentUserTurn);
+  const hasDurableArtifact = /\bPROJECT_STATE\.md\b|\b[\w.-]+\.ya?ml\b/i.test(currentUserTurn);
+  return hasReplacementVerb && hasDurableArtifact;
+}
+
 export function shouldDeliberate(
   config: ConsortiumConfig,
   extractedContext?: ExtractedContext,
   turnsSinceLastAudit: number = 0,
+  currentUserTurn: string = "",
 ): GovernorDecision {
   const mode: GovernorMode = config.governorMode ?? "smart_extractor";
   const maxTurnGap = config.maxTurnGap ?? 20;
@@ -51,6 +58,13 @@ export function shouldDeliberate(
     return {
       shouldDeliberate: true,
       reason: `Maximum turn gap (${maxTurnGap}) reached — forcing periodic safety audit`,
+    };
+  }
+
+  if (config.stateSupersessionGuard === true && hasExplicitDurableStateSupersession(currentUserTurn)) {
+    return {
+      shouldDeliberate: true,
+      reason: "Explicit durable-state supersession guard",
     };
   }
 

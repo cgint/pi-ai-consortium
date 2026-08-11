@@ -79,6 +79,35 @@ describe("Governor Decision Engine", () => {
     expect(auditRes.reason).toBe("Unverified code change detected");
   });
 
+  it("forces deliberation only for an enabled explicit durable-state supersession", () => {
+    const skipContext: ExtractedContext = {
+      ...baseExtractedContext,
+      deliberationNeeded: false,
+      deliberationReason: "Routine conversational query",
+    };
+    const config = {
+      ...DEFAULT_CONFIG,
+      probes: [],
+      synthesis: { systemPrompt: "", provider: "openai", modelId: "gpt-4o" },
+      governorMode: "smart_extractor" as const,
+      stateSupersessionGuard: true,
+    };
+
+    const supersession = shouldDeliberate(
+      config,
+      skipContext,
+      0,
+      "Decision: replace PROJECT_STATE.md YAML with Markdown; retain the prior requirement as historical.",
+    );
+    expect(supersession).toEqual({
+      shouldDeliberate: true,
+      reason: "Explicit durable-state supersession guard",
+    });
+
+    expect(shouldDeliberate(config, skipContext, 0, "Format PROJECT_STATE.md for readability.").shouldDeliberate).toBe(false);
+    expect(shouldDeliberate({ ...config, stateSupersessionGuard: false }, skipContext, 0, "Replace PROJECT_STATE.md YAML with Markdown.").shouldDeliberate).toBe(false);
+  });
+
   it("smart_extractor mode forces audit when maxTurnGap is reached", () => {
     const config: ConsortiumConfig = {
       ...DEFAULT_CONFIG,

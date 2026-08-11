@@ -31,6 +31,7 @@ export default function (pi: ExtensionAPI): void {
   let governorMode: GovernorMode = "smart_extractor";
   let maxTurnGap = 20;
   let periodicInterval = 10;
+  let stateSupersessionGuard = false;
   let turnsSinceLastAudit = 0;
 
   let turnState: TurnState = { deliberation: null };
@@ -42,7 +43,7 @@ export default function (pi: ExtensionAPI): void {
 
   async function persistSettings(
     cwd: string,
-    opts: { enabled?: boolean; governorMode?: GovernorMode; maxTurnGap?: number; periodicInterval?: number },
+    opts: { enabled?: boolean; governorMode?: GovernorMode; maxTurnGap?: number; periodicInterval?: number; stateSupersessionGuard?: boolean },
   ): Promise<void> {
     persistPending = persistPending.then(async () => {
       try {
@@ -76,6 +77,7 @@ export default function (pi: ExtensionAPI): void {
           governorMode: opts.governorMode !== undefined ? opts.governorMode : (existingConsortium.governorMode ?? governorMode),
           maxTurnGap: opts.maxTurnGap !== undefined ? opts.maxTurnGap : (existingConsortium.maxTurnGap ?? maxTurnGap),
           periodicInterval: opts.periodicInterval !== undefined ? opts.periodicInterval : (existingConsortium.periodicInterval ?? periodicInterval),
+          stateSupersessionGuard: opts.stateSupersessionGuard !== undefined ? opts.stateSupersessionGuard : (existingConsortium.stateSupersessionGuard ?? stateSupersessionGuard),
         };
 
         await writeFile(tmp, JSON.stringify(s, null, 2) + "\n");
@@ -100,6 +102,7 @@ export default function (pi: ExtensionAPI): void {
         if (s.consortium.governorMode !== undefined) governorMode = s.consortium.governorMode as GovernorMode;
         if (typeof s.consortium.maxTurnGap === "number") maxTurnGap = s.consortium.maxTurnGap;
         if (typeof s.consortium.periodicInterval === "number") periodicInterval = s.consortium.periodicInterval;
+        if (typeof s.consortium.stateSupersessionGuard === "boolean") stateSupersessionGuard = s.consortium.stateSupersessionGuard;
       }
       if (!enabled && ctx.hasUI) {
         ctx.ui.setStatus("consortium", "consortium: disabled");
@@ -155,6 +158,7 @@ export default function (pi: ExtensionAPI): void {
       governorMode,
       maxTurnGap,
       periodicInterval,
+      stateSupersessionGuard,
     };
 
     turnState.deliberation = runDeliberation(runtimeConfig, event.messages, ctx, logger, onProgress, turnsSinceLastAudit, lastExtractedContext !== null);
@@ -223,6 +227,7 @@ export default function (pi: ExtensionAPI): void {
         synthesis_length: result.synthesis.length,
         probe_count: result.probes.length,
         errors: result.errors,
+        governor_reason: result.governorReason,
         probes: result.probes,
         synthesis: result.synthesis,
         extractedContext: result.extractedContext,

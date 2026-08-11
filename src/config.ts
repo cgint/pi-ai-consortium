@@ -104,4 +104,5 @@ Severity tags: INFO (truncated tool output noted), WARN (tool call failed or ret
   governorMode: "smart_extractor",
   maxTurnGap: 20,
   periodicInterval: 10,
+  stateSupersessionGuard: false,
 };

@@ -107,6 +107,9 @@ export interface ConsortiumConfig {
   /** Periodic turn interval when governorMode === "periodic".
    * @default 3 */
   periodicInterval?: number;
+  /** Enable the narrow c02 guard for explicit durable-state supersession turns.
+   * @default false */
+  stateSupersessionGuard?: boolean;
 }
 
 /** State tracked per turn. */
