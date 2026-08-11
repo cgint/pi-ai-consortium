@@ -198,6 +198,7 @@ export default function (pi: ExtensionAPI): void {
         logger?.log({
           type: "injection_skipped",
           reason: "NO_CONTRIBUTION",
+          governor_reason: result.governorReason,
           probe_count: result.probes.length,
           extractedContext: result.extractedContext,
         });

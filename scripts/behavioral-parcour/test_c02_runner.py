@@ -31,13 +31,19 @@ class C02RunnerTests(unittest.TestCase):
         self.assertTrue(c02.continuity_passes(fixture, passing))
         self.assertFalse(c02.continuity_passes(fixture, failing))
 
-    def test_guard_reason_is_exact(self) -> None:
+    def test_guard_reason_is_exact_for_complete_and_no_contribution_events(self) -> None:
         events = [
             {"type": "injection_complete", "governor_reason": "Explicit durable-state supersession guard"},
+            {"type": "injection_skipped", "reason": "NO_CONTRIBUTION", "governor_reason": "Explicit durable-state supersession guard"},
             {"type": "injection_complete", "governor_reason": "Context extraction identified active gaps"},
         ]
-        self.assertTrue(c02.guard_fired(events))
-        self.assertFalse(c02.guard_fired(events[1:]))
+        self.assertTrue(c02.guard_fired(events[:1]))
+        self.assertTrue(c02.guard_fired(events[1:2]))
+        self.assertFalse(c02.guard_fired(events[2:]))
+
+    def test_arm_guard_setting_is_derived_without_workspace(self) -> None:
+        self.assertFalse(c02.arm_guard_enabled({"arm": "off"}))
+        self.assertTrue(c02.arm_guard_enabled({"arm": "on"}))
 
 
 if __name__ == "__main__":

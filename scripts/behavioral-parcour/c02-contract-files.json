@@ -1,15 +1,15 @@
 {
   "schema_version": "c02-contract-files-v1",
   "files": [
-    {"path": "index.ts", "sha256": "dfa0bd652c4c8fcfd911ce179a473587d15fb6cff0d579d3ebc24a67682db612"},
+    {"path": "index.ts", "sha256": "ea8420ee1ca5bf41bda5865c6ea23f05754bcd69d2c0c9ef6ca32d6dfec1173c"},
     {"path": "src/types.ts", "sha256": "3dc4e4485c71cc216eed0dd05c6c17f262e41e66d2518994d3a40e70c2df7bf7"},
     {"path": "src/config.ts", "sha256": "7036066fb53cfd413dfbd90f55e15e2d6fa43c052bbb393b12bcc0c52068a8d8"},
     {"path": "src/governor.ts", "sha256": "80be29f6592702d9d5a008f9013677911ea17bb0704d7058cb72efe748aeb32d"},
     {"path": "src/core.ts", "sha256": "e64c6c3dfbf4f6f65dd22067147836a9e2fe720b0991a8aea95aecb36e50279d"},
     {"path": "test/governor.test.ts", "sha256": "59031aa2e6b88c5751ea352f27096c7dd18494f2731bc51a08c492f8845dd96f"},
     {"path": "test/core.test.ts", "sha256": "6d42e1b9a114fdf4294f790c6aed95f8154d6f4ad1d9450a8ea87a4821fb5eb7"},
-    {"path": "scripts/behavioral-parcour/c02_runner.py", "sha256": "e61762cb326d39349f080cc3cc386d7bede968b2ad30e1048c555b5073130292"},
-    {"path": "scripts/behavioral-parcour/test_c02_runner.py", "sha256": "01b8a511f0d6231fe0101e7c65ed8985b890be84b9b59ebb07ecd81299144e21"},
+    {"path": "scripts/behavioral-parcour/c02_runner.py", "sha256": "371c9b46e661b269382e5ddc35391badb7b88c30f4a31b0642edf453607e91e1"},
+    {"path": "scripts/behavioral-parcour/test_c02_runner.py", "sha256": "4c67bf4e084e93e93959ad36f6dd63e5ec992e20b0e129bb8b0bb737451cdc35"},
     {"path": "scripts/behavioral-parcour/c02-supersession-corpus.json", "sha256": "cf19c90c00888ea570a39dbc01d9686d878ea669f9a4f8fd6cfb69cdadecb658"},
     {"path": "docs/c02-fresh-supersession-preregistration.md", "sha256": "89235b72b8e9434b6d99a7b34faf690f40fcb3d7a71bc217b8a134d1ee94f180"}
   ]

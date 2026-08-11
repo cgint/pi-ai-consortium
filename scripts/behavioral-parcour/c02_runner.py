@@ -67,8 +67,19 @@ RUN_SPECS = [
 RUN_BY_ID = {item["run_id"]: item for item in RUN_SPECS}
 
 
+def arm_guard_enabled(spec: Dict[str, Any]) -> bool:
+    arm = spec.get("arm")
+    if arm not in ("off", "on"):
+        raise ValueError("c02 arm must be off or on")
+    return arm == "on"
+
+
 def guard_fired(events: List[Dict[str, Any]]) -> bool:
-    return any(event.get("type") == "injection_complete" and event.get("governor_reason") == GUARD_REASON for event in events)
+    return any(
+        event.get("type") in ("injection_complete", "injection_skipped")
+        and event.get("governor_reason") == GUARD_REASON
+        for event in events
+    )
 
 
 def continuity_passes(fixture: Dict[str, Any], final_text: str) -> bool:
@@ -159,7 +170,11 @@ class C02Runner(c01.C01Runner):
         target.write_text(self.fixture["before"])
         settings = self.workspace / ".pi" / "settings.json"
         settings.parent.mkdir(parents=True, exist_ok=True)
-        settings.write_text(json.dumps({"consortium": {"enabled": True, "governorMode": "smart_extractor", "stateSupersessionGuard": self.spec["arm"] == "on"}}, indent=2) + "\n")
+        enabled = arm_guard_enabled(self.spec)
+        settings.write_text(json.dumps({"consortium": {"enabled": True, "governorMode": "smart_extractor", "stateSupersessionGuard": enabled}}, indent=2) + "\n")
+        persisted = json.loads(settings.read_text()).get("consortium", {}).get("stateSupersessionGuard")
+        self.manifest["workspace_guard_setting"] = persisted
+        self.manifest["identity_checks"]["workspace_guard_setting"] = persisted is enabled
         self.fixture_before = self.tmp_root / "fixture-before"
         self.fixture_before.mkdir()
         shutil.copy2(target, self.fixture_before / self.fixture["target"])
@@ -178,7 +193,7 @@ class C02Runner(c01.C01Runner):
             "review_session_sha256": sha256_file(REPO_ROOT / "docs" / "c02-evidence" / "independent-review-8081-twins-session.jsonl") == self.review_session_sha256,
             "pi_version": pi["exit_code"] == 0 and pi["output"].strip() == C02_PI_VERSION,
             "node_version": node["exit_code"] == 0 and C02_NODE_VERSION.fullmatch(node["output"].strip()) is not None,
-            "guard_setting": self.spec["arm"] == (json.loads((self.workspace / ".pi" / "settings.json").read_text())["consortium"]["stateSupersessionGuard"] and "on" or "off"),
+            "guard_setting": isinstance(arm_guard_enabled(self.spec), bool),
             "exact_model": command[command.index("--provider") + 1] == p.MODEL_PROVIDER and command[command.index("--model") + 1] == p.MODEL_ID and command[command.index("--thinking") + 1] == p.THINKING_LEVEL,
         }
         self.manifest = {
