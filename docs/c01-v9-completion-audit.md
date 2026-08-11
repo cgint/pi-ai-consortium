@@ -6,7 +6,7 @@
 | Goal condition | Root-repository evidence | Completion state |
 | --- | --- | --- |
 | Preserve original invalid A1 and amend runtime identity prospectively | `c01-v9-raw/original-a1-infrastructure-invalid/`; `c01-v9-evidence/original-a1-infrastructure-invalid.md`; integrated commits `33d8440`, `eac131b`, `b376b9b` | Complete; original A1 remains zero-prompt and non-reusable. |
-| Exact Pi `0.84.1`, Node `v22.23.*`, replacement A1b, matching tests, independent review | `c01-v9-evidence/a1b-manifest.json`; `independent-review-8081-twins.md`; `independent-review-8081-twins-identity.md`; integrated harness | Complete pre-prompt identity boundary; reviewer session pins `8081-twins/qwen36-27b-nvidia-nvfp4:off`. |
+| Exact Pi `0.84.1`, Node `v22.23.*`, replacement A1b, matching tests, independent review | `c01-v9-evidence/a1b-manifest.json`; `independent-review-8081-twins.md`; `independent-review-8081-twins-identity.md`; integrated harness | **Not met prospectively:** reviewer session pins the exact identity but postdates A1b; no retrospective compliance claim. |
 | Execute frozen c01 or stop at a hard gate | `c01-v9-raw/a1b/`; `c01-v9-evidence/a1b-result.json` | Complete stop: A1b executed, C19 false, five remaining cells intentionally unexecuted. |
 | D1/D7 mechanical and D5 blinded only with valid coverage | A1b result plus primary report coverage table | Complete honest coverage: D1 descriptive only; D5 0; D7 incomplete; no derived claim. |
 | Separate fixed Twins replication | `findings-position-zero.md`; `c01-v9-raw/position-zero-twins-20260811T1135Z/`; `c01-v9-evidence/position-zero-twins-SHA256SUMS.txt` | Complete and scoped; not pooled with local failures or c01. |
