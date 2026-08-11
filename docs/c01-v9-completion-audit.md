@@ -15,6 +15,6 @@
 
 ## Verification boundary
 
-`npm run precommit` passed after integrating the c01 amendment. The integrated c01 contract manifest verifies. A direct post-live Python rerun has two expected path-absence test failures because it targets the preserved, consumed A1b `/tmp` path; the frozen test/harness is not altered and the evidence is not removed. This condition and its limit are published in the primary report.
+`npm run precommit` passed after integrating the c01 amendment. After independent audit exposed two non-hermetic path-absence tests, they were made temporary-target-isolated and the contract manifest rehashed; the runner, scenario, raw A1b evidence, and A1b’s original manifest remain unchanged. The current c01 Python suite and current contract manifest pass with preserved A1b paths present.
 
 No product adaptation is retained. The evidence supports the stop outcome required by the hard-gate rule, not a governance-performance or transfer claim.

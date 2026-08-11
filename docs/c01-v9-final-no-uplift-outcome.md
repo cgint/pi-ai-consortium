@@ -44,4 +44,4 @@ Twins push warm medians were 2.666–2.950s and splice 17.841–18.192s; one 49-
 
 ## Verification note
 
-The c01 Python suite passed before A1b consumed its target paths. A post-live direct rerun in the root checkout reports two path-absence test failures because those tests instantiate the now-consumed default A1b ID and assert its `/tmp` path does not exist. The path is required preserved evidence and must not be removed or reused; no frozen runner/test change was made after observation. This post-live non-hermetic test condition does not alter the pre-run verification or A1b result.
+After independent audit found two non-hermetic identity-failure tests, the tests were changed to use private temporary targets and the contract manifest was rehashed. This post-A1b maintenance change alters no runner behavior, prompts, run IDs, scenario, raw evidence, or A1b result; A1b retains its original pinned contract/test hashes in its manifest. The current c01 Python suite passes with preserved A1b paths present, and the current contract manifest verifies.

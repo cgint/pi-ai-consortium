@@ -144,11 +144,18 @@ class C01RunnerTests(unittest.TestCase):
     def test_well_formed_identity_mismatch_fails_before_any_target_path(self):
         spec = runner.CELL_SPECS["A1"]
         instance = runner.C01Runner("pre-stage-c", "A1", spec["run_id"], spec["arm"], spec["repetition"], "a" * 40, "b" * 40, "c" * 64, "d" * 64, "e" * 64, "f" * 40)
-        result = instance.run()
-        self.assertIn("Frozen identity mismatch before materialization", result["exception"])
-        self.assertEqual(result["prompts_delivered"], 0)
-        self.assertFalse(instance.tmp_root.exists())
-        self.assertFalse(instance.evidence_dir.exists())
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            instance.tmp_root = root / "runtime"
+            instance.workspace = instance.tmp_root / "workspace"
+            instance.sessions_dir = instance.tmp_root / "sessions"
+            instance.runtime_root = instance.tmp_root
+            instance.evidence_dir = root / "evidence"
+            result = instance.run()
+            self.assertIn("Frozen identity mismatch before materialization", result["exception"])
+            self.assertEqual(result["prompts_delivered"], 0)
+            self.assertFalse(instance.tmp_root.exists())
+            self.assertFalse(instance.evidence_dir.exists())
 
     def test_preflight_only_passes_without_target_paths(self):
         spec = runner.CELL_SPECS["A1"]
@@ -194,12 +201,19 @@ class C01RunnerTests(unittest.TestCase):
     def test_malformed_identity_fails_before_any_target_path(self):
         spec = runner.CELL_SPECS["A1"]
         instance = runner.C01Runner("pre-stage-c", "A1", spec["run_id"], spec["arm"], spec["repetition"], "bad", "b" * 40, "c" * 64, "d" * 64, "e" * 64, "f" * 40)
-        self.assertFalse(instance.tmp_root.exists())
-        result = instance.run()
-        self.assertIn("Invalid addendum commit identity", result["exception"])
-        self.assertEqual(result["prompts_delivered"], 0)
-        self.assertFalse(instance.tmp_root.exists())
-        self.assertFalse(instance.evidence_dir.exists())
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            instance.tmp_root = root / "runtime"
+            instance.workspace = instance.tmp_root / "workspace"
+            instance.sessions_dir = instance.tmp_root / "sessions"
+            instance.runtime_root = instance.tmp_root
+            instance.evidence_dir = root / "evidence"
+            self.assertFalse(instance.tmp_root.exists())
+            result = instance.run()
+            self.assertIn("Invalid addendum commit identity", result["exception"])
+            self.assertEqual(result["prompts_delivered"], 0)
+            self.assertFalse(instance.tmp_root.exists())
+            self.assertFalse(instance.evidence_dir.exists())
 
 
 if __name__ == "__main__":
