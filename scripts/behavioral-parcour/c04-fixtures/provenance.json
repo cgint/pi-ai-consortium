@@ -1,0 +1,8 @@
+{
+  "schema_version": "c04-get-state-provenance-v1",
+  "source_path": "docs/c03-raw/c03-off-r1-yaml-markdown/state_final.json",
+  "source_sha256": "de954a25d94321012ba5cf0e6a0b3b4426961aeebffaafbc4be7d5ab4b5342d3",
+  "fixture_sha256": "de954a25d94321012ba5cf0e6a0b3b4426961aeebffaafbc4be7d5ab4b5342d3",
+  "capture_runtime": "Pi 0.84.1",
+  "use_boundary": "schema fixture only; c03 result is not c04 evidence"
+}

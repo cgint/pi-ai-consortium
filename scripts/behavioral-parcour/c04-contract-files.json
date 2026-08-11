@@ -1,0 +1,21 @@
+{
+  "schema_version": "c04-contract-files-v1",
+  "files": [
+    {"path": "index.ts", "sha256": "ea8420ee1ca5bf41bda5865c6ea23f05754bcd69d2c0c9ef6ca32d6dfec1173c"},
+    {"path": "src/types.ts", "sha256": "3dc4e4485c71cc216eed0dd05c6c17f262e41e66d2518994d3a40e70c2df7bf7"},
+    {"path": "src/config.ts", "sha256": "7036066fb53cfd413dfbd90f55e15e2d6fa43c052bbb393b12bcc0c52068a8d8"},
+    {"path": "src/governor.ts", "sha256": "80be29f6592702d9d5a008f9013677911ea17bb0704d7058cb72efe748aeb32d"},
+    {"path": "src/core.ts", "sha256": "e64c6c3dfbf4f6f65dd22067147836a9e2fe720b0991a8aea95aecb36e50279d"},
+    {"path": "test/governor.test.ts", "sha256": "59031aa2e6b88c5751ea352f27096c7dd18494f2731bc51a08c492f8845dd96f"},
+    {"path": "test/core.test.ts", "sha256": "6d42e1b9a114fdf4294f790c6aed95f8154d6f4ad1d9450a8ea87a4821fb5eb7"},
+    {"path": "scripts/behavioral-parcour/phase05_runner.py", "sha256": "8297eecf3854b21dca63f72d04c4217ff81b2129f92a173c9865db5506493ab2"},
+    {"path": "scripts/behavioral-parcour/c04_runner.py", "sha256": "d3c057a522298eb4607fc2828b35d2caf99b38923617787c148a8135ed416168"},
+    {"path": "scripts/behavioral-parcour/test_c04_runner.py", "sha256": "99192f1a288388c0421d629ac475feddd365b9af0688fcba4515b785b6198c7c"},
+    {"path": "scripts/behavioral-parcour/c04-supersession-corpus.json", "sha256": "79d36d10ac7d7428d6b37373f54033c72878172d622b9e4a4f16d095a3448974"},
+    {"path": "scripts/behavioral-parcour/c04-fixtures/pi-0.84.1-get-state.json", "sha256": "de954a25d94321012ba5cf0e6a0b3b4426961aeebffaafbc4be7d5ab4b5342d3"},
+    {"path": "scripts/behavioral-parcour/c04-fixtures/provenance.json", "sha256": "b25e04580aa0c09c9fb424975df7752ea8c1178003234e854379364aaeae0234"},
+    {"path": "docs/c04-supersession-preregistration.md", "sha256": "00b7cf9354a97ec6555cd7067c52ff3689160a0135c6bf4ea31f2c40999f86ff"},
+    {"path": "docs/c04-supersession-preregistration.d2", "sha256": "412c65d660958e9bc246a26ceaf5bff9cb31abe4b428a1c847690dbac8fd9ed4"},
+    {"path": "docs/c04-supersession-preregistration.svg", "sha256": "7e32eb93bea0876ab30cab2da1c3e9d11ce7d05da74689c0104860433f3e762d"}
+  ]
+}

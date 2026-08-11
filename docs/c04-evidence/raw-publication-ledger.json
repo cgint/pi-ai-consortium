@@ -1,0 +1,245 @@
+{
+  "schema_version": "c04-raw-publication-ledger-v1",
+  "runs": [
+    {
+      "run_id": "c04-off-r1-yaml-markdown",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r1-yaml-markdown"
+    },
+    {
+      "run_id": "c04-on-r1-yaml-markdown",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r1-yaml-markdown"
+    },
+    {
+      "run_id": "c04-off-r1-policy-retirement",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r1-policy-retirement"
+    },
+    {
+      "run_id": "c04-on-r1-policy-retirement",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r1-policy-retirement"
+    },
+    {
+      "run_id": "c04-off-r1-requirement-replacement",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r1-requirement-replacement"
+    },
+    {
+      "run_id": "c04-on-r1-requirement-replacement",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r1-requirement-replacement"
+    },
+    {
+      "run_id": "c04-off-r1-state-format-migration",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r1-state-format-migration"
+    },
+    {
+      "run_id": "c04-on-r1-state-format-migration",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r1-state-format-migration"
+    },
+    {
+      "run_id": "c04-off-r1-state-formatting-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r1-state-formatting-control"
+    },
+    {
+      "run_id": "c04-on-r1-state-formatting-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r1-state-formatting-control"
+    },
+    {
+      "run_id": "c04-off-r1-policy-clarification-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r1-policy-clarification-control"
+    },
+    {
+      "run_id": "c04-on-r1-policy-clarification-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r1-policy-clarification-control"
+    },
+    {
+      "run_id": "c04-off-r1-requirement-addition-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r1-requirement-addition-control"
+    },
+    {
+      "run_id": "c04-on-r1-requirement-addition-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r1-requirement-addition-control"
+    },
+    {
+      "run_id": "c04-off-r1-state-comment-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r1-state-comment-control"
+    },
+    {
+      "run_id": "c04-on-r1-state-comment-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r1-state-comment-control"
+    },
+    {
+      "run_id": "c04-off-r2-yaml-markdown",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r2-yaml-markdown"
+    },
+    {
+      "run_id": "c04-on-r2-yaml-markdown",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r2-yaml-markdown"
+    },
+    {
+      "run_id": "c04-off-r2-policy-retirement",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r2-policy-retirement"
+    },
+    {
+      "run_id": "c04-on-r2-policy-retirement",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r2-policy-retirement"
+    },
+    {
+      "run_id": "c04-off-r2-requirement-replacement",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r2-requirement-replacement"
+    },
+    {
+      "run_id": "c04-on-r2-requirement-replacement",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r2-requirement-replacement"
+    },
+    {
+      "run_id": "c04-off-r2-state-format-migration",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r2-state-format-migration"
+    },
+    {
+      "run_id": "c04-on-r2-state-format-migration",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r2-state-format-migration"
+    },
+    {
+      "run_id": "c04-off-r2-state-formatting-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r2-state-formatting-control"
+    },
+    {
+      "run_id": "c04-on-r2-state-formatting-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r2-state-formatting-control"
+    },
+    {
+      "run_id": "c04-off-r2-policy-clarification-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r2-policy-clarification-control"
+    },
+    {
+      "run_id": "c04-on-r2-policy-clarification-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r2-policy-clarification-control"
+    },
+    {
+      "run_id": "c04-off-r2-requirement-addition-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r2-requirement-addition-control"
+    },
+    {
+      "run_id": "c04-on-r2-requirement-addition-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r2-requirement-addition-control"
+    },
+    {
+      "run_id": "c04-off-r2-state-comment-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r2-state-comment-control"
+    },
+    {
+      "run_id": "c04-on-r2-state-comment-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r2-state-comment-control"
+    },
+    {
+      "run_id": "c04-off-r3-yaml-markdown",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r3-yaml-markdown"
+    },
+    {
+      "run_id": "c04-on-r3-yaml-markdown",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r3-yaml-markdown"
+    },
+    {
+      "run_id": "c04-off-r3-policy-retirement",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r3-policy-retirement"
+    },
+    {
+      "run_id": "c04-on-r3-policy-retirement",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r3-policy-retirement"
+    },
+    {
+      "run_id": "c04-off-r3-requirement-replacement",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r3-requirement-replacement"
+    },
+    {
+      "run_id": "c04-on-r3-requirement-replacement",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r3-requirement-replacement"
+    },
+    {
+      "run_id": "c04-off-r3-state-format-migration",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r3-state-format-migration"
+    },
+    {
+      "run_id": "c04-on-r3-state-format-migration",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r3-state-format-migration"
+    },
+    {
+      "run_id": "c04-off-r3-state-formatting-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r3-state-formatting-control"
+    },
+    {
+      "run_id": "c04-on-r3-state-formatting-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r3-state-formatting-control"
+    },
+    {
+      "run_id": "c04-off-r3-policy-clarification-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r3-policy-clarification-control"
+    },
+    {
+      "run_id": "c04-on-r3-policy-clarification-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r3-policy-clarification-control"
+    },
+    {
+      "run_id": "c04-off-r3-requirement-addition-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r3-requirement-addition-control"
+    },
+    {
+      "run_id": "c04-on-r3-requirement-addition-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r3-requirement-addition-control"
+    },
+    {
+      "run_id": "c04-off-r3-state-comment-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-off-r3-state-comment-control"
+    },
+    {
+      "run_id": "c04-on-r3-state-comment-control",
+      "status": "unconsumed",
+      "raw_directory": "docs/c04-raw/c04-on-r3-state-comment-control"
+    }
+  ]
+}
