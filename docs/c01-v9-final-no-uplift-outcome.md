@@ -34,7 +34,7 @@ Two isolated candidates ran and neither is retained:
 1. Candidate 1 is invalid: its deliberation identity resolved to external `google/gemini-3.5-flash`, and the smart extractor skipped the changed navigator lens. Its second run was not consumed.
 2. Candidate 2 used only `olla/qwen36-27b-nvidia-nvfp4`, passed C19/C20, but still skipped the state-changing supersession injection. Its mechanism is inconclusive and its second run is not consumed.
 
-No third candidate is warranted because it cannot produce the required passing frozen c01 matrix. Candidate r1 snapshots are tracked at `docs/c01-v9-evidence/candidate-1-r1-result.json` and `candidate-2-r1-result.json`; neither candidate branch is merged.
+Both candidates occurred only after the C19 hard-gate pause and explicit user authorization; their control boundary is tracked at `docs/c01-v9-evidence/hard-gate-stop-and-adaptation-authorizations.md`. No third candidate is warranted because it cannot produce the required passing frozen c01 matrix. Candidate r1 snapshots are tracked at `docs/c01-v9-evidence/candidate-1-r1-result.json` and `candidate-2-r1-result.json`; neither candidate branch is merged.
 
 ## Separate Twins position-zero replication
 
