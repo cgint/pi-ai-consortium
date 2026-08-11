@@ -1,0 +1,8 @@
+{
+  "schema_version": "c01-preflight-v1",
+  "run_id": "c02-off-r1-yaml-markdown",
+  "pass": false,
+  "prompts_delivered": 0,
+  "exception": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/parcour-c02-off-r1-yaml-markdown/workspace/.pi/settings.json'",
+  "manifest": {}
+}
