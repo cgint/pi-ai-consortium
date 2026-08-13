@@ -296,15 +296,22 @@ class C05RunnerTests(unittest.TestCase):
             self.assertFalse(c05.control_regression(fixture['before'], 'Historical context: obsolete migration.\nCurrent: ' + identity + '\nRELEASE_STREAM=stable'), 'historical prose elsewhere must not erase current identity')
 
     def test_run_wires_preflight_rpc_collection_validation_and_harvest_without_pi(self):
+        root = c05.RUN_ROOT / f'c05-test-run-wiring-{uuid.uuid4().hex}'
         runner = c05.C05Runner(c05.RUN_SPECS[0])
+        runner.runtime_root = root
+        runner.evidence_dir = root / 'evidence'
+        runner.evidence_dir.mkdir(parents=True)
         runner.manifest = {'argv': ['pi'], 'workspace_guard_setting': False}
         proc = type('Proc', (), {})()
-        with patch.object(runner, 'preflight', return_value={'pass': True}), patch.object(runner, '_materialize_workspace') as materialize, patch.object(runner, '_spawn_pi', return_value=proc) as spawn, patch.object(runner, '_run_rpc_loop') as rpc, patch.object(runner, '_cleanup_process') as cleanup, patch.object(runner, '_collect_consortium_logs') as consortium, patch.object(runner, '_collect_session_logs') as sessions, patch.object(runner, '_validate_all', return_value=[{'id':'C05-process','pass':True}]) as validate, patch.object(runner, '_harvest') as harvest, patch.object(runner, '_raw_valid', return_value=True):
-            result = runner.run()
-        materialize.assert_called_once(); spawn.assert_called_once(); rpc.assert_called_once(); cleanup.assert_called_once_with(proc)
-        consortium.assert_called_once(); sessions.assert_called_once(); validate.assert_called_once(); harvest.assert_called_once()
-        self.assertFalse(result['pass']); self.assertEqual(result['exit_class'], 2)
-        self.assertIn('Harvest failed:', result['harvest_error'])
+        try:
+            with patch.object(runner, 'preflight', return_value={'pass': True}), patch.object(runner, '_materialize_workspace') as materialize, patch.object(runner, '_spawn_pi', return_value=proc) as spawn, patch.object(runner, '_run_rpc_loop') as rpc, patch.object(runner, '_cleanup_process') as cleanup, patch.object(runner, '_collect_consortium_logs') as consortium, patch.object(runner, '_collect_session_logs') as sessions, patch.object(runner, '_validate_all', return_value=[{'id':'C05-process','pass':True}]) as validate, patch.object(runner, '_harvest') as harvest, patch.object(runner, '_raw_valid', return_value=True):
+                result = runner.run()
+            materialize.assert_called_once(); spawn.assert_called_once(); rpc.assert_called_once(); cleanup.assert_called_once_with(proc)
+            consortium.assert_called_once(); sessions.assert_called_once(); validate.assert_called_once(); harvest.assert_called_once()
+            self.assertTrue(result['pass']); self.assertEqual(result['exit_class'], 0)
+            self.assertNotIn('harvest_error', result)
+        finally:
+            if root.exists(): shutil.rmtree(root)
 
     def test_raw_destination_conflict_allows_only_gitkeep(self):
         root=c05.RAW_ROOT / f'c05-test-placeholder-{uuid.uuid4().hex}'

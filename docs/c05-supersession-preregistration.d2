@@ -1,0 +1,21 @@
+direction: down
+
+baseline: "**c04 immutable valid-negative baseline**\nnot Phase 0; no cell reuse" {style.fill: "#FFF3CD"}
+phase0: "**Phase 0-B accepted**\nidentity · runtime · extensions\nno user prompts" {style.fill: "#FFF3CD"}
+freeze: "**c05 freeze**\ncontract · preregistration · ledger\n56 tracked empty raw destinations" {style.fill: "#FFF3CD"}
+review: "**Post-freeze review**\nexact identity · raw-session PASS" {style.fill: "#DDEBF7"}
+preflight: "**Zero-materialization preflight**\nPhase 0 · hashes · review · paths" {style.fill: "#DDEBF7"}
+smoke: "**8 ON smoke cells**\ncomplete denominator despite behavioral exits\nany failed transition blocks matrix" {style.fill: "#D9EAD3"}
+matrix: "**48 serial matrix cells**\n3 repeats × 8 fixtures × OFF/ON" {style.fill: "#D9EAD3"}
+stop: "**Mandatory stop**\nidentity · review · infrastructure\nsafety · raw/harvest failure" {style.fill: "#FCE8E6"}
+result: "**Publish result**\nsmoke valid · ON fires 12/12 · OFF 0/12\ncontrols 0/24 · ON ≥11/12, ≥3 vs OFF" {style.fill: "#D9EAD3"}
+
+baseline -> freeze
+phase0 -> freeze -> review -> preflight
+preflight -> smoke: "all gates pass; no materialization before"
+preflight -> stop: "mandatory failure"
+smoke -> matrix: "committed valid transition only; controller plans one cell"
+smoke -> stop: "mandatory failure; behavioral exit completes remaining smoke only"
+matrix -> result: "behavioral outcomes continue; no retries"
+matrix -> stop: "mandatory failure"
+stop -> result

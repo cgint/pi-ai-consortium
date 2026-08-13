@@ -1,0 +1,121 @@
+{
+  "schema_version": "c05-contract-files-v1",
+  "files": [
+    {
+      "path": "index.ts",
+      "sha256": "7b0c7a306987e12cbd2e369f56a9dfb4deb91f3f6720eecc84e9ba5d5a024fdb"
+    },
+    {
+      "path": "src/types.ts",
+      "sha256": "3dc4e4485c71cc216eed0dd05c6c17f262e41e66d2518994d3a40e70c2df7bf7"
+    },
+    {
+      "path": "src/config.ts",
+      "sha256": "7036066fb53cfd413dfbd90f55e15e2d6fa43c052bbb393b12bcc0c52068a8d8"
+    },
+    {
+      "path": "src/governor.ts",
+      "sha256": "80be29f6592702d9d5a008f9013677911ea17bb0704d7058cb72efe748aeb32d"
+    },
+    {
+      "path": "src/core.ts",
+      "sha256": "51ed192b7820e97f878035e9d3d8f4072c7766040bee3e21206a842beb5f4a9d"
+    },
+    {
+      "path": "test/governor.test.ts",
+      "sha256": "59031aa2e6b88c5751ea352f27096c7dd18494f2731bc51a08c492f8845dd96f"
+    },
+    {
+      "path": "test/core.test.ts",
+      "sha256": "450065fc149f3803e2f0fb5da9fbfda4738d737160821fd4d0bffe96e1188920"
+    },
+    {
+      "path": "test/injection-order.test.ts",
+      "sha256": "b3a3470d60a1ce507f3ff552d927d606eefb348d8bd82d3bd6eef4f9f32de9a0"
+    },
+    {
+      "path": "scripts/behavioral-parcour/phase05_runner.py",
+      "sha256": "8297eecf3854b21dca63f72d04c4217ff81b2129f92a173c9865db5506493ab2"
+    },
+    {
+      "path": "scripts/behavioral-parcour/c05_phase0.py",
+      "sha256": "dff886d60aadf91cb0dde2821b5eca1c6845f8fe676126a4044a9011dd555b36"
+    },
+    {
+      "path": "scripts/behavioral-parcour/c05_phase0_probe.py",
+      "sha256": "efec6a2167f55d7991f533c2e3db19d98fe12966e5b1996d290d231d9a232d1f"
+    },
+    {
+      "path": "scripts/behavioral-parcour/c05_runner.py",
+      "sha256": "daa0b6e4cd94186746f2ec3ba47828ae33a23e34964723bf4e38258d1397577e"
+    },
+    {
+      "path": "scripts/behavioral-parcour/c05_scorer.py",
+      "sha256": "57fbb08a80482126061fc39f192175fb1600ef6b60f4c086cdefcee93908bea8"
+    },
+    {
+      "path": "scripts/behavioral-parcour/test_c05_phase0.py",
+      "sha256": "ba0ed08b5cd2d31684caeaba7a6f7c9cfa48babd34e334f001d882ff3056ec19"
+    },
+    {
+      "path": "scripts/behavioral-parcour/test_c05_phase0_probe.py",
+      "sha256": "af35bd7a91dd7d4f29eddb16b03315cc2f0e48bd02c06d854d53bcedf1c96209"
+    },
+    {
+      "path": "scripts/behavioral-parcour/test_c05_runner.py",
+      "sha256": "15c7454cd92f8f0491bb6847e5370e25a6906a24b77ee945388597b84d508507"
+    },
+    {
+      "path": "scripts/behavioral-parcour/test_c05_scorer.py",
+      "sha256": "80e359c4e215f05864f972b55e910f4eca9aad64bf2d26565a9f9181394d2544"
+    },
+    {
+      "path": "scripts/behavioral-parcour/c05-supersession-corpus.json",
+      "sha256": "0daec30201315a92a183df1e62b54d145ef25ea6d11b2b836b615f17e8d520f7"
+    },
+    {
+      "path": "scripts/behavioral-parcour/verify_c05_freeze.py",
+      "sha256": "7a2392946e48c2ba57fa6b983ae439e448a83871983e746dc004cd7827cd5e6f"
+    },
+    {
+      "path": "scripts/behavioral-parcour/test_verify_c05_freeze.py",
+      "sha256": "559fa5c445387436522f2bf36076c7b0cece55ca45e60bdb6d78ba3e9de38c68"
+    },
+    {
+      "path": "docs/c05-evidence/phase0-capability-b/result.json",
+      "sha256": "f9a90f1a93f07f64d2da76602323906444d333ced4ccc20296439e3a537aa76f"
+    },
+    {
+      "path": "docs/c05-evidence/phase0-capability-b/independent-audit.md",
+      "sha256": "39e95c8089abd50491f0661a631b399eac89e4948251b560416838471be4713c"
+    },
+    {
+      "path": "docs/c05-supersession-preregistration.md",
+      "sha256": "f80982a7cb1b47a8ed26ab68ace653d11f01b6ebcf8dc79452951f953c44bf40"
+    },
+    {
+      "path": "docs/c05-supersession-preregistration.d2",
+      "sha256": "3f14e9b44abe6b89f266f9cf3f6be71ca8cc63724252549242702cbdb056d4b4"
+    },
+    {
+      "path": "docs/c05-supersession-preregistration.svg",
+      "sha256": "18ade5f9c69d3ce50f1c0632231ed985c1e31e0f13fdfffc58eb801dd56cc228"
+    },
+    {
+      "path": "scripts/behavioral-parcour/c05_controller.py",
+      "sha256": "eb5c3d8f635b693da8969a7239db796f3199c839472a52bb05caf41ae26af66b"
+    },
+    {
+      "path": "scripts/behavioral-parcour/test_c05_controller.py",
+      "sha256": "44a3d45dedd1a7ed5aa8abc1f676ca42deccde3e2f9bc55564d30d000db78280"
+    },
+    {
+      "path": "scripts/behavioral-parcour/c05_aggregate.py",
+      "sha256": "fc84ceee41b4f9cffb7e249f8f71029c1131e5f67d9c71879caef170287fde47"
+    },
+    {
+      "path": "scripts/behavioral-parcour/test_c05_aggregate.py",
+      "sha256": "c7e91c34a1cf9dfba781c67fbb251d14c8f991f28111a900d4333883c4a7f89c"
+    }
+  ]
+}

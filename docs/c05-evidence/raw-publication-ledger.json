@@ -1,0 +1,285 @@
+{
+  "schema_version": "c05-raw-publication-ledger-v1",
+  "runs": [
+    {
+      "run_id": "c05-smoke-on-yaml-markdown",
+      "raw_directory": "docs/c05-raw/c05-smoke-on-yaml-markdown",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-smoke-on-policy-retirement",
+      "raw_directory": "docs/c05-raw/c05-smoke-on-policy-retirement",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-smoke-on-requirement-replacement",
+      "raw_directory": "docs/c05-raw/c05-smoke-on-requirement-replacement",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-smoke-on-state-format-migration",
+      "raw_directory": "docs/c05-raw/c05-smoke-on-state-format-migration",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-smoke-on-state-formatting-control",
+      "raw_directory": "docs/c05-raw/c05-smoke-on-state-formatting-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-smoke-on-policy-clarification-control",
+      "raw_directory": "docs/c05-raw/c05-smoke-on-policy-clarification-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-smoke-on-requirement-addition-control",
+      "raw_directory": "docs/c05-raw/c05-smoke-on-requirement-addition-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-smoke-on-state-comment-control",
+      "raw_directory": "docs/c05-raw/c05-smoke-on-state-comment-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r1-yaml-markdown",
+      "raw_directory": "docs/c05-raw/c05-off-r1-yaml-markdown",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r1-yaml-markdown",
+      "raw_directory": "docs/c05-raw/c05-on-r1-yaml-markdown",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r1-policy-retirement",
+      "raw_directory": "docs/c05-raw/c05-off-r1-policy-retirement",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r1-policy-retirement",
+      "raw_directory": "docs/c05-raw/c05-on-r1-policy-retirement",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r1-requirement-replacement",
+      "raw_directory": "docs/c05-raw/c05-off-r1-requirement-replacement",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r1-requirement-replacement",
+      "raw_directory": "docs/c05-raw/c05-on-r1-requirement-replacement",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r1-state-format-migration",
+      "raw_directory": "docs/c05-raw/c05-off-r1-state-format-migration",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r1-state-format-migration",
+      "raw_directory": "docs/c05-raw/c05-on-r1-state-format-migration",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r1-state-formatting-control",
+      "raw_directory": "docs/c05-raw/c05-off-r1-state-formatting-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r1-state-formatting-control",
+      "raw_directory": "docs/c05-raw/c05-on-r1-state-formatting-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r1-policy-clarification-control",
+      "raw_directory": "docs/c05-raw/c05-off-r1-policy-clarification-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r1-policy-clarification-control",
+      "raw_directory": "docs/c05-raw/c05-on-r1-policy-clarification-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r1-requirement-addition-control",
+      "raw_directory": "docs/c05-raw/c05-off-r1-requirement-addition-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r1-requirement-addition-control",
+      "raw_directory": "docs/c05-raw/c05-on-r1-requirement-addition-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r1-state-comment-control",
+      "raw_directory": "docs/c05-raw/c05-off-r1-state-comment-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r1-state-comment-control",
+      "raw_directory": "docs/c05-raw/c05-on-r1-state-comment-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r2-yaml-markdown",
+      "raw_directory": "docs/c05-raw/c05-off-r2-yaml-markdown",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r2-yaml-markdown",
+      "raw_directory": "docs/c05-raw/c05-on-r2-yaml-markdown",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r2-policy-retirement",
+      "raw_directory": "docs/c05-raw/c05-off-r2-policy-retirement",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r2-policy-retirement",
+      "raw_directory": "docs/c05-raw/c05-on-r2-policy-retirement",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r2-requirement-replacement",
+      "raw_directory": "docs/c05-raw/c05-off-r2-requirement-replacement",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r2-requirement-replacement",
+      "raw_directory": "docs/c05-raw/c05-on-r2-requirement-replacement",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r2-state-format-migration",
+      "raw_directory": "docs/c05-raw/c05-off-r2-state-format-migration",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r2-state-format-migration",
+      "raw_directory": "docs/c05-raw/c05-on-r2-state-format-migration",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r2-state-formatting-control",
+      "raw_directory": "docs/c05-raw/c05-off-r2-state-formatting-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r2-state-formatting-control",
+      "raw_directory": "docs/c05-raw/c05-on-r2-state-formatting-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r2-policy-clarification-control",
+      "raw_directory": "docs/c05-raw/c05-off-r2-policy-clarification-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r2-policy-clarification-control",
+      "raw_directory": "docs/c05-raw/c05-on-r2-policy-clarification-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r2-requirement-addition-control",
+      "raw_directory": "docs/c05-raw/c05-off-r2-requirement-addition-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r2-requirement-addition-control",
+      "raw_directory": "docs/c05-raw/c05-on-r2-requirement-addition-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r2-state-comment-control",
+      "raw_directory": "docs/c05-raw/c05-off-r2-state-comment-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r2-state-comment-control",
+      "raw_directory": "docs/c05-raw/c05-on-r2-state-comment-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r3-yaml-markdown",
+      "raw_directory": "docs/c05-raw/c05-off-r3-yaml-markdown",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r3-yaml-markdown",
+      "raw_directory": "docs/c05-raw/c05-on-r3-yaml-markdown",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r3-policy-retirement",
+      "raw_directory": "docs/c05-raw/c05-off-r3-policy-retirement",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r3-policy-retirement",
+      "raw_directory": "docs/c05-raw/c05-on-r3-policy-retirement",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r3-requirement-replacement",
+      "raw_directory": "docs/c05-raw/c05-off-r3-requirement-replacement",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r3-requirement-replacement",
+      "raw_directory": "docs/c05-raw/c05-on-r3-requirement-replacement",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r3-state-format-migration",
+      "raw_directory": "docs/c05-raw/c05-off-r3-state-format-migration",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r3-state-format-migration",
+      "raw_directory": "docs/c05-raw/c05-on-r3-state-format-migration",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r3-state-formatting-control",
+      "raw_directory": "docs/c05-raw/c05-off-r3-state-formatting-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r3-state-formatting-control",
+      "raw_directory": "docs/c05-raw/c05-on-r3-state-formatting-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r3-policy-clarification-control",
+      "raw_directory": "docs/c05-raw/c05-off-r3-policy-clarification-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r3-policy-clarification-control",
+      "raw_directory": "docs/c05-raw/c05-on-r3-policy-clarification-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r3-requirement-addition-control",
+      "raw_directory": "docs/c05-raw/c05-off-r3-requirement-addition-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r3-requirement-addition-control",
+      "raw_directory": "docs/c05-raw/c05-on-r3-requirement-addition-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-off-r3-state-comment-control",
+      "raw_directory": "docs/c05-raw/c05-off-r3-state-comment-control",
+      "status": "unconsumed"
+    },
+    {
+      "run_id": "c05-on-r3-state-comment-control",
+      "raw_directory": "docs/c05-raw/c05-on-r3-state-comment-control",
+      "status": "unconsumed"
+    }
+  ]
+}
