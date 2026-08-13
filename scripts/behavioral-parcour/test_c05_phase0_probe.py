@@ -43,10 +43,12 @@ class C05Phase0ProbeTests(unittest.TestCase):
 
     def test_publication_dry_run_validates_exact_fresh_evidence_destination(self) -> None:
         publication = phase0.publication_dry_run(probe.EVIDENCE_ROOT.parent, [probe.EVIDENCE_ROOT.name])
-        self.assertTrue(publication["pass"])
+        destination_exists = probe.EVIDENCE_ROOT.exists()
         self.assertEqual(publication["authorized_root"], str(probe.REPO_ROOT / "docs" / "c05-evidence"))
         self.assertEqual(publication["destinations"], [str(probe.EVIDENCE_ROOT)])
         self.assertEqual(publication["destinations"], [probe.build_plan({})["paths"]["evidence_root"]])
+        self.assertEqual(publication["conflicts"], [str(probe.EVIDENCE_ROOT)] if destination_exists else [])
+        self.assertEqual(publication["pass"], not destination_exists)
 
     def test_plan_validation_makes_required_failures_fatal(self) -> None:
         plan = probe.build_plan({})

@@ -1,6 +1,6 @@
 # c05 status
 
-**Status:** Phase 0 attempt 2 harness and c05 scorer ready; no c05 freeze or prompt started
+**Status:** Phase 0 attempt 2 independently passed; c05 freeze artifacts next; no behavioral prompt started
 **As-of:** 2026-08-13
 
 ## Diagram
@@ -26,8 +26,9 @@ Diagnose and minimally fix the supersession guard’s inactive causal path, then
 - Authorized attempt 2 uses fresh ID `c05-phase0-capability-b`; its plan records `docs/c05-evidence/phase0-capability-b`, dry-runs that exact destination, and fails unless returned and planned destinations match.
 - The c05-owned eight-fixture corpus preserves all c04 fixture content and ordering; only `requirement-replacement` adds the authorized separator-equivalence scoring metadata.
 - The c05 scorer accepts `release notes`/`release-notes` only when Markdown is affirmatively current, YAML is explicitly historical/superseded, and `RELEASE_STREAM=stable`; all six tracked historical outputs pass and adversarial negated-current forms fail.
-- Independent review passed attempt 2; after its scorer blocker was corrected, 17/17 c05 Python tests and 448/448 repository tests pass.
-- No Phase 0 attempt-2 process, c05 freeze, smoke prompt, or matrix prompt has started.
+- Attempt 2 ran once from committed harness `ff1a85e`; exactly two `get_state` controls returned the required nested identity and the exact tested publication destination was used byte-identically.
+- Independent executable audit passed all Phase 0 gates and independently ran 17/17 c05 Python tests; full repository checks remain 448/448 tests with zero audit vulnerabilities.
+- No c05 freeze, smoke prompt, or matrix prompt has started.
 - All new transient/cache writes are confined beneath the repository’s ignored `.parcour-runs/` path.
 
 ## Compatibility policy
@@ -41,4 +42,4 @@ Diagnose and minimally fix the supersession guard’s inactive causal path, then
 
 The c04 `requirement-replacement` scorer requires literal hyphenated marker strings, while all six OFF/ON outputs preserve the requested semantic current and superseded policies using equivalent “release notes” wording. This is a verified scorer defect, not a behavioral failure. Correcting it pre-freeze would reclassify c04 semantically to 11/12 in both arms; c04 itself will not be changed.
 
-The c05 corpus/scorer correction is prospective and tested but not yet frozen. The next step is the single authorized zero-user-prompt Phase 0 attempt `c05-phase0-capability-b`; freeze remains prohibited until its evidence is published and independently accepted.
+The c05 corpus/scorer correction remains prospective and tested but not yet frozen. Next: create and verify fresh c05 runner, contract, preregistration, smoke/matrix IDs, and raw-publication ledger; then freeze before prospective review, preflight, or any behavioral prompt.
