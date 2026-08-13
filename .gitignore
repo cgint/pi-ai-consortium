@@ -7,6 +7,7 @@ dist/
 .pi/goals/
 .pi/*.json
 .pi-subagents/
+.pi-rlm/
 .scan-results/
 
 # Behavioral parcour: templates are committed, run evidence is not.
