@@ -1,6 +1,6 @@
 # c05 status
 
-**Status:** Phase 0 attempt 2 independently passed; c05 freeze artifacts next; no behavioral prompt started
+**Status:** Freeze `360a05b` committed; post-freeze review attempt 1 infrastructure-invalid; mandatory stop before preflight; no behavioral prompt started
 **As-of:** 2026-08-13
 
 ## Diagram
@@ -28,8 +28,12 @@ Diagnose and minimally fix the supersession guard’s inactive causal path, then
 - The c05 scorer accepts `release notes`/`release-notes` only when Markdown is affirmatively current, YAML is explicitly historical/superseded, and `RELEASE_STREAM=stable`; all six tracked historical outputs pass and adversarial negated-current forms fail.
 - Attempt 2 ran once from committed harness `ff1a85e`; exactly two `get_state` controls returned the required nested identity and the exact tested publication destination was used byte-identically.
 - Independent executable audit passed all Phase 0 gates and independently ran 17/17 c05 Python tests; full repository checks remain 448/448 tests with zero audit vulnerabilities.
-- No c05 freeze, smoke prompt, or matrix prompt has started.
-- All new transient/cache writes are confined beneath the repository’s ignored `.parcour-runs/` path.
+- The complete c05 protocol froze at `360a05b04f2c0ec7be544a731b7da2a1cf741503`: 29 contracted immutable files, 8 smoke IDs, 48 matrix IDs, 56 unconsumed ledger records, and 56 empty raw placeholders.
+- Committed-byte verification passed, as did all c05 Python tests and the full repository gate (typecheck, 448/448 tests, zero audit vulnerabilities).
+- Post-freeze review attempt 1 used observed identity `8081-twins/qwen36-27b-nvidia-nvfp4:off`, but produced zero tokens and no verdict after timeout/connection errors.
+- Attempt 1 is preserved under `docs/c05-evidence/independent-review-attempt-1-timeout*` and is infrastructure-invalid.
+- Per the frozen review gate, no retry, preflight, smoke prompt, or matrix prompt occurred; all 56 IDs remain unconsumed and all raw placeholders remain empty.
+- All transient/cache writes are confined beneath the repository’s ignored `.parcour-runs/` path.
 
 ## Compatibility policy
 
@@ -38,8 +42,6 @@ Diagnose and minimally fix the supersession guard’s inactive causal path, then
 - Child `CONSORTIUM_MODEL` is always overwritten with `8081-twins/qwen36-27b-nvidia-nvfp4`, including when ambient state points to Google.
 - Extension existence and SHA-256, exact settings location/payload, reviewer command shape, repository path confinement, and zero-prompt RPC methods are checked explicitly.
 
-## Measurement issue requiring resolution before freeze
+## Current blocker
 
-The c04 `requirement-replacement` scorer requires literal hyphenated marker strings, while all six OFF/ON outputs preserve the requested semantic current and superseded policies using equivalent “release notes” wording. This is a verified scorer defect, not a behavioral failure. Correcting it pre-freeze would reclassify c04 semantically to 11/12 in both arms; c04 itself will not be changed.
-
-The c05 corpus/scorer correction remains prospective and tested but not yet frozen. Next: create and verify fresh c05 runner, contract, preregistration, smoke/matrix IDs, and raw-publication ledger; then freeze before prospective review, preflight, or any behavioral prompt.
+The exact post-freeze review did not produce the required session-backed `HEADLINE: PASS` / `BLOCKER: None`. The frozen protocol authorizes no retry after a mandatory review/infrastructure failure. A new attempt therefore requires explicit human authorization and must preserve attempt 1 unchanged; until then, preflight and all 56 scheduled prompts remain blocked.
