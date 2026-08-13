@@ -1,6 +1,6 @@
 # c05 status
 
-**Status:** Phase 0 implementation ready; live zero-prompt capability probe pending
+**Status:** BLOCKED — Phase 0 attempt preserved as harness-invalid; no c05 freeze or prompt started
 **As-of:** 2026-08-13
 
 ## Diagram
@@ -21,6 +21,8 @@ Diagnose and minimally fix the supersession guard’s inactive causal path, then
 - A production-registration test proves workspace settings yield `state_supersession_guard=true`, source `workspace_settings`, and nonzero structured-turn length.
 - Capability-first Phase 0 helpers and zero-user-prompt probe have 13/13 deterministic tests passing.
 - Full repository gate passes: typecheck, 448/448 tests, and zero audit vulnerabilities.
+- The first live Phase 0 attempt proved exact runtime identity and sent only two `get_state` controls, but independent audit found its publication dry-run tested `docs/c05-phase0-capability` rather than the actual `docs/c05-evidence/phase0-capability` destination.
+- That attempt is preserved as harness-invalid at `docs/c05-evidence/phase0-capability/`; no retry, freeze, review, smoke, or matrix work has started.
 - All new transient/cache writes are confined beneath the repository’s ignored `.parcour-runs/` path.
 
 ## Compatibility policy
@@ -34,4 +36,4 @@ Diagnose and minimally fix the supersession guard’s inactive causal path, then
 
 The c04 `requirement-replacement` scorer requires literal hyphenated marker strings, while all six OFF/ON outputs preserve the requested semantic current and superseded policies using equivalent “release notes” wording. This is a verified scorer defect, not a behavioral failure. Correcting it pre-freeze would reclassify c04 semantically to 11/12 in both arms; c04 itself will not be changed.
 
-No c05 predicate, fixture, threshold, or corpus has been frozen or changed yet. The live Phase 0 probe and its exact observed evidence come next; then this measurement decision must be resolved before c05 freeze.
+No c05 predicate, fixture, threshold, or corpus has been frozen or changed yet. Progress requires explicit authorization for a fresh Phase 0 attempt after correcting only the publication dry-run destination; the measurement decision must then be resolved before c05 freeze.

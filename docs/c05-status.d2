@@ -1,6 +1,7 @@
 direction: down
 
-compat: "Phase 0\nCapability proof"
+compat: "Phase 0 attempt 1\nHarness-invalid"
+unblock: "Authorized fresh attempt?" {shape: diamond}
 causal: "Causal fix\nTests + telemetry"
 decision: "Measurement valid?" {shape: diamond}
 freeze: "Freeze c05\nContract + corpus"
@@ -9,7 +10,9 @@ smoke_gate: "Smoke passes?" {shape: diamond}
 matrix: "48-cell matrix"
 closure: "Bounded uplift\nor honest negative"
 
-compat -> causal
+compat -> unblock
+unblock -> causal: yes / corrected path
+unblock -> closure: no / preserve blocker
 causal -> decision
 decision -> freeze: yes
 decision -> closure: no / preserve blocker

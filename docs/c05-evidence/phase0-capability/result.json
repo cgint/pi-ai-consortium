@@ -1,0 +1,298 @@
+{
+  "checks": {
+    "execution": true,
+    "extensions": true,
+    "final_state": true,
+    "initial_state": true,
+    "only_get_state": true,
+    "path_confinement": true,
+    "process_exit": true,
+    "publication_dry_run": true,
+    "reviewer_command_exact": true,
+    "settings_exact": true,
+    "versions": true,
+    "zero_user_prompts": true
+  },
+  "failure": null,
+  "identity": {
+    "state_final": {
+      "checks": {
+        "model": true,
+        "provider": true,
+        "response_success": true,
+        "thinking": true
+      },
+      "observed": {
+        "model": "qwen36-27b-nvidia-nvfp4",
+        "provider": "8081-twins",
+        "thinking": "off"
+      },
+      "pass": true
+    },
+    "state_initial": {
+      "checks": {
+        "model": true,
+        "provider": true,
+        "response_success": true,
+        "thinking": true
+      },
+      "observed": {
+        "model": "qwen36-27b-nvidia-nvfp4",
+        "provider": "8081-twins",
+        "thinking": "off"
+      },
+      "pass": true
+    }
+  },
+  "pass": true,
+  "plan": {
+    "checks": {
+      "extensions": true,
+      "only_get_state": true,
+      "path_confinement": true,
+      "reviewer_command_exact": true,
+      "settings_exact": true,
+      "zero_user_prompts": true
+    },
+    "child_environment": {
+      "CONSORTIUM_MODEL": "8081-twins/qwen36-27b-nvidia-nvfp4",
+      "PI_SKIP_VERSION_CHECK": "1"
+    },
+    "command": [
+      "pi",
+      "--mode",
+      "rpc",
+      "--no-context-files",
+      "--no-skills",
+      "--no-prompt-templates",
+      "--no-extensions",
+      "--tools",
+      "read",
+      "-e",
+      "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-olla-autodetect/index.ts",
+      "-e",
+      "/Users/cgint/dev-external/pi-ai-consortium/index.ts",
+      "-e",
+      "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-focus-guard/index.ts",
+      "--provider",
+      "8081-twins",
+      "--model",
+      "qwen36-27b-nvidia-nvfp4",
+      "--thinking",
+      "off",
+      "--dm-off",
+      "--write-guard",
+      "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-phase0-capability/workspace",
+      "--approve",
+      "--session-dir",
+      "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-phase0-capability/sessions",
+      "--name",
+      "c05-phase0-capability"
+    ],
+    "extension_hashes": {
+      "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-focus-guard/index.ts": "8a4383eef13551749c3065199b9b734714478a00a508157177a3c4f105a9f0b1",
+      "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-olla-autodetect/index.ts": "4abcf40187c3d40bb8c6f68f4ebb2b226aa9aa73c0213f89a2f2da0576101039",
+      "/Users/cgint/dev-external/pi-ai-consortium/index.ts": "7b0c7a306987e12cbd2e369f56a9dfb4deb91f3f6720eecc84e9ba5d5a024fdb"
+    },
+    "paths": {
+      "result": "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-phase0-capability/result.json",
+      "run_root": "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-phase0-capability",
+      "sessions": "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-phase0-capability/sessions",
+      "workspace": "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-phase0-capability/workspace"
+    },
+    "reviewer_command": [
+      "pi",
+      "--mode",
+      "rpc",
+      "--no-context-files",
+      "--no-skills",
+      "--no-prompt-templates",
+      "--no-extensions",
+      "--tools",
+      "read",
+      "--provider",
+      "8081-twins",
+      "--model",
+      "qwen36-27b-nvidia-nvfp4",
+      "--thinking",
+      "off",
+      "--session-dir",
+      "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-phase0-capability/sessions",
+      "--name",
+      "c05-phase0-capability-review",
+      "--write-guard",
+      "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-phase0-capability/workspace",
+      "--approve"
+    ],
+    "rpc_commands": [
+      {
+        "id": "state_initial",
+        "type": "get_state"
+      },
+      {
+        "id": "state_final",
+        "type": "get_state"
+      }
+    ],
+    "run_id": "c05-phase0-capability",
+    "schema_version": "c05-phase0-probe-plan-v1",
+    "settings": {
+      "path": "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-phase0-capability/workspace/.pi/settings.json",
+      "payload": {
+        "consortium": {
+          "enabled": true,
+          "governorMode": "smart_extractor",
+          "stateSupersessionGuard": true
+        }
+      },
+      "serialized": "{\n  \"consortium\": {\n    \"enabled\": true,\n    \"governorMode\": \"smart_extractor\",\n    \"stateSupersessionGuard\": true\n  }\n}\n"
+    }
+  },
+  "process_returncode": 0,
+  "publication_dry_run": {
+    "authorized_root": "/Users/cgint/dev-external/pi-ai-consortium/docs",
+    "conflicts": [],
+    "destinations": [
+      "/Users/cgint/dev-external/pi-ai-consortium/docs/c05-phase0-capability"
+    ],
+    "dry_run": true,
+    "pass": true
+  },
+  "raw_streams": {
+    "stderr": [
+      "[olla] Discovering models from http://pluto:40114/olla/openai/v1..."
+    ],
+    "stdout": [
+      "{\"type\":\"extension_ui_request\",\"id\":\"276161b0-8e38-4b81-8a49-8f38257a1b6a\",\"method\":\"setStatus\",\"statusKey\":\"a1_discuss\",\"statusText\":\"\u2705\"}",
+      "{\"type\":\"extension_ui_request\",\"id\":\"b7124480-6186-4d70-b902-a9d2c426d62a\",\"method\":\"setStatus\",\"statusKey\":\"a1_discuss\",\"statusText\":\"\u2705\"}",
+      "{\"type\":\"extension_ui_request\",\"id\":\"0a95f0d7-fdc0-46d8-b5ee-484e07affb38\",\"method\":\"setStatus\",\"statusKey\":\"a2_write_guard\",\"statusText\":\"\ud83d\udd30\"}",
+      "{\"type\":\"extension_ui_request\",\"id\":\"233dfab0-e950-49cd-8353-e026888b09a0\",\"method\":\"setStatus\",\"statusKey\":\"a3_commit_guard\",\"statusText\":\"\ud83d\udcdd\"}",
+      "{\"id\":\"state_initial\",\"type\":\"response\",\"command\":\"get_state\",\"success\":true,\"data\":{\"model\":{\"id\":\"qwen36-27b-nvidia-nvfp4\",\"name\":\"qwen36-27b-nvidia-nvfp4\",\"api\":\"openai-completions\",\"provider\":\"8081-twins\",\"baseUrl\":\"http://twins:8081/v1\",\"reasoning\":true,\"thinkingLevelMap\":{\"off\":\"none\"},\"input\":[\"text\",\"image\"],\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0},\"contextWindow\":262144,\"maxTokens\":32768,\"compat\":{\"thinkingFormat\":\"openai\"}},\"thinkingLevel\":\"off\",\"isStreaming\":false,\"isCompacting\":false,\"steeringMode\":\"one-at-a-time\",\"followUpMode\":\"one-at-a-time\",\"sessionFile\":\"/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-phase0-capability/sessions/2026-08-13T13-56-25-487Z_019ffb68-ed0f-78f3-afa0-c543915fb873.jsonl\",\"sessionId\":\"019ffb68-ed0f-78f3-afa0-c543915fb873\",\"sessionName\":\"c05-phase0-capability\",\"autoCompactionEnabled\":true,\"messageCount\":1,\"pendingMessageCount\":0}}",
+      "{\"id\":\"state_final\",\"type\":\"response\",\"command\":\"get_state\",\"success\":true,\"data\":{\"model\":{\"id\":\"qwen36-27b-nvidia-nvfp4\",\"name\":\"qwen36-27b-nvidia-nvfp4\",\"api\":\"openai-completions\",\"provider\":\"8081-twins\",\"baseUrl\":\"http://twins:8081/v1\",\"reasoning\":true,\"thinkingLevelMap\":{\"off\":\"none\"},\"input\":[\"text\",\"image\"],\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0},\"contextWindow\":262144,\"maxTokens\":32768,\"compat\":{\"thinkingFormat\":\"openai\"}},\"thinkingLevel\":\"off\",\"isStreaming\":false,\"isCompacting\":false,\"steeringMode\":\"one-at-a-time\",\"followUpMode\":\"one-at-a-time\",\"sessionFile\":\"/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-phase0-capability/sessions/2026-08-13T13-56-25-487Z_019ffb68-ed0f-78f3-afa0-c543915fb873.jsonl\",\"sessionId\":\"019ffb68-ed0f-78f3-afa0-c543915fb873\",\"sessionName\":\"c05-phase0-capability\",\"autoCompactionEnabled\":true,\"messageCount\":1,\"pendingMessageCount\":0}}"
+    ]
+  },
+  "schema_version": "c05-phase0-probe-result-v1",
+  "states": {
+    "state_final": {
+      "command": "get_state",
+      "data": {
+        "autoCompactionEnabled": true,
+        "followUpMode": "one-at-a-time",
+        "isCompacting": false,
+        "isStreaming": false,
+        "messageCount": 1,
+        "model": {
+          "api": "openai-completions",
+          "baseUrl": "http://twins:8081/v1",
+          "compat": {
+            "thinkingFormat": "openai"
+          },
+          "contextWindow": 262144,
+          "cost": {
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "input": 0,
+            "output": 0
+          },
+          "id": "qwen36-27b-nvidia-nvfp4",
+          "input": [
+            "text",
+            "image"
+          ],
+          "maxTokens": 32768,
+          "name": "qwen36-27b-nvidia-nvfp4",
+          "provider": "8081-twins",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "off": "none"
+          }
+        },
+        "pendingMessageCount": 0,
+        "sessionFile": "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-phase0-capability/sessions/2026-08-13T13-56-25-487Z_019ffb68-ed0f-78f3-afa0-c543915fb873.jsonl",
+        "sessionId": "019ffb68-ed0f-78f3-afa0-c543915fb873",
+        "sessionName": "c05-phase0-capability",
+        "steeringMode": "one-at-a-time",
+        "thinkingLevel": "off"
+      },
+      "id": "state_final",
+      "success": true,
+      "type": "response"
+    },
+    "state_initial": {
+      "command": "get_state",
+      "data": {
+        "autoCompactionEnabled": true,
+        "followUpMode": "one-at-a-time",
+        "isCompacting": false,
+        "isStreaming": false,
+        "messageCount": 1,
+        "model": {
+          "api": "openai-completions",
+          "baseUrl": "http://twins:8081/v1",
+          "compat": {
+            "thinkingFormat": "openai"
+          },
+          "contextWindow": 262144,
+          "cost": {
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "input": 0,
+            "output": 0
+          },
+          "id": "qwen36-27b-nvidia-nvfp4",
+          "input": [
+            "text",
+            "image"
+          ],
+          "maxTokens": 32768,
+          "name": "qwen36-27b-nvidia-nvfp4",
+          "provider": "8081-twins",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "off": "none"
+          }
+        },
+        "pendingMessageCount": 0,
+        "sessionFile": "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-phase0-capability/sessions/2026-08-13T13-56-25-487Z_019ffb68-ed0f-78f3-afa0-c543915fb873.jsonl",
+        "sessionId": "019ffb68-ed0f-78f3-afa0-c543915fb873",
+        "sessionName": "c05-phase0-capability",
+        "steeringMode": "one-at-a-time",
+        "thinkingLevel": "off"
+      },
+      "id": "state_initial",
+      "success": true,
+      "type": "response"
+    }
+  },
+  "version_check": {
+    "checks": {
+      "node_compatible": true,
+      "pi_compatible": true
+    },
+    "observed": {
+      "node": "v22.23.2",
+      "pi": "0.84.1"
+    },
+    "pass": true
+  },
+  "versions": {
+    "node": {
+      "argv": [
+        "node",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "v22.23.2\n"
+    },
+    "pi": {
+      "argv": [
+        "pi",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "0.84.1\n"
+    }
+  }
+}
