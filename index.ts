@@ -15,7 +15,7 @@ import type {
   TurnStartEvent,
 } from "@earendil-works/pi-coding-agent";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
-import { ConsortiumCore, type ModelCallFn } from "./src/core.js";
+import { ConsortiumCore, getCurrentHumanUserTurn, type ModelCallFn } from "./src/core.js";
 import { callModelWithAuth } from "./src/model.js";
 import { DEFAULT_CONFIG, parseModelRef } from "./src/config.js";
 import { buildUserContext, buildUserContextFromMessages } from "./src/context.js";
@@ -32,6 +32,7 @@ export default function (pi: ExtensionAPI): void {
   let maxTurnGap = 20;
   let periodicInterval = 10;
   let stateSupersessionGuard = false;
+  let stateSupersessionGuardSource = "default";
   let turnsSinceLastAudit = 0;
 
   let turnState: TurnState = { deliberation: null };
@@ -102,7 +103,10 @@ export default function (pi: ExtensionAPI): void {
         if (s.consortium.governorMode !== undefined) governorMode = s.consortium.governorMode as GovernorMode;
         if (typeof s.consortium.maxTurnGap === "number") maxTurnGap = s.consortium.maxTurnGap;
         if (typeof s.consortium.periodicInterval === "number") periodicInterval = s.consortium.periodicInterval;
-        if (typeof s.consortium.stateSupersessionGuard === "boolean") stateSupersessionGuard = s.consortium.stateSupersessionGuard;
+        if (typeof s.consortium.stateSupersessionGuard === "boolean") {
+          stateSupersessionGuard = s.consortium.stateSupersessionGuard;
+          stateSupersessionGuardSource = "workspace_settings";
+        }
       }
       if (!enabled && ctx.hasUI) {
         ctx.ui.setStatus("consortium", "consortium: disabled");
@@ -160,6 +164,13 @@ export default function (pi: ExtensionAPI): void {
       periodicInterval,
       stateSupersessionGuard,
     };
+
+    logger.log({
+      type: "governor_input",
+      state_supersession_guard: stateSupersessionGuard,
+      state_supersession_guard_source: stateSupersessionGuardSource,
+      current_human_turn_length: getCurrentHumanUserTurn(event.messages).length,
+    });
 
     turnState.deliberation = runDeliberation(runtimeConfig, event.messages, ctx, logger, onProgress, turnsSinceLastAudit, lastExtractedContext !== null);
 

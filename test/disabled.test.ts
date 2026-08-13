@@ -4,19 +4,27 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const deliberate = vi.fn();
 const buildUserContextFromMessages = vi.fn(() => "current agent context");
 
-vi.mock("../src/core.js", () => ({
-  ConsortiumCore: class {
-    deliberate = deliberate;
-  },
-}));
+vi.mock("../src/core.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../src/core.js")>();
+  return {
+    ...actual,
+    ConsortiumCore: class {
+      deliberate = deliberate;
+    },
+  };
+});
 vi.mock("../src/config.js", () => ({
   DEFAULT_CONFIG: { probes: [], synthesis: {} },
   parseModelRef: () => undefined,
 }));
-vi.mock("../src/context.js", () => ({
-  buildUserContext: vi.fn(),
-  buildUserContextFromMessages,
-}));
+vi.mock("../src/context.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../src/context.js")>();
+  return {
+    ...actual,
+    buildUserContext: vi.fn(),
+    buildUserContextFromMessages,
+  };
+});
 vi.mock("../src/model.js", () => ({ callModelWithAuth: vi.fn() }));
 vi.mock("../src/ui.js", () => ({
   ConsortiumLogger: class { log = vi.fn(); },

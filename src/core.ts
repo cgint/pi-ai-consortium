@@ -4,7 +4,7 @@
 import type { ConsortiumConfig, DeliberationResult, ProbeResult, ProgressCallback, ExtractedContext } from "./types.js";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import { extractContextFromMessages, getDefaultExtractedContext } from "./extraction.js";
-import { buildProbeInputXml } from "./context.js";
+import { buildProbeInputXml, formatAgentMessageContent } from "./context.js";
 import { shouldDeliberate } from "./governor.js";
 
 /** Injectable model call function (mockable for tests). */
@@ -40,6 +40,20 @@ function validateProbeOutput(text: string): string {
   if (/^(INFO|WARN|BLOCK)\s+\S/.test(trimmed)) return trimmed;
   // Model ignored instructions or emitted bare tag — discard output
   return "NO_CONTRIBUTION";
+}
+
+const CONSORTIUM_SYNTHETIC_PREFIX = "[CONSORTIUM DELIBERATION]";
+
+/** Return the latest human-authored user turn, normalized across Pi message content shapes. */
+export function getCurrentHumanUserTurn(messages: AgentMessage[]): string {
+  for (let index = messages.length - 1; index >= 0; index--) {
+    const message = messages[index];
+    if (message.role !== "user") continue;
+    const content = formatAgentMessageContent(message);
+    if (content.startsWith(CONSORTIUM_SYNTHETIC_PREFIX)) continue;
+    return content;
+  }
+  return "";
 }
 
 export class ConsortiumCore {
@@ -110,11 +124,8 @@ export class ConsortiumCore {
       userContext = input;
     }
 
-    const currentUserMessage = Array.isArray(input)
-      ? [...input].reverse().find((message) => message.role === "user" && "content" in message && typeof message.content === "string")
-      : undefined;
-    const currentUserTurn = currentUserMessage && "content" in currentUserMessage && typeof currentUserMessage.content === "string"
-      ? currentUserMessage.content
+    const currentUserTurn = Array.isArray(input)
+      ? getCurrentHumanUserTurn(input)
       : "";
 
     // Phase 0.5 (Post-extraction): Re-evaluate governor gate with extracted context (e.g. for smart_extractor mode)

@@ -1,0 +1,20 @@
+direction: down
+
+compat: "Phase 0\nCapability proof"
+causal: "Causal fix\nTests + telemetry"
+decision: "Measurement valid?" {shape: diamond}
+freeze: "Freeze c05\nContract + corpus"
+smoke: "8-cell ON smoke\n4 positive / 4 control"
+smoke_gate: "Smoke passes?" {shape: diamond}
+matrix: "48-cell matrix"
+closure: "Bounded uplift\nor honest negative"
+
+compat -> causal
+causal -> decision
+decision -> freeze: yes
+decision -> closure: no / preserve blocker
+freeze -> smoke
+smoke -> smoke_gate
+smoke_gate -> matrix: yes
+smoke_gate -> closure: no / stop
+matrix -> closure
