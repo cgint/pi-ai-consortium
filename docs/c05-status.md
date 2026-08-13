@@ -1,6 +1,6 @@
 # c05 status
 
-**Status:** BLOCKED — Phase 0 attempt preserved as harness-invalid; no c05 freeze or prompt started
+**Status:** Phase 0 attempt 2 harness and c05 scorer ready; no c05 freeze or prompt started
 **As-of:** 2026-08-13
 
 ## Diagram
@@ -22,7 +22,12 @@ Diagnose and minimally fix the supersession guard’s inactive causal path, then
 - Capability-first Phase 0 helpers and zero-user-prompt probe have 13/13 deterministic tests passing.
 - Full repository gate passes: typecheck, 448/448 tests, and zero audit vulnerabilities.
 - The first live Phase 0 attempt proved exact runtime identity and sent only two `get_state` controls, but independent audit found its publication dry-run tested `docs/c05-phase0-capability` rather than the actual `docs/c05-evidence/phase0-capability` destination.
-- That attempt is preserved as harness-invalid at `docs/c05-evidence/phase0-capability/`; no retry, freeze, review, smoke, or matrix work has started.
+- That attempt remains preserved as harness-invalid at `docs/c05-evidence/phase0-capability/`.
+- Authorized attempt 2 uses fresh ID `c05-phase0-capability-b`; its plan records `docs/c05-evidence/phase0-capability-b`, dry-runs that exact destination, and fails unless returned and planned destinations match.
+- The c05-owned eight-fixture corpus preserves all c04 fixture content and ordering; only `requirement-replacement` adds the authorized separator-equivalence scoring metadata.
+- The c05 scorer accepts `release notes`/`release-notes` only when Markdown is affirmatively current, YAML is explicitly historical/superseded, and `RELEASE_STREAM=stable`; all six tracked historical outputs pass and adversarial negated-current forms fail.
+- Independent review passed attempt 2; after its scorer blocker was corrected, 17/17 c05 Python tests and 448/448 repository tests pass.
+- No Phase 0 attempt-2 process, c05 freeze, smoke prompt, or matrix prompt has started.
 - All new transient/cache writes are confined beneath the repository’s ignored `.parcour-runs/` path.
 
 ## Compatibility policy
@@ -36,4 +41,4 @@ Diagnose and minimally fix the supersession guard’s inactive causal path, then
 
 The c04 `requirement-replacement` scorer requires literal hyphenated marker strings, while all six OFF/ON outputs preserve the requested semantic current and superseded policies using equivalent “release notes” wording. This is a verified scorer defect, not a behavioral failure. Correcting it pre-freeze would reclassify c04 semantically to 11/12 in both arms; c04 itself will not be changed.
 
-No c05 predicate, fixture, threshold, or corpus has been frozen or changed yet. Progress requires explicit authorization for a fresh Phase 0 attempt after correcting only the publication dry-run destination; the measurement decision must then be resolved before c05 freeze.
+The c05 corpus/scorer correction is prospective and tested but not yet frozen. The next step is the single authorized zero-user-prompt Phase 0 attempt `c05-phase0-capability-b`; freeze remains prohibited until its evidence is published and independently accepted.

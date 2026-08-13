@@ -18,7 +18,10 @@ import c05_phase0_probe as probe
 class C05Phase0ProbeTests(unittest.TestCase):
     def test_plan_is_confined_exact_and_prompt_free(self) -> None:
         plan = probe.build_plan({"CONSORTIUM_MODEL": "google/ambient"})
+        self.assertEqual(probe.RUN_ID, "c05-phase0-capability-b")
         self.assertEqual(plan["paths"]["workspace"], str(probe.WORKSPACE))
+        self.assertEqual(plan["paths"]["evidence_root"], str(probe.EVIDENCE_ROOT))
+        self.assertEqual(probe.EVIDENCE_ROOT, probe.REPO_ROOT / "docs" / "c05-evidence" / "phase0-capability-b")
         self.assertEqual(plan["settings"]["path"], str(probe.WORKSPACE / ".pi" / "settings.json"))
         self.assertEqual(plan["settings"]["payload"], phase0.settings_spec(probe.WORKSPACE, True)[1])
         self.assertEqual(plan["child_environment"]["CONSORTIUM_MODEL"], phase0.MODEL_REF)
@@ -37,6 +40,13 @@ class C05Phase0ProbeTests(unittest.TestCase):
         self.assertEqual(command[command.index("--model") + 1], phase0.MODEL_ID)
         self.assertEqual(command[command.index("--thinking") + 1], phase0.THINKING_LEVEL)
         self.assertEqual(command[command.index("--write-guard") + 1], str(probe.WORKSPACE))
+
+    def test_publication_dry_run_validates_exact_fresh_evidence_destination(self) -> None:
+        publication = phase0.publication_dry_run(probe.EVIDENCE_ROOT.parent, [probe.EVIDENCE_ROOT.name])
+        self.assertTrue(publication["pass"])
+        self.assertEqual(publication["authorized_root"], str(probe.REPO_ROOT / "docs" / "c05-evidence"))
+        self.assertEqual(publication["destinations"], [str(probe.EVIDENCE_ROOT)])
+        self.assertEqual(publication["destinations"], [probe.build_plan({})["paths"]["evidence_root"]])
 
     def test_plan_validation_makes_required_failures_fatal(self) -> None:
         plan = probe.build_plan({})

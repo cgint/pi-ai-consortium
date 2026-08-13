@@ -1,8 +1,8 @@
 direction: down
 
 compat: "Phase 0 attempt 1\nHarness-invalid"
-unblock: "Authorized fresh attempt?" {shape: diamond}
-causal: "Causal fix\nTests + telemetry"
+attempt2: "Phase 0 attempt 2\nAuthorized / pending"
+causal: "Causal fix\nTests + telemetry passed"
 decision: "Measurement valid?" {shape: diamond}
 freeze: "Freeze c05\nContract + corpus"
 smoke: "8-cell ON smoke\n4 positive / 4 control"
@@ -10,9 +10,8 @@ smoke_gate: "Smoke passes?" {shape: diamond}
 matrix: "48-cell matrix"
 closure: "Bounded uplift\nor honest negative"
 
-compat -> unblock
-unblock -> causal: yes / corrected path
-unblock -> closure: no / preserve blocker
+compat -> attempt2: preserved
+attempt2 -> causal: capability pass required
 causal -> decision
 decision -> freeze: yes
 decision -> closure: no / preserve blocker

@@ -23,8 +23,9 @@ import c05_phase0 as phase0
 import phase05_runner as paths
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-RUN_ID = "c05-phase0-capability"
+RUN_ID = "c05-phase0-capability-b"
 RUN_ROOT = REPO_ROOT / ".parcour-runs" / RUN_ID
+EVIDENCE_ROOT = REPO_ROOT / "docs" / "c05-evidence" / "phase0-capability-b"
 WORKSPACE = RUN_ROOT / "workspace"
 SESSIONS = RUN_ROOT / "sessions"
 RESULT = RUN_ROOT / "result.json"
@@ -67,11 +68,11 @@ def build_plan(ambient: Mapping[str, str]) -> dict[str, Any]:
     command = build_pi_command(WORKSPACE, SESSIONS)
     extension_hashes = extension_provenance()
     reviewer = phase0.build_reviewer_command(WORKSPACE, SESSIONS, f"{RUN_ID}-review")
-    confinement = all(confined(path) for path in (RUN_ROOT, WORKSPACE, SESSIONS, RESULT, settings_path))
+    confinement = all(confined(path) for path in (RUN_ROOT, WORKSPACE, SESSIONS, RESULT, settings_path, EVIDENCE_ROOT))
     return {
         "schema_version": "c05-phase0-probe-plan-v1",
         "run_id": RUN_ID,
-        "paths": {"run_root": str(RUN_ROOT), "workspace": str(WORKSPACE), "sessions": str(SESSIONS), "result": str(RESULT)},
+        "paths": {"run_root": str(RUN_ROOT), "workspace": str(WORKSPACE), "sessions": str(SESSIONS), "result": str(RESULT), "evidence_root": str(EVIDENCE_ROOT)},
         "settings": {"path": str(settings_path), "payload": settings, "serialized": phase0.serialize_settings(settings)},
         "command": command,
         "child_environment": {key: phase0.build_child_env(ambient)[key] for key in ("CONSORTIUM_MODEL", "PI_SKIP_VERSION_CHECK")},
@@ -138,7 +139,8 @@ def run_live() -> dict[str, Any]:
     settings_path = Path(plan["settings"]["path"])
     settings_path.parent.mkdir()
     settings_path.write_text(str(plan["settings"]["serialized"]))
-    publication = phase0.publication_dry_run(REPO_ROOT / "docs", [RUN_ID])
+    publication = phase0.publication_dry_run(EVIDENCE_ROOT.parent, [EVIDENCE_ROOT.name])
+    publication_destination_exact = publication["destinations"] == [str(EVIDENCE_ROOT)]
     versions = {"node": _command_output(["node", "--version"]), "pi": _command_output(["pi", "--version"])}
     version_check = phase0.version_provenance(versions["node"]["stdout"], versions["pi"]["stdout"])
     raw_stdout: list[str] = []
@@ -167,7 +169,7 @@ def run_live() -> dict[str, Any]:
     else:
         failure = None
     identity = {name: phase0.validate_executor_state(state) for name, state in states.items()}
-    checks = {**plan["checks"], "versions": version_check["pass"], "publication_dry_run": publication["pass"], "initial_state": identity.get("state_initial", {}).get("pass") is True, "final_state": identity.get("state_final", {}).get("pass") is True, "process_exit": process_returncode == 0, "execution": failure is None}
+    checks = {**plan["checks"], "versions": version_check["pass"], "publication_dry_run": publication["pass"], "publication_destination_exact": publication_destination_exact, "initial_state": identity.get("state_initial", {}).get("pass") is True, "final_state": identity.get("state_final", {}).get("pass") is True, "process_exit": process_returncode == 0, "execution": failure is None}
     result = {"schema_version": "c05-phase0-probe-result-v1", "plan": plan, "versions": versions, "version_check": version_check, "publication_dry_run": publication, "states": states, "identity": identity, "raw_streams": {"stdout": raw_stdout, "stderr": raw_stderr}, "process_returncode": process_returncode, "failure": failure, "pass": all(value is True for value in checks.values()), "checks": checks}
     RESULT.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
     return result
