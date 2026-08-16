@@ -1,7 +1,7 @@
 # c05 status
 
-**Status:** Replacement freeze `56f51c8` verified; final authorized review attempt 5 passed substantively but failed the frozen BLOCKER-line regex; mandatory stop before preflight; no behavioral prompt started
-**As-of:** 2026-08-13
+**Status:** Protocol-blocked closure recommended after final authorized review attempt 6 failed its first-byte format gate; 0/56 behavioral cells executed
+**As-of:** 2026-08-16
 
 ## Diagram
 
@@ -42,16 +42,17 @@ Diagnose and minimally fix the supersession guard’s inactive causal path, then
 - Child `CONSORTIUM_MODEL` is always overwritten with `8081-twins/qwen36-27b-nvidia-nvfp4`, including when ambient state points to Google.
 - Extension existence and SHA-256, exact settings location/payload, reviewer command shape, repository path confinement, and zero-prompt RPC methods are checked explicitly.
 
-## Current gate
+## Closure
 
-The user clarified that compatible patch versions are provenance, not blockers. The runner now accepts only Pi `0.84.*` and Node `22.*`, records exact Phase 0-B and current strings separately in every manifest, and keeps command, child environment, extension hash, provider/model/thinking, schema, review, evidence, ordering, safety, and confinement gates strict. Deterministic tests reject Pi 0.83/0.85, Node 21/23, and malformed versions.
+The compatibility runner accepts only Pi `0.84.*` and Node `22.*`, records exact accepted/current strings, and retains strict command, environment, extension, nested identity, schema, review, evidence, ordering, safety, and confinement gates. A one-time Pi `0.84.2` probe sent two `get_state` controls and zero prompts; both nested identities and all 13 checks passed. Accepted Phase 0-B was not rerun.
 
-A one-time fresh-ID compatibility probe under installed Pi `0.84.2` sent exactly two `get_state` controls and zero prompts. Both nested states proved provider `8081-twins`, model `qwen36-27b-nvidia-nvfp4`, thinking `off`; all 13 checks and process exit passed. Evidence is under `docs/c05-evidence/c05-patch-compatibility-schema-0842/`. Accepted Phase 0-B was not rerun.
+Replacement freeze `56f51c879ebb60526db1e2f4d7044272279f7d46` verifies all 36 contracted files. Review attempts 3–6 remain preserved:
 
-Freeze `360a05b`, review attempts 1/2, and the failed exact-version preflight remain unchanged. The authorized compatibility replacement freeze is `56f51c879ebb60526db1e2f4d7044272279f7d46`; committed-byte verification passes all 36 contract entries. Fresh exact-model review attempt 3 observed the required identity but returned four zero-token connection errors and no verdict. It is preserved at `docs/c05-evidence/independent-review-attempt-3*` and is infrastructure-invalid.
+- attempt 3: four zero-token connection errors;
+- attempt 4: BLOCK after guessed paths, without reading actual artifacts;
+- attempt 5: substantive PASS, rejected by the frozen `BLOCKER:` regex;
+- attempt 6: substantive PASS with valid later/ending verdict blocks, but prose preceded the explicitly required first-byte block.
 
-No fresh preflight is authorized: the canonical review still belongs to freeze `360a05b` and cannot be reused. Attempt 4 used the required model identity but guessed nonexistent root-level artifact paths, never read the actual `docs/c05-supersession-preregistration.md`, `scripts/behavioral-parcour/c05-contract-files.json`, ledger, runner, verifier, or compatibility bundle paths, and returned `HEADLINE: BLOCK` claiming they were absent. It is preserved at `docs/c05-evidence/independent-review-attempt-4*` as review-navigation-invalid; the BLOCK is not reinterpreted as PASS.
+Attempt 6 exhausted the authorized retry budget. The canonical review remains attempt 2 for freeze `360a05b` and cannot authorize `56f51c8`. No fresh preflight ran; all 56 ledger records remain unconsumed, every raw destination contains only `.gitkeep`, and no scheduled runtime root exists.
 
-Attempt 5 enumerated all 95 exact paths and returned `CONTRADICTS: None`, `NOT FOUND: None`, and `HEADLINE: PASS`. All session timing, identity, raw-hash, and headline predicates passed, but the frozen parser rejected Markdown heading `### BLOCKER: None` because it permits only whitespace before `BLOCKER:`. Raw evidence and the rejected canonical candidate are preserved at `docs/c05-evidence/independent-review-attempt-5*`; neither output nor parser was repaired.
-
-The canonical review remains attempt 2 for freeze `360a05b` and cannot authorize replacement freeze `56f51c8`. All 56 ledger records and raw placeholders remain unconsumed. The goal authorized no further review retries; any additional attempt or parser/prompt-policy change requires a new explicit human goal tweak.
+Final classification and recommendation are published at `docs/c05-final-protocol-blocked-outcome.md`: c05 is protocol-blocked with no behavioral evidence; mechanism, continuity, controls, and uplift are N/A. Retain the supersession guard default-off, do not enable it, do not claim uplift, and do not propose attempt 7.

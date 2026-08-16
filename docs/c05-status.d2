@@ -1,22 +1,11 @@
 direction: down
 
-compat: "Phase 0 attempt 1\nHarness-invalid"
-attempt2: "Phase 0 attempt 2\nIndependent PASS"
-causal: "Causal fix\nTests + telemetry passed"
-decision: "Measurement valid?" {shape: diamond}
-freeze: "Freeze c05\nContract + corpus"
-smoke: "8-cell ON smoke\n4 positive / 4 control"
-smoke_gate: "Smoke passes?" {shape: diamond}
-matrix: "48-cell matrix"
-closure: "Bounded uplift\nor honest negative"
+phase0: "**Phase 0**\nattempt 1 invalid · attempt 2 PASS" {style.fill: "#FFF3CD"}
+causal: "**Causal fix**\nstructured human input · telemetry\ndefault-off guard" {style.fill: "#D9EAD3"}
+initial: "**Initial freeze 360a05b**\nreview 2 PASS · preflight version stop" {style.fill: "#FFF3CD"}
+replacement: "**Replacement freeze 56f51c8**\nPi 0.84.* · Node 22.*\n36 contracted files" {style.fill: "#DDEBF7"}
+reviews: "**Review attempts 3–6**\nconnection · navigation · format failures\nall preserved" {style.fill: "#FCE8E6"}
+closure: "**Protocol-blocked closure**\n0/56 behavioral cells\nno mechanism or uplift claim" {style.fill: "#FCE8E6"}
+recommend: "**Retain guard default-off**\ndo not enable · do not claim uplift\nno attempt 7" {style.fill: "#FFF3CD"}
 
-compat -> attempt2: preserved
-attempt2 -> causal: capability pass required
-causal -> decision
-decision -> freeze: yes
-decision -> closure: no / preserve blocker
-freeze -> smoke
-smoke -> smoke_gate
-smoke_gate -> matrix: yes
-smoke_gate -> closure: no / stop
-matrix -> closure
+phase0 -> causal -> initial -> replacement -> reviews -> closure -> recommend

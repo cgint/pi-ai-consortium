@@ -1,0 +1,10 @@
+direction: down
+
+baseline: "**c04 valid negative**\n0/12 guard fires · 8/12 vs 8/12\ncausal input defect later identified" {style.fill: "#FFF3CD"}
+fix: "**c05 causal fix + compatibility**\nstructured human turn · default-off guard\nPi 0.84.* / Node 22.*" {style.fill: "#D9EAD3"}
+freeze: "**Replacement freeze 56f51c8**\n36 contracted files\n56 unconsumed destinations" {style.fill: "#DDEBF7"}
+reviews: "**Post-freeze review gate**\nattempts 3–6 preserved\nno parser-valid authorized PASS" {style.fill: "#FCE8E6"}
+blocked: "**Protocol-blocked closure**\n0/56 behavioral cells\nmechanism · continuity · controls = N/A" {style.fill: "#FCE8E6"}
+recommend: "**Recommendation**\nretain guard default-off\ndo not claim uplift or enable\nredesign review protocol separately" {style.fill: "#FFF3CD"}
+
+baseline -> fix -> freeze -> reviews -> blocked -> recommend
