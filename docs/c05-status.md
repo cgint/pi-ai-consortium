@@ -55,4 +55,4 @@ Replacement freeze `56f51c879ebb60526db1e2f4d7044272279f7d46` verifies all 36 co
 
 Attempt 6 exhausted the authorized retry budget. The canonical review remains attempt 2 for freeze `360a05b` and cannot authorize `56f51c8`. No fresh preflight ran; all 56 ledger records remain unconsumed, every raw destination contains only `.gitkeep`, and no scheduled runtime root exists.
 
-Final classification and recommendation are published at `docs/c05-final-protocol-blocked-outcome.md`: c05 is protocol-blocked with no behavioral evidence; mechanism, continuity, controls, and uplift are N/A. Retain the supersession guard default-off, do not enable it, do not claim uplift, and do not propose attempt 7.
+Final classification and recommendation are published at `docs/c05-final-protocol-blocked-outcome.md`: c05 is protocol-blocked with no behavioral evidence; mechanism, continuity, controls, and uplift are N/A. The independent completion audit at `docs/c05-completion-audit.md` disapproves behavioral completion because criteria 8–11 remain blocked. Retain the supersession guard default-off, do not enable it, do not claim uplift, and do not propose attempt 7.

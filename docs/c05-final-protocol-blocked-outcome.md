@@ -36,7 +36,7 @@ This is **protocol-blocked**, not mechanism-failed and not no-uplift. The c05 ca
   - attempt 5: substantive PASS, rejected because `### BLOCKER: None` failed the frozen regex;
   - attempt 6: substantive PASS, rejected because prose preceded the required first-byte verdict block.
 
-Attempt 6 exhausted the explicitly authorized retry budget. Its evidence is `docs/c05-evidence/independent-review-attempt-6-format-invalid.md` plus the raw session/output/stderr alongside it.
+Attempt 6 exhausted the explicitly authorized retry budget. Its evidence is `docs/c05-evidence/independent-review-attempt-6-format-invalid.md` plus the raw session/output/stderr alongside it. The independent requirement audit at `docs/c05-completion-audit.md` ends `<disapproved/>`: the closure branch is valid, but criteria 8–11 and the behavioral objective remain blocked.
 
 ## Recommendation
 
