@@ -1,6 +1,6 @@
 # c05 status
 
-**Status:** Pi 0.84.* / Node 22.* compatibility amendment implemented and current Pi 0.84.2 schema probe passed; replacement freeze next; no behavioral prompt started
+**Status:** Compatibility replacement freeze `56f51c8` committed and verified; fresh review attempt 3 connection-failed with zero tokens; mandatory stop before preflight; no behavioral prompt started
 **As-of:** 2026-08-13
 
 ## Diagram
@@ -48,4 +48,6 @@ The user clarified that compatible patch versions are provenance, not blockers. 
 
 A one-time fresh-ID compatibility probe under installed Pi `0.84.2` sent exactly two `get_state` controls and zero prompts. Both nested states proved provider `8081-twins`, model `qwen36-27b-nvidia-nvfp4`, thinking `off`; all 13 checks and process exit passed. Evidence is under `docs/c05-evidence/c05-patch-compatibility-schema-0842/`. Accepted Phase 0-B was not rerun.
 
-Freeze `360a05b`, both review attempts, and the failed exact-version preflight remain unchanged. All 56 ledger records and raw placeholders remain unconsumed. Next: regenerate the contract, pass full gates, create the authorized replacement freeze, then run one fresh exact-model review and one fresh zero-materialization preflight.
+Freeze `360a05b`, review attempts 1/2, and the failed exact-version preflight remain unchanged. The authorized compatibility replacement freeze is `56f51c879ebb60526db1e2f4d7044272279f7d46`; committed-byte verification passes all 36 contract entries. Fresh exact-model review attempt 3 observed the required identity but returned four zero-token connection errors and no verdict. It is preserved at `docs/c05-evidence/independent-review-attempt-3*` and is infrastructure-invalid.
+
+No fresh preflight is authorized: the canonical review still belongs to freeze `360a05b` and cannot be reused. All 56 ledger records and raw placeholders remain unconsumed. Any fresh review retry requires explicit human authorization.
