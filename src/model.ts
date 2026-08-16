@@ -20,7 +20,7 @@ export interface ModelRegistry {
   getApiKeyAndHeaders(model: { provider: string; id: string }): Promise<{
     ok: boolean;
     apiKey?: string;
-    headers?: Record<string, string>;
+    headers?: Record<string, string | null>;
     error?: string;
   }>;
   getApiKeyForProvider?(provider: string): Promise<string | undefined>;
