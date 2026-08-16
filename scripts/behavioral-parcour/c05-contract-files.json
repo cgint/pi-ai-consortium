@@ -47,7 +47,7 @@
     },
     {
       "path": "scripts/behavioral-parcour/c05_runner.py",
-      "sha256": "daa0b6e4cd94186746f2ec3ba47828ae33a23e34964723bf4e38258d1397577e"
+      "sha256": "0528d3274c536c8c7501703b670dfc020e2799bad5d995a1347dd9fe36904d61"
     },
     {
       "path": "scripts/behavioral-parcour/c05_scorer.py",
@@ -63,7 +63,7 @@
     },
     {
       "path": "scripts/behavioral-parcour/test_c05_runner.py",
-      "sha256": "15c7454cd92f8f0491bb6847e5370e25a6906a24b77ee945388597b84d508507"
+      "sha256": "fb12090c62e3cfaab4d1abae861da8c334e2832d7b620c4338128e4cf5746fd2"
     },
     {
       "path": "scripts/behavioral-parcour/test_c05_scorer.py",
@@ -75,11 +75,11 @@
     },
     {
       "path": "scripts/behavioral-parcour/verify_c05_freeze.py",
-      "sha256": "7a2392946e48c2ba57fa6b983ae439e448a83871983e746dc004cd7827cd5e6f"
+      "sha256": "d9478ba3f70916d1587d33a7bc72426fdbbd1b6f21e1808e9a79bb7488a5eddf"
     },
     {
       "path": "scripts/behavioral-parcour/test_verify_c05_freeze.py",
-      "sha256": "559fa5c445387436522f2bf36076c7b0cece55ca45e60bdb6d78ba3e9de38c68"
+      "sha256": "3af0706227453d58afe1da586cd015cef1997434c283439750428dd6ff587d37"
     },
     {
       "path": "docs/c05-evidence/phase0-capability-b/result.json",
@@ -91,15 +91,15 @@
     },
     {
       "path": "docs/c05-supersession-preregistration.md",
-      "sha256": "f80982a7cb1b47a8ed26ab68ace653d11f01b6ebcf8dc79452951f953c44bf40"
+      "sha256": "39a2b3bba1377e4a91a5c98bb9f4545f9da4c21d40cb80edce9032282ac03d76"
     },
     {
       "path": "docs/c05-supersession-preregistration.d2",
-      "sha256": "3f14e9b44abe6b89f266f9cf3f6be71ca8cc63724252549242702cbdb056d4b4"
+      "sha256": "8d00ec692ec85ac6874d4c82e20e14c6a2368a63de83fbd39e04ef2705711f11"
     },
     {
       "path": "docs/c05-supersession-preregistration.svg",
-      "sha256": "18ade5f9c69d3ce50f1c0632231ed985c1e31e0f13fdfffc58eb801dd56cc228"
+      "sha256": "8bd54a603c7919b008ef1fd465995691ee89366fe3efb3b8fcd8b71a03827627"
     },
     {
       "path": "scripts/behavioral-parcour/c05_controller.py",
@@ -116,6 +116,34 @@
     {
       "path": "scripts/behavioral-parcour/test_c05_aggregate.py",
       "sha256": "c7e91c34a1cf9dfba781c67fbb251d14c8f991f28111a900d4333883c4a7f89c"
+    },
+    {
+      "path": "docs/c05-evidence/preflight-attempt-1-pi-version-mismatch.json",
+      "sha256": "26c97169940743e7d123cc5cc111756a0855a9bc787cbf7889c4fddb172d77c0"
+    },
+    {
+      "path": "docs/c05-evidence/preflight-attempt-1-pi-version-mismatch-diagnostic.json",
+      "sha256": "a569a28a2f35682af66bf34df6f4877482c48c06cbc40e4ea478b4219a12c407"
+    },
+    {
+      "path": "docs/c05-evidence/c05-patch-compatibility-schema-0842/audit.md",
+      "sha256": "004d7aaa9e482345521cfb903dba7f315c50d6a026a7741b334bb39e14c5ce8c"
+    },
+    {
+      "path": "docs/c05-evidence/c05-patch-compatibility-schema-0842/console.json",
+      "sha256": "a2e026cde0b1719cf0bff94f103dfef45b4ac0d1cb589d79fbb62ad8520acbb1"
+    },
+    {
+      "path": "docs/c05-evidence/c05-patch-compatibility-schema-0842/probe-wrapper.py",
+      "sha256": "8106b452f3accdfd0b24407b2d0a599741fbbd8caf836027c87ff8adb175733b"
+    },
+    {
+      "path": "docs/c05-evidence/c05-patch-compatibility-schema-0842/result.json",
+      "sha256": "232a4b4eaa2be3d3dddf1aa81f84fc800c50f0f71f5c5f9461153acd1bb376b4"
+    },
+    {
+      "path": "docs/c05-evidence/c05-patch-compatibility-schema-0842/manifest.json",
+      "sha256": "a1351c5b209a5cfae9131ea182a7697ff0d961b53efbcc28c866f31113def62a"
     }
   ]
 }

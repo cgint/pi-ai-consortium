@@ -32,7 +32,8 @@ CONTRACT_PATH = HERE / "c05-contract-files.json"
 REVIEW_PATH = REPO_ROOT / "docs/c05-evidence/independent-review.json"
 LEDGER_PATH = REPO_ROOT / "docs/c05-evidence/raw-publication-ledger.json"
 PHASE0_SHA256 = "f9a90f1a93f07f64d2da76602323906444d333ced4ccc20296439e3a537aa76f"
-PI_VERSION, NODE_VERSION = "0.84.1", "v22.23.2"
+RECORDED_PI_VERSION, RECORDED_NODE_VERSION = "0.84.1", "v22.23.2"
+PI_VERSION_FAMILY, NODE_VERSION_FAMILY = (0, 84), (22,)
 MODEL_PROVIDER, MODEL_ID, THINKING = phase0.MODEL_PROVIDER, phase0.MODEL_ID, phase0.THINKING_LEVEL
 MODEL_REF = phase0.MODEL_REF
 GUARD_REASON = "Explicit durable-state supersession guard"
@@ -80,14 +81,36 @@ def build_pi_command(workspace: Path, sessions: Path, run_id: str) -> list[str]:
     return ["pi", "--mode", "rpc", "--no-context-files", "--no-skills", "--no-prompt-templates", "--no-extensions", "--tools", "read,edit,grep,find,ls", "-e", str(base.PROVIDER_EXT), "-e", str(base.CONSORTIUM_EXT), "-e", str(base.FOCUS_EXT), "--provider", MODEL_PROVIDER, "--model", MODEL_ID, "--thinking", THINKING, "--dm-off", "--write-guard", str(workspace), "--approve", "--session-dir", str(sessions), "--name", run_id]
 
 
-def validate_runtime_gate(accepted: Mapping[str, Any], workspace: Path, sessions: Path, run_id: str) -> bool:
+def current_runtime_versions() -> dict[str, str]:
+    """Read exact runtime strings for provenance; compatibility is evaluated separately."""
+    return {
+        "node": subprocess.check_output(["node", "--version"], text=True).strip(),
+        "pi": subprocess.check_output(["pi", "--version"], text=True).strip(),
+    }
+
+
+def runtime_version_family_compatible(accepted: Mapping[str, Any], current: Mapping[str, Any]) -> bool:
+    """Accept patch drift only within frozen Pi 0.84.* and Node 22.* families."""
+    accepted_node = phase0.parse_version(str(accepted.get("node", "")), prefix="v")
+    accepted_pi = phase0.parse_version(str(accepted.get("pi", "")))
+    current_node = phase0.parse_version(str(current.get("node", "")), prefix="v")
+    current_pi = phase0.parse_version(str(current.get("pi", "")))
+    return bool(
+        accepted_node and accepted_pi and current_node and current_pi
+        and accepted_node[:1] == current_node[:1] == NODE_VERSION_FAMILY
+        and accepted_pi[:2] == current_pi[:2] == PI_VERSION_FAMILY
+    )
+
+
+def validate_runtime_gate(accepted: Mapping[str, Any], workspace: Path, sessions: Path, run_id: str, versions: Mapping[str, Any] | None = None) -> bool:
     """Independently recheck current runtime inputs against Phase0-B's plan."""
     plan = accepted.get("plan", {})
     command, child, hashes = plan.get("command"), plan.get("child_environment"), plan.get("extension_hashes")
     current = build_pi_command(workspace, sessions, run_id)
     selected_child = {key: build_child_env(dict(os.environ)).get(key) for key in ("CONSORTIUM_MODEL", "PI_SKIP_VERSION_CHECK")}
     try:
-        versions = {"node": subprocess.check_output(["node", "--version"], text=True).strip(), "pi": subprocess.check_output(["pi", "--version"], text=True).strip()}
+        versions = dict(versions) if versions is not None else current_runtime_versions()
+        accepted_versions = accepted.get("version_check", {}).get("observed", {})
         extensions_ok = isinstance(hashes, Mapping) and len(hashes) == 3 and all(isinstance(path, str) and re.fullmatch(r"[0-9a-f]{64}", str(digest)) and Path(path).is_file() and sha256_file(Path(path)) == digest for path, digest in hashes.items())
         # Compare stable runtime identity; probe-only tools and run-specific paths are intentionally different.
         def command_identity(argv: Any) -> list[str] | None:
@@ -96,7 +119,7 @@ def validate_runtime_gate(accepted: Mapping[str, Any], workspace: Path, sessions
             ignored = {"--tools", "--write-guard", "--session-dir", "--name"}
             return [str(item) for index, item in enumerate(argv) if not (argv[index - 1] in ignored if index else False) and item not in ignored]
         confined = all(str(path).startswith(str(REPO_ROOT) + os.sep) for path in (workspace, sessions))
-        return versions == accepted.get("version_check", {}).get("observed") and extensions_ok and command_identity(command) == command_identity(current) and confined and child == selected_child
+        return runtime_version_family_compatible(accepted_versions, versions) and extensions_ok and command_identity(command) == command_identity(current) and confined and child == selected_child
     except (OSError, subprocess.SubprocessError, ValueError, TypeError):
         return False
 
@@ -110,7 +133,7 @@ def validate_phase0(path: Path, expected_sha256: str):
     checks = data.get("checks", {})
     observed = data.get("version_check", {}).get("observed", {})
     identities = data.get("identity", {})
-    valid = data.get("pass") is True and all(checks.values()) and observed == {"pi": PI_VERSION, "node": NODE_VERSION} and all(x.get("pass") is True for x in identities.values())
+    valid = data.get("pass") is True and all(checks.values()) and observed == {"pi": RECORDED_PI_VERSION, "node": RECORDED_NODE_VERSION} and all(x.get("pass") is True for x in identities.values())
     if not valid:
         raise RuntimeError("accepted Phase 0 result identity/version checks failed")
     return data
@@ -426,9 +449,10 @@ class C05Runner(base.Phase05Runner):
             ledger = validate_ledger(Path(self.frozen.get("ledger_path", LEDGER_PATH)), self.frozen["ledger_sha256"], specs, require_all_unconsumed=all_targets)
             if not self.spec.get("smoke") and not validate_smoke_decision(Path(self.frozen.get("smoke_decision_path", "")), self.frozen.get("smoke_decision_sha256", ""), ledger):
                 raise RuntimeError("matrix run requires a verified committed smoke decision")
-            self.manifest = {"schema_version": "c05-run-manifest-v1", "run_id": self.run_id, "workspace": str(self.workspace), "runtime_root": str(self.runtime_root), "raw_destination": f"docs/c05-raw/{self.run_id}", "argv": build_pi_command(self.workspace, self.sessions_dir, self.run_id), "child_environment": {key: build_child_env(dict(os.environ)).get(key) for key in ("CONSORTIUM_MODEL", "PI_SKIP_VERSION_CHECK")}, "runtime_versions": phase0_result["version_check"]["observed"], "extension_hashes": phase0_result["plan"]["extension_hashes"], "phase0_sha256": self.frozen["phase0_sha256"], "contract_sha256": self.frozen["contract_sha256"], "review_sha256": self.frozen["review_sha256"], "ledger_sha256": self.frozen["ledger_sha256"], "freeze_commit": self.frozen["freeze_commit"], "arm": self.spec["arm"], "fixture_id": self.fixture["id"], "smoke": self.spec["smoke"], "phase0": str(PHASE0_PATH)}
-            if not validate_runtime_gate(phase0_result, self.workspace, self.sessions_dir, self.run_id):
-                raise RuntimeError("current runtime inputs differ from accepted Phase0 B")
+            current_versions = current_runtime_versions()
+            self.manifest = {"schema_version": "c05-run-manifest-v1", "run_id": self.run_id, "workspace": str(self.workspace), "runtime_root": str(self.runtime_root), "raw_destination": f"docs/c05-raw/{self.run_id}", "argv": build_pi_command(self.workspace, self.sessions_dir, self.run_id), "child_environment": {key: build_child_env(dict(os.environ)).get(key) for key in ("CONSORTIUM_MODEL", "PI_SKIP_VERSION_CHECK")}, "runtime_versions": {"accepted_phase0": phase0_result["version_check"]["observed"], "current": current_versions}, "extension_hashes": phase0_result["plan"]["extension_hashes"], "phase0_sha256": self.frozen["phase0_sha256"], "contract_sha256": self.frozen["contract_sha256"], "review_sha256": self.frozen["review_sha256"], "ledger_sha256": self.frozen["ledger_sha256"], "freeze_commit": self.frozen["freeze_commit"], "arm": self.spec["arm"], "fixture_id": self.fixture["id"], "smoke": self.spec["smoke"], "phase0": str(PHASE0_PATH)}
+            if not validate_runtime_gate(phase0_result, self.workspace, self.sessions_dir, self.run_id, current_versions):
+                raise RuntimeError("current runtime inputs differ from accepted Phase0 B capabilities, identity, or compatible version families")
             return {"pass": True, "prompts_delivered": 0, "manifest": self.manifest}
         except Exception as exc:
             return {"pass": False, "prompts_delivered": 0, "exception": f"{type(exc).__name__}: {exc}", "manifest": self.manifest}

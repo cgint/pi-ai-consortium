@@ -1,0 +1,20 @@
+{
+  "run_id": "c05-patch-compatibility-schema-0842",
+  "result": "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-patch-compatibility-schema-0842/result.json",
+  "pass": true,
+  "checks": {
+    "path_confinement": true,
+    "settings_exact": true,
+    "extensions": true,
+    "zero_user_prompts": true,
+    "only_get_state": true,
+    "reviewer_command_exact": true,
+    "versions": true,
+    "publication_dry_run": true,
+    "publication_destination_exact": true,
+    "initial_state": true,
+    "final_state": true,
+    "process_exit": true,
+    "execution": true
+  }
+}

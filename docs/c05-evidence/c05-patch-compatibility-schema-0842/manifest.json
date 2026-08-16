@@ -1,0 +1,30 @@
+{
+  "schema_version": "c05-patch-compatibility-evidence-v1",
+  "run_id": "c05-patch-compatibility-schema-0842",
+  "files": [
+    {
+      "path": "audit.md",
+      "sha256": "004d7aaa9e482345521cfb903dba7f315c50d6a026a7741b334bb39e14c5ce8c",
+      "size": 926
+    },
+    {
+      "path": "console.json",
+      "sha256": "a2e026cde0b1719cf0bff94f103dfef45b4ac0d1cb589d79fbb62ad8520acbb1",
+      "size": 584
+    },
+    {
+      "path": "probe-wrapper.py",
+      "sha256": "8106b452f3accdfd0b24407b2d0a599741fbbd8caf836027c87ff8adb175733b",
+      "size": 780
+    },
+    {
+      "path": "result.json",
+      "sha256": "232a4b4eaa2be3d3dddf1aa81f84fc800c50f0f71f5c5f9461153acd1bb376b4",
+      "size": 11866
+    }
+  ],
+  "coverage": {
+    "files": 4,
+    "bytes": 14156
+  }
+}

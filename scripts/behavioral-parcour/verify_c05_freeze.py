@@ -8,7 +8,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parent.parent
@@ -24,6 +24,7 @@ C04_CORPUS = HERE / "c04-supersession-corpus.json"
 C05_CORPUS = HERE / "c05-supersession-corpus.json"
 PHASE0_RESULT = REPO_ROOT / "docs/c05-evidence/phase0-capability-b/result.json"
 PHASE0_AUDIT = REPO_ROOT / "docs/c05-evidence/phase0-capability-b/independent-audit.md"
+PATCH_COMPAT_ROOT = REPO_ROOT / "docs/c05-evidence/c05-patch-compatibility-schema-0842"
 EXCLUDED_PREFIXES = ("docs/c05-raw/",)
 EXCLUDED_PATHS = {str(CONTRACT.relative_to(REPO_ROOT)), str(LEDGER.relative_to(REPO_ROOT))}
 EXCLUDED_EVIDENCE_PREFIXES = ("docs/c05-evidence/independent-review", "docs/c05-evidence/raw-publication", "docs/c05-evidence/c05-aggregate")
@@ -58,7 +59,7 @@ def verify_contract(freeze_commit: str | None) -> dict[str, Any]:
             if frozen.returncode or hashlib.sha256(frozen.stdout).hexdigest() != digest:
                 fail(f"freeze-commit contract hash mismatch: {rel}")
         paths.add(rel)
-    required = {"scripts/behavioral-parcour/c05_runner.py", "scripts/behavioral-parcour/c05_scorer.py", "scripts/behavioral-parcour/c05-supersession-corpus.json", "scripts/behavioral-parcour/c05_controller.py", "scripts/behavioral-parcour/test_c05_controller.py", "scripts/behavioral-parcour/c05_aggregate.py", "scripts/behavioral-parcour/test_c05_aggregate.py", "docs/c05-supersession-preregistration.md", "docs/c05-supersession-preregistration.d2", "docs/c05-supersession-preregistration.svg", str(PHASE0_RESULT.relative_to(REPO_ROOT)), str(PHASE0_AUDIT.relative_to(REPO_ROOT))}
+    required = {"scripts/behavioral-parcour/c05_runner.py", "scripts/behavioral-parcour/c05_scorer.py", "scripts/behavioral-parcour/c05-supersession-corpus.json", "scripts/behavioral-parcour/c05_controller.py", "scripts/behavioral-parcour/test_c05_controller.py", "scripts/behavioral-parcour/c05_aggregate.py", "scripts/behavioral-parcour/test_c05_aggregate.py", "docs/c05-supersession-preregistration.md", "docs/c05-supersession-preregistration.d2", "docs/c05-supersession-preregistration.svg", str(PHASE0_RESULT.relative_to(REPO_ROOT)), str(PHASE0_AUDIT.relative_to(REPO_ROOT)), "docs/c05-evidence/preflight-attempt-1-pi-version-mismatch.json", "docs/c05-evidence/preflight-attempt-1-pi-version-mismatch-diagnostic.json", *(str(path.relative_to(REPO_ROOT)) for path in PATCH_COMPAT_ROOT.iterdir() if path.is_file())}
     if not required <= paths:
         fail(f"contract missing required files: {sorted(required - paths)}")
     return {"entries": len(paths), "paths": sorted(paths)}
@@ -108,9 +109,12 @@ def verify_corpus_and_predicate() -> dict[str, Any]:
 
 def verify_preregistration_and_helpers() -> dict[str, Any]:
     preregistration = (REPO_ROOT / "docs/c05-supersession-preregistration.md").read_text()
-    required_markers = ("immutable valid-negative baseline", "Any failed smoke transition categorically blocks every matrix cell", "all 12 ON-positive cells fire", "all 12 OFF-positive cells do not fire", "all 24 controls do not fire", "controller has one-cell authority")
+    required_markers = ("immutable valid-negative baseline", "Any failed smoke transition categorically blocks every matrix cell", "all 12 ON-positive cells fire", "all 12 OFF-positive cells do not fire", "all 24 controls do not fire", "controller has one-cell authority", "Live compatibility: Pi `0.84.*`; Node `22.*`")
     if any(marker not in preregistration for marker in required_markers):
-        fail("preregistration smoke-block/matrix mechanism/control predicate markers missing")
+        fail("preregistration compatibility/smoke-block/matrix mechanism/control predicate markers missing")
+    accepted = {"node": "v22.23.2", "pi": "0.84.1"}
+    if not runner.runtime_version_family_compatible(accepted, {"node": "v22.99.0", "pi": "0.84.2"}) or runner.runtime_version_family_compatible(accepted, {"node": "v23.0.0", "pi": "0.84.2"}) or runner.runtime_version_family_compatible(accepted, {"node": "v22.99.0", "pi": "0.85.0"}):
+        fail("runtime patch-family policy implementation mismatch")
     controller_source = Path(controller.__file__).read_text()
     aggregate_source = Path(aggregate.__file__).read_text()
     if "--execute-next" not in controller_source or "if args.execute_next else 0" not in controller_source:
@@ -118,7 +122,7 @@ def verify_preregistration_and_helpers() -> dict[str, Any]:
     required_aggregate_markers = ("runner.smoke_transition(smoke)", "on_fires == 12", "off_fires == 0", "control_fires == 0", '"paired_records"', '"denominators"')
     if any(marker not in aggregate_source for marker in required_aggregate_markers):
         fail("aggregate smoke/mechanism/control threshold implementation missing")
-    return {"preregistration_markers": len(required_markers), "controller_default_read_only": True, "aggregate_thresholds": {"on_positive_fires": "12/12", "off_positive_fires": "0/12", "control_fires": "0/24", "on_controls_reported": "0/12"}}
+    return {"preregistration_markers": len(required_markers), "controller_default_read_only": True, "runtime_version_policy": {"pi": "0.84.*", "node": "22.*", "exact_strings_recorded": True}, "aggregate_thresholds": {"on_positive_fires": "12/12", "off_positive_fires": "0/12", "control_fires": "0/24", "on_controls_reported": "0/12"}}
 
 
 def verify_phase0() -> dict[str, Any]:
@@ -129,12 +133,44 @@ def verify_phase0() -> dict[str, Any]:
     return {"result_sha256": runner.PHASE0_SHA256}
 
 
+def verify_patch_compatibility_evidence() -> dict[str, Any]:
+    manifest_path = PATCH_COMPAT_ROOT / "manifest.json"
+    result_path = PATCH_COMPAT_ROOT / "result.json"
+    manifest = json.loads(manifest_path.read_text())
+    expected_names = {"audit.md", "console.json", "probe-wrapper.py", "result.json"}
+    records = manifest.get("files")
+    if manifest.get("schema_version") != "c05-patch-compatibility-evidence-v1" or manifest.get("run_id") != PATCH_COMPAT_ROOT.name or not isinstance(records, list) or {item.get("path") for item in records} != expected_names:
+        fail("patch compatibility manifest schema/coverage mismatch")
+    if any(not isinstance(item, dict) or set(item) != {"path", "sha256", "size"} or not (PATCH_COMPAT_ROOT / item["path"]).is_file() or sha256(PATCH_COMPAT_ROOT / item["path"]) != item["sha256"] or (PATCH_COMPAT_ROOT / item["path"]).stat().st_size != item["size"] for item in records):
+        fail("patch compatibility evidence hash/size mismatch")
+    if manifest.get("coverage") != {"files": len(records), "bytes": sum(item["size"] for item in records)}:
+        fail("patch compatibility evidence coverage mismatch")
+    result = json.loads(result_path.read_text())
+    plan, identities, checks = result.get("plan", {}), result.get("identity", {}), result.get("checks", {})
+    rpc_methods = [item.get("type") for item in plan.get("rpc_commands", []) if isinstance(item, Mapping)]
+    expected_identity = {"provider": runner.MODEL_PROVIDER, "model": runner.MODEL_ID, "thinking": runner.THINKING}
+    observed_versions = result.get("version_check", {}).get("observed", {})
+    identity_ok = set(identities) == {"state_initial", "state_final"} and all(item.get("pass") is True and item.get("observed") == expected_identity for item in identities.values())
+    valid = (
+        result.get("schema_version") == "c05-phase0-probe-result-v1"
+        and plan.get("run_id") == PATCH_COMPAT_ROOT.name
+        and rpc_methods == ["get_state", "get_state"]
+        and isinstance(checks, Mapping) and len(checks) == 13 and all(value is True for value in checks.values())
+        and observed_versions == {"node": "v22.23.2", "pi": "0.84.2"}
+        and runner.runtime_version_family_compatible({"node": "v22.23.2", "pi": "0.84.1"}, observed_versions)
+        and identity_ok and result.get("process_returncode") == 0 and result.get("failure") is None
+    )
+    if not valid:
+        fail("patch compatibility zero-prompt schema evidence invalid")
+    return {"versions": observed_versions, "rpc_methods": rpc_methods, "identity": expected_identity, "checks": len(checks), "manifest_sha256": sha256(manifest_path)}
+
+
 def verify(freeze_commit: str | None = None) -> dict[str, Any]:
     if freeze_commit and (len(freeze_commit) != 40 or any(ch not in "0123456789abcdef" for ch in freeze_commit)):
         fail("freeze commit must be a 40-character lowercase SHA")
     if freeze_commit and subprocess.run(["git", "merge-base", "--is-ancestor", freeze_commit, "HEAD"], cwd=REPO_ROOT).returncode:
         fail("freeze commit is not an ancestor of HEAD")
-    return {"pass": True, "contract": verify_contract(freeze_commit), "ledger": verify_ledger_and_raw(), "corpus": verify_corpus_and_predicate(), "package": verify_preregistration_and_helpers(), "phase0": verify_phase0(), "freeze_commit": freeze_commit}
+    return {"pass": True, "contract": verify_contract(freeze_commit), "ledger": verify_ledger_and_raw(), "corpus": verify_corpus_and_predicate(), "package": verify_preregistration_and_helpers(), "phase0": verify_phase0(), "patch_compatibility": verify_patch_compatibility_evidence(), "freeze_commit": freeze_commit}
 
 
 def main() -> int:

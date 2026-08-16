@@ -1,6 +1,6 @@
 # c05 status
 
-**Status:** Freeze and exact review passed; preflight attempt 1 mandatory-stopped because current Pi `0.84.2` differs from frozen `0.84.1`; no behavioral prompt started
+**Status:** Pi 0.84.* / Node 22.* compatibility amendment implemented and current Pi 0.84.2 schema probe passed; replacement freeze next; no behavioral prompt started
 **As-of:** 2026-08-13
 
 ## Diagram
@@ -37,13 +37,15 @@ Diagnose and minimally fix the supersession guard’s inactive causal path, then
 
 ## Compatibility policy
 
-- Node and Pi versions are recorded as provenance; compatibility accepts Node 22+ and the package-supported Pi range `>=0.74.0,<1.0.0` before capability checks.
+- Node and Pi versions are recorded as provenance; c05 preflight and live execution accept only Node `22.*` and Pi `0.84.*`, then require all schema/capability and integrity checks.
 - Provider/model/thinking identity is never inferred from version or command construction: live nested `get_state` must prove it.
 - Child `CONSORTIUM_MODEL` is always overwritten with `8081-twins/qwen36-27b-nvidia-nvfp4`, including when ambient state points to Google.
 - Extension existence and SHA-256, exact settings location/payload, reviewer command shape, repository path confinement, and zero-prompt RPC methods are checked explicitly.
 
-## Current blocker
+## Current gate
 
-The first post-review preflight delivered zero prompts and exited mandatory class 2. Direct comparison found one mismatch: Phase 0-B/freeze require Pi `0.84.1`, while the installed runtime is `0.84.2`. Node `v22.23.2`, the exact command identity, `CONSORTIUM_MODEL`, `PI_SKIP_VERSION_CHECK`, all three extension hashes, and repository confinement still match. Evidence is preserved at `docs/c05-evidence/preflight-attempt-1-pi-version-mismatch.json` and `-diagnostic.json`.
+The user clarified that compatible patch versions are provenance, not blockers. The runner now accepts only Pi `0.84.*` and Node `22.*`, records exact Phase 0-B and current strings separately in every manifest, and keeps command, child environment, extension hash, provider/model/thinking, schema, review, evidence, ordering, safety, and confinement gates strict. Deterministic tests reject Pi 0.83/0.85, Node 21/23, and malformed versions.
 
-No scheduled runtime root was created, all 56 ledger records remain unconsumed, and all raw destinations contain only `.gitkeep`. The frozen protocol permits compatible patch versions only before freeze and requires the exact recorded version afterward. Any retry, compatibility-policy change, refreeze, or runtime restoration therefore requires explicit human authorization.
+A one-time fresh-ID compatibility probe under installed Pi `0.84.2` sent exactly two `get_state` controls and zero prompts. Both nested states proved provider `8081-twins`, model `qwen36-27b-nvidia-nvfp4`, thinking `off`; all 13 checks and process exit passed. Evidence is under `docs/c05-evidence/c05-patch-compatibility-schema-0842/`. Accepted Phase 0-B was not rerun.
+
+Freeze `360a05b`, both review attempts, and the failed exact-version preflight remain unchanged. All 56 ledger records and raw placeholders remain unconsumed. Next: regenerate the contract, pass full gates, create the authorized replacement freeze, then run one fresh exact-model review and one fresh zero-materialization preflight.

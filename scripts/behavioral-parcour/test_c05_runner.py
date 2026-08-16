@@ -43,20 +43,33 @@ class C05RunnerTests(unittest.TestCase):
         with self.assertRaises(RuntimeError): c05.validate_phase0(c05.PHASE0_PATH, '0'*64)
         with self.assertRaises(ValueError): c05.validate_phase0(c05.PHASE0_PATH, 'f9a90f')
 
-    def test_runtime_gate_uses_real_phase0_shape_and_selected_child_environment(self):
+    def test_runtime_version_family_accepts_patch_and_rejects_family_or_malformed_values(self):
+        accepted = {'node':'v22.23.2', 'pi':'0.84.1'}
+        self.assertTrue(c05.runtime_version_family_compatible(accepted, {'node':'v22.99.0', 'pi':'0.84.2'}))
+        for current in (
+            {'node':'v21.99.0', 'pi':'0.84.2'},
+            {'node':'v23.0.0', 'pi':'0.84.2'},
+            {'node':'v22.23.2', 'pi':'0.83.9'},
+            {'node':'v22.23.2', 'pi':'0.85.0'},
+            {'node':'22.23.2', 'pi':'0.84.2'},
+            {'node':'v22.23.2', 'pi':'unknown'},
+        ):
+            self.assertFalse(c05.runtime_version_family_compatible(accepted, current), current)
+
+    def test_runtime_gate_uses_real_phase0_shape_selected_child_environment_and_patch_policy(self):
         accepted = copy.deepcopy(json.loads(c05.PHASE0_PATH.read_text()))
         workspace, sessions, run_id = c05.RUN_ROOT / 'runtime-gate' / 'workspace', c05.RUN_ROOT / 'runtime-gate' / 'sessions', 'c05-runtime-gate'
-        versions = ['v22.23.2\n', '0.84.1\n']
-        with patch.dict(os.environ, {'UNRELATED_AMBIENT': 'wrong'}, clear=False), patch('subprocess.check_output', side_effect=versions):
-            self.assertTrue(c05.validate_runtime_gate(accepted, workspace, sessions, run_id))
+        current = {'node':'v22.99.0', 'pi':'0.84.2'}
+        with patch.dict(os.environ, {'UNRELATED_AMBIENT': 'wrong'}, clear=False):
+            self.assertTrue(c05.validate_runtime_gate(accepted, workspace, sessions, run_id, current))
         for mutate in (
             lambda data: data['plan']['child_environment'].__setitem__('UNRELATED_AMBIENT', 'wrong'),
             lambda data: data['plan']['extension_hashes'].__setitem__(str(c05.REPO_ROOT / 'index.ts'), '0' * 64),
             lambda data: data['plan']['command'].__setitem__(0, 'not-pi'),
         ):
             bad = copy.deepcopy(accepted); mutate(bad)
-            with patch('subprocess.check_output', side_effect=['v22.23.2\n', '0.84.1\n']):
-                self.assertFalse(c05.validate_runtime_gate(bad, workspace, sessions, run_id))
+            self.assertFalse(c05.validate_runtime_gate(bad, workspace, sessions, run_id, current))
+        self.assertFalse(c05.validate_runtime_gate(accepted, workspace, sessions, run_id, {'node':'v22.99.0','pi':'0.85.0'}))
 
     def test_governor_telemetry_requires_exact_state_changing_selection(self):
         valid = {'type':'governor_input','state_supersession_guard':True,'state_supersession_guard_source':'workspace_settings','current_human_turn_length':1}
@@ -146,9 +159,13 @@ class C05RunnerTests(unittest.TestCase):
     def test_contract_review_ledger_gates_fail_closed_before_materialization(self):
         spec=c05.SMOKE_SPECS[0]
         runner=c05.C05Runner(spec, freeze_commit='0'*40, phase0_sha256='0'*64, contract_sha256='0'*64, review_sha256='0'*64, ledger_sha256='0'*64)
-        with patch.object(c05, 'run_paths', return_value=[]), patch.object(c05, 'validate_phase0') as p0, patch.object(c05, 'validate_contract') as contract, patch.object(c05, 'validate_review') as review, patch.object(c05, 'validate_ledger') as ledger, patch.object(c05, 'validate_runtime_gate', return_value=True), patch('subprocess.check_output', return_value='2026-01-01T00:00:00Z'):
+        accepted={'pass':True, 'version_check':{'observed':{'node':'v22.23.2','pi':'0.84.1'}}, 'plan':{'extension_hashes':{}}}
+        current={'node':'v22.23.9','pi':'0.84.2'}
+        with patch.object(c05, 'run_paths', return_value=[]), patch.object(c05, 'validate_phase0', return_value=accepted) as p0, patch.object(c05, 'validate_contract') as contract, patch.object(c05, 'validate_review') as review, patch.object(c05, 'validate_ledger') as ledger, patch.object(c05, 'current_runtime_versions', return_value=current), patch.object(c05, 'validate_runtime_gate', return_value=True) as runtime_gate, patch('subprocess.check_output', return_value='2026-01-01T00:00:00Z'):
             result=runner.preflight()
         self.assertTrue(result['pass']); p0.assert_called_once(); contract.assert_called_once(); review.assert_called_once(); ledger.assert_called_once()
+        runtime_gate.assert_called_once_with(accepted, runner.workspace, runner.sessions_dir, runner.run_id, current)
+        self.assertEqual(result['manifest']['runtime_versions'], {'accepted_phase0':accepted['version_check']['observed'], 'current':current})
         self.assertFalse(runner.runtime_root.exists(), 'preflight must not materialize a run')
 
     def test_nested_schema_malformed_and_obsolete_fail(self):

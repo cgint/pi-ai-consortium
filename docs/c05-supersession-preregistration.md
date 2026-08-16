@@ -15,9 +15,16 @@ The c04 scorer recognized only the literal `release-notes` spelling. The corpus�
 
 The control predicate is derived solely from each control fixture’s `before` text, not control metadata: a control regresses if its current durable identity or `RELEASE_STREAM=stable` disappears, or if the sole apparent identity is historical. The four identities are YAML changelog entries, legacy-yaml-approval, YAML release notes, and yaml-state-v1.
 
+## Prospective patch-compatibility amendment
+
+Freeze `360a05b`, review-timeout attempt 1, accepted review attempt 2, and the zero-prompt preflight failure on installed Pi `0.84.2` remain immutable historical c05 evidence. That preflight compared exact version strings against Phase 0-B's recorded Pi `0.84.1`; no scheduled runtime root, raw artifact, or ledger record was consumed.
+
+This replacement freeze changes only the runtime patch-version policy and its tests, manifest provenance, preregistration/verifier, diagram, and contract hashes. Exact Pi and Node strings remain recorded, but version compatibility is `Pi 0.84.*` and `Node 22.*`; a patch difference alone is not a failure. Major/minor-family, schema/capability, provider/model/thinking, effective model, extension hash, command identity, safety, confinement, review, evidence, or ordering mismatches remain mandatory stops. Phase 0-B remains the accepted capability evidence and is not rerun.
+
 ## Frozen identity and runtime
 
-- Pi CLI `0.84.1`; Node `v22.23.2`.
+- Phase 0-B provenance: Pi CLI `0.84.1`; Node `v22.23.2`.
+- Live compatibility: Pi `0.84.*`; Node `22.*`; every manifest records both exact Phase 0-B and current strings.
 - Executor and deliberation: `8081-twins/qwen36-27b-nvidia-nvfp4`, thinking `off`.
 - Child environment overwrites ambient selection with `CONSORTIUM_MODEL=8081-twins/qwen36-27b-nvidia-nvfp4` and `PI_SKIP_VERSION_CHECK=1`.
 - Extension order: provider autodetect, this repository’s `index.ts`, then focus guard; Phase 0-B records their exact paths and SHA-256 values.
@@ -29,7 +36,7 @@ Before the matrix, execute exactly these eight ON smoke IDs in corpus fixture or
 
 Matrix order is repetition 1, 2, then 3; within each: yaml-markdown, policy-retirement, requirement-replacement, state-format-migration, state-formatting-control, policy-clarification-control, requirement-addition-control, state-comment-control; each fixture is OFF then ON. The imported runner’s `SMOKE_SPECS + RUN_SPECS` is authoritative for all 56 IDs and order.
 
-A review occurs only after the freeze commit and before preflight; preflight occurs before prompt 1 and materializes none of the 56 scheduled `.parcour-runs/<run-id>` roots and no raw evidence. Preserved Phase 0 attempt roots and explicitly named ignored test/cache roots are provenance or tooling state, not scheduled behavioral targets and are excluded from this absence predicate. Contract, review, Phase 0, runtime identity, path confinement, ledger/raw evidence, infrastructure, safety, or harvest failure is a mandatory stop. Behavioral failures consume and publish their cell and do not suppress later frozen cells. There are no retries or substitutions.
+A fresh exact-model review occurs only after this replacement freeze commit and before the fresh preflight; preflight occurs before prompt 1 and materializes none of the 56 scheduled `.parcour-runs/<run-id>` roots and no raw evidence. Preserved Phase 0 attempt roots and explicitly named ignored test/cache roots are provenance or tooling state, not scheduled behavioral targets and are excluded from this absence predicate. Contract, review, Phase 0, runtime identity, path confinement, ledger/raw evidence, infrastructure, safety, or harvest failure is a mandatory stop. Behavioral failures consume and publish their cell and do not suppress later frozen cells. There are no retries or substitutions.
 
 ## Publication, result, and write boundary
 

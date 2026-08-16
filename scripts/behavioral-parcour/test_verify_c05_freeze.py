@@ -19,7 +19,19 @@ class VerifyC05FreezeTests(unittest.TestCase):
         self.assertEqual(report["ledger"], {"runs": 56, "smoke": 8, "matrix": 48, "scheduled_runtime_targets_absent": True})
         self.assertEqual(report["phase0"]["result_sha256"], "f9a90f1a93f07f64d2da76602323906444d333ced4ccc20296439e3a537aa76f")
         self.assertTrue(report["package"]["controller_default_read_only"])
+        self.assertEqual(report["package"]["runtime_version_policy"], {"pi": "0.84.*", "node": "22.*", "exact_strings_recorded": True})
         self.assertEqual(report["package"]["aggregate_thresholds"]["control_fires"], "0/24")
+
+    def test_preregistration_verifies_patch_family_policy(self):
+        report = verify.verify_preregistration_and_helpers()
+        self.assertEqual(report["runtime_version_policy"], {"pi": "0.84.*", "node": "22.*", "exact_strings_recorded": True})
+
+    def test_patch_compatibility_probe_is_zero_prompt_nested_identity_evidence(self):
+        report = verify.verify_patch_compatibility_evidence()
+        self.assertEqual(report["versions"], {"node": "v22.23.2", "pi": "0.84.2"})
+        self.assertEqual(report["rpc_methods"], ["get_state", "get_state"])
+        self.assertEqual(report["identity"], {"provider": "8081-twins", "model": "qwen36-27b-nvidia-nvfp4", "thinking": "off"})
+        self.assertEqual(report["checks"], 13)
 
     def test_contract_excludes_its_self_and_all_mutable_publication_paths(self):
         data = json.loads(verify.CONTRACT.read_text())
