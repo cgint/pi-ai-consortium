@@ -1,6 +1,6 @@
 # c05 status
 
-**Status:** Freeze `360a05b` committed; authorized post-freeze review attempt 2 passed exact session validation; preflight next; no behavioral prompt started
+**Status:** Freeze and exact review passed; preflight attempt 1 mandatory-stopped because current Pi `0.84.2` differs from frozen `0.84.1`; no behavioral prompt started
 **As-of:** 2026-08-13
 
 ## Diagram
@@ -42,6 +42,8 @@ Diagnose and minimally fix the supersession guard’s inactive causal path, then
 - Child `CONSORTIUM_MODEL` is always overwritten with `8081-twins/qwen36-27b-nvidia-nvfp4`, including when ambient state points to Google.
 - Extension existence and SHA-256, exact settings location/payload, reviewer command shape, repository path confinement, and zero-prompt RPC methods are checked explicitly.
 
-## Current gate
+## Current blocker
 
-After explicit resume with the exact model available, one fresh review attempt was executed under `8081-twins/qwen36-27b-nvidia-nvfp4:off`. Attempt 2 returned `HEADLINE: PASS` and `BLOCKER: None`; `c05_runner.validate_review()` accepted its exact timestamp, raw-session hash, provider/model/thinking events, and verdict. Evidence is under `docs/c05-evidence/independent-review-attempt-2*` with canonical metadata at `docs/c05-evidence/independent-review.json`. Attempt 1 remains unchanged. No preflight or scheduled prompt has run yet.
+The first post-review preflight delivered zero prompts and exited mandatory class 2. Direct comparison found one mismatch: Phase 0-B/freeze require Pi `0.84.1`, while the installed runtime is `0.84.2`. Node `v22.23.2`, the exact command identity, `CONSORTIUM_MODEL`, `PI_SKIP_VERSION_CHECK`, all three extension hashes, and repository confinement still match. Evidence is preserved at `docs/c05-evidence/preflight-attempt-1-pi-version-mismatch.json` and `-diagnostic.json`.
+
+No scheduled runtime root was created, all 56 ledger records remain unconsumed, and all raw destinations contain only `.gitkeep`. The frozen protocol permits compatible patch versions only before freeze and requires the exact recorded version afterward. Any retry, compatibility-policy change, refreeze, or runtime restoration therefore requires explicit human authorization.

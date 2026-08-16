@@ -1,0 +1,30 @@
+{
+  "schema_version": "c05-preflight-failure-diagnostic-v1",
+  "pass": false,
+  "classification": "mandatory-stop-runtime-identity-mismatch",
+  "prompts_delivered": 0,
+  "freeze_commit": "360a05b04f2c0ec7be544a731b7da2a1cf741503",
+  "preflight_sha256": "26c97169940743e7d123cc5cc111756a0855a9bc787cbf7889c4fddb172d77c0",
+  "mismatch": {
+    "field": "pi_version",
+    "accepted": "0.84.1",
+    "current": "0.84.2"
+  },
+  "matching": {
+    "node_version": "v22.23.2",
+    "command_identity": true,
+    "child_environment": {
+      "CONSORTIUM_MODEL": "8081-twins/qwen36-27b-nvidia-nvfp4",
+      "PI_SKIP_VERSION_CHECK": "1"
+    },
+    "extension_hashes": true,
+    "path_confinement": true
+  },
+  "schedule_state": {
+    "ledger_records": 56,
+    "unconsumed": 56,
+    "raw_non_placeholder_files": 0,
+    "scheduled_runtime_roots": 0
+  },
+  "decision": "No retry, compatibility relaxation, refreeze, smoke, or matrix execution is authorized."
+}

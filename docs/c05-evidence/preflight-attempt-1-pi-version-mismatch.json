@@ -1,0 +1,65 @@
+{
+  "pass": false,
+  "prompts_delivered": 0,
+  "exception": "RuntimeError: current runtime inputs differ from accepted Phase0 B",
+  "manifest": {
+    "schema_version": "c05-run-manifest-v1",
+    "run_id": "c05-smoke-on-yaml-markdown",
+    "workspace": "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-smoke-on-yaml-markdown/workspace",
+    "runtime_root": "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-smoke-on-yaml-markdown",
+    "raw_destination": "docs/c05-raw/c05-smoke-on-yaml-markdown",
+    "argv": [
+      "pi",
+      "--mode",
+      "rpc",
+      "--no-context-files",
+      "--no-skills",
+      "--no-prompt-templates",
+      "--no-extensions",
+      "--tools",
+      "read,edit,grep,find,ls",
+      "-e",
+      "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-olla-autodetect/index.ts",
+      "-e",
+      "/Users/cgint/dev-external/pi-ai-consortium/index.ts",
+      "-e",
+      "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-focus-guard/index.ts",
+      "--provider",
+      "8081-twins",
+      "--model",
+      "qwen36-27b-nvidia-nvfp4",
+      "--thinking",
+      "off",
+      "--dm-off",
+      "--write-guard",
+      "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-smoke-on-yaml-markdown/workspace",
+      "--approve",
+      "--session-dir",
+      "/Users/cgint/dev-external/pi-ai-consortium/.parcour-runs/c05-smoke-on-yaml-markdown/sessions",
+      "--name",
+      "c05-smoke-on-yaml-markdown"
+    ],
+    "child_environment": {
+      "CONSORTIUM_MODEL": "8081-twins/qwen36-27b-nvidia-nvfp4",
+      "PI_SKIP_VERSION_CHECK": "1"
+    },
+    "runtime_versions": {
+      "node": "v22.23.2",
+      "pi": "0.84.1"
+    },
+    "extension_hashes": {
+      "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-focus-guard/index.ts": "8a4383eef13551749c3065199b9b734714478a00a508157177a3c4f105a9f0b1",
+      "/Users/cgint/.pi/profiles/partner/agent/git/github.com/cgint/pi-olla-autodetect/index.ts": "4abcf40187c3d40bb8c6f68f4ebb2b226aa9aa73c0213f89a2f2da0576101039",
+      "/Users/cgint/dev-external/pi-ai-consortium/index.ts": "7b0c7a306987e12cbd2e369f56a9dfb4deb91f3f6720eecc84e9ba5d5a024fdb"
+    },
+    "phase0_sha256": "f9a90f1a93f07f64d2da76602323906444d333ced4ccc20296439e3a537aa76f",
+    "contract_sha256": "eace6f08202ae5f04a062a8c8119255d0569c3e9875ae7d08d7156cce6b84e05",
+    "review_sha256": "e89031f0a806ce63d015c778f10525deeaca9276fb763d48e64cb4313b6c7f4b",
+    "ledger_sha256": "684b75753c77fcb211b89278e72afd6e52ea53135d8af5f2ba5e86e60e6d828e",
+    "freeze_commit": "360a05b04f2c0ec7be544a731b7da2a1cf741503",
+    "arm": "on",
+    "fixture_id": "yaml-markdown",
+    "smoke": true,
+    "phase0": "/Users/cgint/dev-external/pi-ai-consortium/docs/c05-evidence/phase0-capability-b/result.json"
+  }
+}
