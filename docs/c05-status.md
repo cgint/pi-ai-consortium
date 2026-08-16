@@ -1,6 +1,6 @@
 # c05 status
 
-**Status:** Freeze `360a05b` committed; post-freeze review attempt 1 infrastructure-invalid; mandatory stop before preflight; no behavioral prompt started
+**Status:** Freeze `360a05b` committed; authorized post-freeze review attempt 2 passed exact session validation; preflight next; no behavioral prompt started
 **As-of:** 2026-08-13
 
 ## Diagram
@@ -42,6 +42,6 @@ Diagnose and minimally fix the supersession guard’s inactive causal path, then
 - Child `CONSORTIUM_MODEL` is always overwritten with `8081-twins/qwen36-27b-nvidia-nvfp4`, including when ambient state points to Google.
 - Extension existence and SHA-256, exact settings location/payload, reviewer command shape, repository path confinement, and zero-prompt RPC methods are checked explicitly.
 
-## Current blocker
+## Current gate
 
-The exact post-freeze review did not produce the required session-backed `HEADLINE: PASS` / `BLOCKER: None`. The frozen protocol authorizes no retry after a mandatory review/infrastructure failure. A new attempt therefore requires explicit human authorization and must preserve attempt 1 unchanged; until then, preflight and all 56 scheduled prompts remain blocked.
+After explicit resume with the exact model available, one fresh review attempt was executed under `8081-twins/qwen36-27b-nvidia-nvfp4:off`. Attempt 2 returned `HEADLINE: PASS` and `BLOCKER: None`; `c05_runner.validate_review()` accepted its exact timestamp, raw-session hash, provider/model/thinking events, and verdict. Evidence is under `docs/c05-evidence/independent-review-attempt-2*` with canonical metadata at `docs/c05-evidence/independent-review.json`. Attempt 1 remains unchanged. No preflight or scheduled prompt has run yet.

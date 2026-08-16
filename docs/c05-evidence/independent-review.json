@@ -1,0 +1,20 @@
+{
+  "schema_version": "c05-independent-review-v1",
+  "pass": true,
+  "blockers": [],
+  "timestamp": "2026-08-16T08:03:06.677Z",
+  "freeze_commit": "360a05b04f2c0ec7be544a731b7da2a1cf741503",
+  "attempt": 2,
+  "identity": {
+    "provider": "8081-twins",
+    "model": "qwen36-27b-nvidia-nvfp4",
+    "thinkingLevel": "off"
+  },
+  "raw_session_path": "docs/c05-evidence/independent-review-attempt-2-session.jsonl",
+  "raw_session_sha256": "f81afcbf934471c814255c0defa187ccee9ed4a5d6c5db243c541f32770780bd",
+  "output_path": "docs/c05-evidence/independent-review-attempt-2.output.md",
+  "output_sha256": "c72d46f2daff44106d15600d4b9df68aa33033f19ee5c195b08ff76b16c60c79",
+  "stderr_path": "docs/c05-evidence/independent-review-attempt-2.stderr.log",
+  "stderr_sha256": "ae4a2c3a8a6541e537bcc8616ec8c1f0a68ad430bf9ba44082d13ac14eee94fe",
+  "prior_attempt": "docs/c05-evidence/independent-review-attempt-1-timeout.md"
+}
