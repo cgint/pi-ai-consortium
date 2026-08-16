@@ -1,6 +1,6 @@
 # c05 status
 
-**Status:** Replacement freeze `56f51c8` verified; review attempt 4 returned BLOCK after guessing wrong artifact paths; mandatory stop before preflight; no behavioral prompt started
+**Status:** Replacement freeze `56f51c8` verified; final authorized review attempt 5 passed substantively but failed the frozen BLOCKER-line regex; mandatory stop before preflight; no behavioral prompt started
 **As-of:** 2026-08-13
 
 ## Diagram
@@ -52,4 +52,6 @@ Freeze `360a05b`, review attempts 1/2, and the failed exact-version preflight re
 
 No fresh preflight is authorized: the canonical review still belongs to freeze `360a05b` and cannot be reused. Attempt 4 used the required model identity but guessed nonexistent root-level artifact paths, never read the actual `docs/c05-supersession-preregistration.md`, `scripts/behavioral-parcour/c05-contract-files.json`, ledger, runner, verifier, or compatibility bundle paths, and returned `HEADLINE: BLOCK` claiming they were absent. It is preserved at `docs/c05-evidence/independent-review-attempt-4*` as review-navigation-invalid; the BLOCK is not reinterpreted as PASS.
 
-All 56 ledger records and raw placeholders remain unconsumed. Any further review retry requires explicit human authorization and a prompt containing the exact artifact paths.
+Attempt 5 enumerated all 95 exact paths and returned `CONTRADICTS: None`, `NOT FOUND: None`, and `HEADLINE: PASS`. All session timing, identity, raw-hash, and headline predicates passed, but the frozen parser rejected Markdown heading `### BLOCKER: None` because it permits only whitespace before `BLOCKER:`. Raw evidence and the rejected canonical candidate are preserved at `docs/c05-evidence/independent-review-attempt-5*`; neither output nor parser was repaired.
+
+The canonical review remains attempt 2 for freeze `360a05b` and cannot authorize replacement freeze `56f51c8`. All 56 ledger records and raw placeholders remain unconsumed. The goal authorized no further review retries; any additional attempt or parser/prompt-policy change requires a new explicit human goal tweak.

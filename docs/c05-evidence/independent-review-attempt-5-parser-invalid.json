@@ -1,0 +1,24 @@
+{
+  "schema_version": "c05-independent-review-v1",
+  "pass": true,
+  "blockers": [],
+  "timestamp": "2026-08-16T09:59:02.614Z",
+  "freeze_commit": "56f51c879ebb60526db1e2f4d7044272279f7d46",
+  "attempt": 5,
+  "identity": {
+    "provider": "8081-twins",
+    "model": "qwen36-27b-nvidia-nvfp4",
+    "thinkingLevel": "off"
+  },
+  "raw_session_path": "docs/c05-evidence/independent-review-attempt-5-session.jsonl",
+  "raw_session_sha256": "df7fe075d52dce594374daf47a3563406b68d31f3a9f9f291e623252a3709967",
+  "output_path": "docs/c05-evidence/independent-review-attempt-5.output.md",
+  "output_sha256": "490b8f9d9c0b05dc500c3d5cc384f5d8f48d657855bfcd9461c95f9e9fbee53d",
+  "stderr_path": "docs/c05-evidence/independent-review-attempt-5.stderr.log",
+  "stderr_sha256": "ae4a2c3a8a6541e537bcc8616ec8c1f0a68ad430bf9ba44082d13ac14eee94fe",
+  "prior_attempts": [
+    "docs/c05-evidence/independent-review-attempt-3-connection-failure.md",
+    "docs/c05-evidence/independent-review-attempt-4-navigation-invalid.md"
+  ],
+  "exact_paths_enumerated": 95
+}
