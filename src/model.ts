@@ -9,7 +9,7 @@
  */
 
 import { streamSimple } from "@earendil-works/pi-ai/compat";
-import type { Context, Usage } from "@earendil-works/pi-ai";
+import type { Context, Usage, ThinkingLevel } from "@earendil-works/pi-ai";
 
 /**
  * Minimal model registry interface matching pi-coding-agent's ModelRegistry.
@@ -65,6 +65,7 @@ export async function callModelWithAuth(
   modelRegistry: ModelRegistry,
   signal?: AbortSignal,
   retries: number = DEFAULT_RETRIES,
+  reasoning?: ThinkingLevel,
 ): Promise<CallModelResult> {
   const model = modelRegistry.find(provider, modelId);
   if (!model) {
@@ -113,6 +114,7 @@ export async function callModelWithAuth(
         apiKey,
         headers: auth.headers,
         signal,
+        ...(reasoning ? { reasoning } : {}),
       } as any);
 
       const result = await eventStream.result();

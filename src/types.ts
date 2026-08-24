@@ -1,5 +1,7 @@
 // Consortium types — pure interfaces, no runtime dependencies.
 
+import type { ThinkingLevel } from "@earendil-works/pi-ai";
+
 /** High-level strategic context vectors extracted from session history. */
 export interface ExtractedContext {
   /** 1. Macro goals, technical criteria, and quality expectations set by user. */
@@ -8,11 +10,11 @@ export interface ExtractedContext {
   deliverables: string[];
   /** 3. Directions, goals, or constraints that were canceled, updated, or superseded. */
   revisedOrSupersededDirection: string[];
-  /** 4. Confirmed user decisions, approved trade-offs, and design preferences. */
+  /** 4. Confirmed user decisions, approved trade-offs, architecture selections. */
   userDecisions: string[];
   /** 5. High-level domain ambiguities or unaddressed user questions requiring clarification. */
   questionsAndInformationGaps: string[];
-  /** 6. Active session rules, allowed path boundaries, and mode flags. */
+  /** 6. Active session rules, allowed path boundaries, read-only mode flags, and session guards. */
   controlBoundaries: string[];
   /** 7. Verified milestone progress achieved so far (high-level, not individual tool calls). */
   observedWork: string[];
@@ -110,6 +112,10 @@ export interface ConsortiumConfig {
   /** Enable the narrow c02 guard for explicit durable-state supersession turns.
    * @default false */
   stateSupersessionGuard?: boolean;
+  /** Reasoning/thinking level passed to streamSimple.
+   * Defaults to "medium" when unset.
+   * @default "medium" */
+  reasoning?: ThinkingLevel;
 }
 
 /** State tracked per turn. */

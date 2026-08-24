@@ -45,6 +45,32 @@ export function parseModelRef(
   return { provider: s.slice(0, sep), modelId: s.slice(sep + 1) };
 }
 
+/**
+ * Parse the CONSORTIUM_REASONING env var into a valid ThinkingLevel.
+ *
+ * Returns undefined for empty/missing input. Returns the validated level
+ * for valid input. Logs a warning and returns "medium" (the default) for
+ * unrecognized values, mirroring the graceful fallback in parseModelRef.
+ *
+ * Valid values: "minimal" | "low" | "medium" | "high" | "xhigh" | "max"
+ */
+const VALID_REASONING_LEVELS = ["minimal", "low", "medium", "high", "xhigh", "max"] as const;
+
+export function parseReasoningLevel(
+  raw: string | undefined,
+): "minimal" | "low" | "medium" | "high" | "xhigh" | "max" | undefined {
+  const s = raw?.trim().toLowerCase();
+  if (!s) return undefined;
+  if ((VALID_REASONING_LEVELS as readonly string[]).includes(s)) {
+    return s as "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
+  }
+  console.warn(
+    `[consortium] CONSORTIUM_REASONING="${raw}" is not a valid level ` +
+    `(${VALID_REASONING_LEVELS.join(", ")}) — falling back to "medium"`,
+  );
+  return "medium";
+}
+
 export const DEFAULT_CONFIG: Omit<ConsortiumConfig, "probes" | "synthesis" | "extraction"> & {
   probes: Array<Omit<ConsortiumConfig["probes"][number], "provider" | "modelId">>;
   synthesis: Omit<ConsortiumConfig["synthesis"], "provider" | "modelId">;
@@ -105,4 +131,5 @@ Severity tags: INFO (truncated tool output noted), WARN (tool call failed or ret
   maxTurnGap: 20,
   periodicInterval: 10,
   stateSupersessionGuard: false,
+  reasoning: parseReasoningLevel(process.env.CONSORTIUM_REASONING) ?? "medium",
 };

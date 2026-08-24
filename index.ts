@@ -469,7 +469,7 @@ export async function runDeliberation(
     });
 
     try {
-      const result = await callModelWithAuth(provider, modelId, system, user, modelRegistry, signal);
+      const result = await callModelWithAuth(provider, modelId, system, user, modelRegistry, signal, undefined, config.reasoning);
       const duration = Date.now() - start;
       const usageReported = result.usage !== null;
 

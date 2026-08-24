@@ -332,4 +332,51 @@ describe("callModelWithAuth", () => {
       .rejects.toThrow("first attempt failed");
     expect(mockStreamSimple).toHaveBeenCalledTimes(1);
   });
+
+  it("forwards reasoning level to streamSimple when provided", async () => {
+    const { callModelWithAuth } = await import("../src/model.js");
+
+    const modelRegistry = {
+      find: vi.fn().mockReturnValue({ provider: "test", id: "model" }),
+      getApiKeyAndHeaders: vi.fn().mockResolvedValue({ ok: true, apiKey: "key" }),
+    };
+    mockStreamSimple.mockReturnValue({
+      result: vi.fn().mockResolvedValue({
+        role: "assistant",
+        stopReason: "stop",
+        content: [{ type: "text", text: "OK" }],
+        usage: { input: 1, output: 1, cacheRead: 0, cacheWrite: 0, totalTokens: 2, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } },
+      }),
+    } as any);
+
+    await callModelWithAuth("test", "model", "", "", modelRegistry as any, undefined, 0, "medium");
+
+    expect(mockStreamSimple).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ reasoning: "medium" }),
+    );
+  });
+
+  it("does not include reasoning in streamSimple options when undefined", async () => {
+    const { callModelWithAuth } = await import("../src/model.js");
+
+    const modelRegistry = {
+      find: vi.fn().mockReturnValue({ provider: "test", id: "model" }),
+      getApiKeyAndHeaders: vi.fn().mockResolvedValue({ ok: true, apiKey: "key" }),
+    };
+    mockStreamSimple.mockReturnValue({
+      result: vi.fn().mockResolvedValue({
+        role: "assistant",
+        stopReason: "stop",
+        content: [{ type: "text", text: "OK" }],
+        usage: { input: 1, output: 1, cacheRead: 0, cacheWrite: 0, totalTokens: 2, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } },
+      }),
+    } as any);
+
+    await callModelWithAuth("test", "model", "", "", modelRegistry as any, undefined, 0);
+
+    const call = mockStreamSimple.mock.calls[0];
+    expect(call[2]).not.toHaveProperty("reasoning");
+  });
 });

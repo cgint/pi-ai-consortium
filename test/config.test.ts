@@ -1,7 +1,7 @@
 // Tests for configuration and probe role lenses in src/config.ts.
 
 import { describe, expect, it } from "vitest";
-import { DEFAULT_CONFIG, PROBE_SYSTEM_PROMPT, CANONICAL_PROBE_ORDER, parseModelRef } from "../src/config.js";
+import { DEFAULT_CONFIG, PROBE_SYSTEM_PROMPT, CANONICAL_PROBE_ORDER, parseModelRef, parseReasoningLevel } from "../src/config.js";
 
 describe("src/config.ts", () => {
   it("defines 5 canonical reality-grounded probes", () => {
@@ -93,4 +93,41 @@ describe("src/config.ts", () => {
       });
     });
   });
+
+  // ── parseReasoningLevel ──
+
+  describe("parseReasoningLevel", () => {
+    it("returns undefined for undefined input", () => {
+      expect(parseReasoningLevel(undefined)).toBeUndefined();
+    });
+
+    it("returns undefined for empty string", () => {
+      expect(parseReasoningLevel("")).toBeUndefined();
+    });
+
+    it("returns undefined for whitespace-only string", () => {
+      expect(parseReasoningLevel("   ")).toBeUndefined();
+    });
+
+    it("parses each valid level", () => {
+      for (const level of ["minimal", "low", "medium", "high", "xhigh", "max"]) {
+        expect(parseReasoningLevel(level)).toBe(level);
+      }
+    });
+
+    it("normalizes case", () => {
+      expect(parseReasoningLevel("MEDIUM")).toBe("medium");
+      expect(parseReasoningLevel("High")).toBe("high");
+    });
+
+    it("trims whitespace", () => {
+      expect(parseReasoningLevel("  low  ")).toBe("low");
+    });
+
+    it("falls back to medium for unrecognized value", () => {
+      expect(parseReasoningLevel("ultra")).toBe("medium");
+      expect(parseReasoningLevel("nonsense")).toBe("medium");
+    });
+  });
+
 });

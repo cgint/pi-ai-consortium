@@ -1,9 +1,10 @@
 # Plan: Surface Undefined Model Behaviours & Add Retry
 
-**Status:** Implemented — all tests green (470/470)
+**Status:** Implemented — loud boundary + retry + CONSORTIUM_REASONING green (479/479)
 **Date:** 2026-08-25
 **Session:** doc-rocker-elixir, model `google/gemini-3.7-flash`
 **Implementation complete:** 2026-08-25
+**Follow-up:** `CONSORTIUM_REASONING` env var (root cause fix for Gemini 3 Flash)
 
 ---
 
@@ -413,3 +414,79 @@ In `test/ui.test.ts` (or existing ui test file):
 - `npx tsc --noEmit` — clean
 - `npx vitest run` — 470/470 pass
 - `./precommit.sh` — typecheck + test + audit all green
+
+
+---
+
+## Root Cause: Gemini 3 Flash + `thinking: { enabled: false }` → `MINIMAL`
+
+### Finding (2026-08-25, verified against `pi-ai@0.84.2` source)
+
+`src/model.ts` calls `streamSimple` **without** a `reasoning` option.
+In `pi-ai`'s Google provider (`dist/api/google-generative-ai.js`):
+
+```js
+if (!options?.reasoning) {
+    return stream(model, context, { ...base, thinking: { enabled: false } });
+}
+```
+
+Then `buildParams` produces:
+
+```js
+else if (model.reasoning && options.thinking && !options.thinking.enabled) {
+    config.thinkingConfig = getDisabledThinkingConfig(model);
+}
+```
+
+For Gemini 3 Flash models, `getDisabledThinkingConfig` returns:
+
+```js
+if (isGemini3FlashModel(model)) {
+    return { thinkingLevel: "MINIMAL" };
+}
+```
+
+So the failing request carried `thinkingConfig: { thinkingLevel: "MINIMAL" }`.
+If `gemini-3.7-flash` rejects that config, the provider returns
+`stopReason: "error"` and no text — which is exactly what the session log
+showed (45 calls, 0 bytes, ~300ms, no usage).
+
+**Confidence:** Strong hypothesis. The decisive proof (the provider's actual
+`errorMessage`) was never logged because the old code swallowed it. The loud
+boundary now in `model.ts` will capture it on the next real run.
+
+### Fix: `CONSORTIUM_REASONING` env var
+
+Pass an explicit `reasoning` level to `streamSimple`, bypassing the
+`thinking: { enabled: false }` → `MINIMAL` path.
+
+| Env value | `ThinkingLevel` | Gemini 3 Flash maps to |
+|---|---|---|
+| *(unset)* | `"medium"` (default) | `HIGH` |
+| `minimal` | `"minimal"` | `MINIMAL` |
+| `low` | `"low"` | `LOW`* |
+| `medium` | `"medium"` | `HIGH` |
+| `high` | `"high"` | `HIGH` |
+| `xhigh` | `"xhigh"` | `HIGH`* |
+| `max` | `"max"` | `HIGH`* |
+
+\* `getThinkingLevel` in `pi-ai` clamps unknown levels for Gemini 3 models.
+
+Default is `"medium"` because:
+- It avoids the broken `MINIMAL` default path entirely.
+- It's provider-agnostic — `"medium"` is a valid `ThinkingLevel` for all
+  providers (OpenAI maps it to `reasoning_effort`, Anthropic to extended
+  thinking, etc.).
+- It mirrors the `CONSORTIUM_MODEL` pattern: one env var, one default.
+
+### Changes
+
+| File | Change |
+|---|---|
+| `src/types.ts` | Add `reasoning?: ThinkingLevel` to `ConsortiumConfig` |
+| `src/config.ts` | Read `CONSORTIUM_REASONING` env var, validate against `ThinkingLevel`, default `"medium"` |
+| `src/model.ts` | Accept `reasoning?: ThinkingLevel` param, pass to `streamSimple` options |
+| `index.ts` | Pass `config.reasoning` to `callModelWithAuth` |
+| `test/config.test.ts` | Test env var parsing (valid, invalid, unset) |
+| `test/model.test.ts` | Test reasoning is forwarded to `streamSimple` |
