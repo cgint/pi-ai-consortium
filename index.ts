@@ -293,6 +293,7 @@ export default function (pi: ExtensionAPI): void {
       const info = [
         `Consortium: ${enabled ? "enabled" : "disabled"}`,
         `Deliberation Model: ${deliberationModel.provider}/${deliberationModel.id} (${deliberationModel.source})`,
+        `Reasoning: ${DEFAULT_CONFIG.reasoning}`,
         `Governor Mode: ${governorMode}`,
         `Max Turn Gap (Safety Net): ${maxTurnGap}`,
         `Periodic Interval: ${periodicInterval}`,
