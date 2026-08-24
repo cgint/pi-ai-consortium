@@ -141,7 +141,7 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     expect(receivedUserPrompt).toContain("Message 15: Turn detail for item 15");
   });
 
-  it("falls back gracefully to default 9-slot context on LLM call failure", async () => {
+  it("propagates errors on LLM call failure (no silent fallback)", async () => {
     const failingCallFn: ModelCallFn = async () => {
       throw new Error("API network failure");
     };
@@ -150,10 +150,20 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
       { role: "user", content: "Build a feature", timestamp: Date.now() },
     ];
 
-    const ctx = await extractContextFromMessages(messages, failingCallFn);
+    await expect(extractContextFromMessages(messages, failingCallFn))
+      .rejects.toThrow("API network failure");
+  });
 
-    expect(ctx.userRequirements[0]).toContain("Build a feature");
-    expect(ctx.deliverables).toEqual([]);
-    expect(ctx.deliberationNeeded).toBe(true);
+  it("propagates errors on invalid JSON from model", async () => {
+    const badJsonCallFn: ModelCallFn = async () => {
+      return "not valid json {{{";
+    };
+
+    const messages: AgentMessage[] = [
+      { role: "user", content: "Build a feature", timestamp: Date.now() },
+    ];
+
+    await expect(extractContextFromMessages(messages, badJsonCallFn))
+      .rejects.toThrow("JSON");
   });
 });

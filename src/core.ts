@@ -3,7 +3,7 @@
 
 import type { ConsortiumConfig, DeliberationResult, ProbeResult, ProgressCallback, ExtractedContext } from "./types.js";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
-import { extractContextFromMessages, getDefaultExtractedContext } from "./extraction.js";
+import { extractContextFromMessages } from "./extraction.js";
 import { buildProbeInputXml, formatAgentMessageContent } from "./context.js";
 import { shouldDeliberate } from "./governor.js";
 
@@ -117,7 +117,16 @@ export class ConsortiumCore {
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         errors.push(`Extraction: ${msg}`);
-        extractedContext = getDefaultExtractedContext(input);
+        // Extraction failed — probes would get no meaningful input.
+        // Skip them; the panel will show the extraction error.
+        onProgress?.("complete", 0, 0);
+        return {
+          probes: [],
+          synthesis: "NO_CONTRIBUTION",
+          extractedContext: undefined,
+          governorReason: this.config.governorMode ?? "smart_extractor",
+          errors,
+        };
       }
       userContext = buildProbeInputXml(input, extractedContext);
     } else {

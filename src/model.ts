@@ -54,6 +54,9 @@ export interface CallModelResult {
   usage: Usage | null;
 }
 
+const RETRY_DELAY_MS = 500;
+const DEFAULT_RETRIES = 1;
+
 export async function callModelWithAuth(
   provider: string,
   modelId: string,
@@ -61,6 +64,7 @@ export async function callModelWithAuth(
   userPrompt: string,
   modelRegistry: ModelRegistry,
   signal?: AbortSignal,
+  retries: number = DEFAULT_RETRIES,
 ): Promise<CallModelResult> {
   const model = modelRegistry.find(provider, modelId);
   if (!model) {
@@ -101,19 +105,47 @@ export async function callModelWithAuth(
     tools: [],
   };
 
-  const eventStream = streamSimple(model as any, context, {
-    apiKey,
-    headers: auth.headers,
-    signal,
-  } as any);
+  let lastError: Error | undefined;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      // Re-invoke streamSimple per attempt — a settled stream cannot be re-read.
+      const eventStream = streamSimple(model as any, context, {
+        apiKey,
+        headers: auth.headers,
+        signal,
+      } as any);
 
-  const result = await eventStream.result();
+      const result = await eventStream.result();
 
-  // Extract text from the AssistantMessage response
-  const text = textFromMessage(result);
+      // Loud boundary 1: provider said the call errored or was aborted.
+      // pi-ai's result() RESOLVES (does not reject) on error events, so
+      // without this check the empty text silently becomes NO_CONTRIBUTION.
+      if (result.stopReason === "error" || result.stopReason === "aborted") {
+        throw new Error(
+          result.errorMessage ?? `Model call stopped: ${result.stopReason}`,
+        );
+      }
 
-  // Retain usage if totalTokens > 0; all-zero means unreported → null
-  const usage = result.usage && result.usage.totalTokens > 0 ? result.usage : null;
+      // Extract text from the AssistantMessage response
+      const text = textFromMessage(result);
 
-  return { text, usage };
+      // Loud boundary 2: no text content at all — provider anomaly
+      // (e.g. thinking-only response, safety-filtered with no content).
+      if (text.length === 0) {
+        throw new Error(
+          `Empty response from ${provider}/${modelId} ` +
+          `(stopReason=${result.stopReason}, totalTokens=${result.usage?.totalTokens ?? 0})`,
+        );
+      }
+
+      // Retain usage if totalTokens > 0; all-zero means unreported → null
+      const usage = result.usage && result.usage.totalTokens > 0 ? result.usage : null;
+      return { text, usage };
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      if (attempt >= retries || signal?.aborted) throw lastError;
+      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+    }
+  }
+  throw lastError;
 }

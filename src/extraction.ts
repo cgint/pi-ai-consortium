@@ -25,7 +25,7 @@ export const EXTRACTION_SYSTEM_PROMPT = [
   '  "userDecisions": ["Explicit user choices, approved trade-offs, architecture selections, or preferences"],',
   '  "questionsAndInformationGaps": ["High-level domain ambiguities or unaddressed user questions requiring clarification"],',
   '  "controlBoundaries": ["Active session rules, allowed path boundaries, read-only mode flags, and session guards"],',
-  '  "observedWork": ["High-level milestone progress achieved so far (do NOT list individual tool calls)"],',
+  '  "observedWork": ["High-level milestone progress achieved so far (do not list individual tool calls)"],',
   '  "observedCriticalFacts": ["Verified domain truths, system behaviors, and test outcomes observed in logs"],',
   '  "relevantLearnings": ["Systemic insights, structural architecture patterns, or project rules learned"],',
   '  "deliberationNeeded": true or false,',
@@ -38,7 +38,10 @@ export const EXTRACTION_SYSTEM_PROMPT = [
   "Output raw JSON ONLY. No conversational prefix or markdown wrapper.",
 ].join("\n");
 
-/** Safe default fallback context when extraction is skipped or fails. */
+/**
+ * Default context for the legitimate empty-history case (messages.length === 0).
+ * NOT used as an error fallback — extraction errors propagate to core.ts.
+ */
 export function getDefaultExtractedContext(messages?: AgentMessage[]): ExtractedContext {
   let initialGoal = "General task execution";
   if (messages && messages.length > 0) {
@@ -74,7 +77,12 @@ function ensureStringArray(val: unknown, defaultVal: string[] = []): string[] {
   return defaultVal;
 }
 
-/** Extract 9 strategic context vectors from recent messages using a fast LLM pass. */
+/**
+ * Extract 9 strategic context vectors from recent messages using a fast LLM pass.
+ *
+ * Errors propagate to the caller (core.ts) which logs them and skips probes.
+ * No silent fallback: a failed extraction must not masquerade as "nothing to extract".
+ */
 export async function extractContextFromMessages(
   messages: AgentMessage[],
   callModel: ModelCallFn,
@@ -91,34 +99,30 @@ export async function extractContextFromMessages(
     userPrompt = `${userPrompt}\n\n<previous_extracted_context_baseline>\n${JSON.stringify(previousContext, null, 2)}\n</previous_extracted_context_baseline>`;
   }
 
-  try {
-    const raw = await callModel(
-      "extraction",
-      EXTRACTION_SYSTEM_PROMPT,
-      userPrompt,
-      1024,
-      0.2,
-      signal,
-    );
+  const raw = await callModel(
+    "extraction",
+    EXTRACTION_SYSTEM_PROMPT,
+    userPrompt,
+    1024,
+    0.2,
+    signal,
+  );
 
-    const jsonText = raw.replace(/^```(?:json)?\n?/i, "").replace(/\n?```$/i, "").trim();
-    const parsed = JSON.parse(jsonText);
-    const defaults = getDefaultExtractedContext(messages);
+  const jsonText = raw.replace(/^```(?:json)?\n?/i, "").replace(/\n?```$/i, "").trim();
+  const parsed = JSON.parse(jsonText);
+  const defaults = getDefaultExtractedContext(messages);
 
-    return {
-      userRequirements: ensureStringArray(parsed.userRequirements, defaults.userRequirements),
-      deliverables: ensureStringArray(parsed.deliverables, defaults.deliverables),
-      revisedOrSupersededDirection: ensureStringArray(parsed.revisedOrSupersededDirection, defaults.revisedOrSupersededDirection),
-      userDecisions: ensureStringArray(parsed.userDecisions, defaults.userDecisions),
-      questionsAndInformationGaps: ensureStringArray(parsed.questionsAndInformationGaps, defaults.questionsAndInformationGaps),
-      controlBoundaries: ensureStringArray(parsed.controlBoundaries, defaults.controlBoundaries),
-      observedWork: ensureStringArray(parsed.observedWork, defaults.observedWork),
-      observedCriticalFacts: ensureStringArray(parsed.observedCriticalFacts, defaults.observedCriticalFacts),
-      relevantLearnings: ensureStringArray(parsed.relevantLearnings, defaults.relevantLearnings),
-      deliberationNeeded: typeof parsed.deliberationNeeded === "boolean" ? parsed.deliberationNeeded : true,
-      deliberationReason: parsed.deliberationReason ? String(parsed.deliberationReason) : undefined,
-    };
-  } catch {
-    return getDefaultExtractedContext(messages);
-  }
+  return {
+    userRequirements: ensureStringArray(parsed.userRequirements, defaults.userRequirements),
+    deliverables: ensureStringArray(parsed.deliverables, defaults.deliverables),
+    revisedOrSupersededDirection: ensureStringArray(parsed.revisedOrSupersededDirection, defaults.revisedOrSupersededDirection),
+    userDecisions: ensureStringArray(parsed.userDecisions, defaults.userDecisions),
+    questionsAndInformationGaps: ensureStringArray(parsed.questionsAndInformationGaps, defaults.questionsAndInformationGaps),
+    controlBoundaries: ensureStringArray(parsed.controlBoundaries, defaults.controlBoundaries),
+    observedWork: ensureStringArray(parsed.observedWork, defaults.observedWork),
+    observedCriticalFacts: ensureStringArray(parsed.observedCriticalFacts, defaults.observedCriticalFacts),
+    relevantLearnings: ensureStringArray(parsed.relevantLearnings, defaults.relevantLearnings),
+    deliberationNeeded: typeof parsed.deliberationNeeded === "boolean" ? parsed.deliberationNeeded : true,
+    deliberationReason: parsed.deliberationReason ? String(parsed.deliberationReason) : undefined,
+  };
 }

@@ -124,14 +124,26 @@ export function formatProgressText(phase: string, current: number, total: number
 export function formatVisibleMessage(result: DeliberationResult): string {
   const lines: string[] = [];
 
+  const extractionError = result.errors?.find((e) => e.startsWith("Extraction:"));
+  const probeFailed = result.probes.filter((p) => p.text.startsWith("[error:")).length;
+  const contributed = result.probes.filter(
+    (p) => !p.text.trim().startsWith("NO_CONTRIBUTION") && !p.text.startsWith("[error:"),
+  ).length;
+
   // Header
   if (result.skippedByGovernor) {
     lines.push(`◇ Consortium deliberation — skipped (${result.governorReason || "governor gate"})`);
+  } else if (extractionError && result.probes.length === 0) {
+    lines.push(`⚠ Consortium deliberation — extraction failed, probes skipped`);
+    lines.push(`  ${extractionError.replace("Extraction: ", "").slice(0, 120)}`);
+  } else if (probeFailed > 0 && contributed === 0) {
+    lines.push(`⚠ Consortium deliberation — ${probeFailed}/${result.probes.length} probes FAILED`);
   } else if (result.synthesis.trim().startsWith("NO_CONTRIBUTION")) {
-    lines.push(`◇ Consortium deliberation — 0/${result.probes.length} probes contributed (nothing to add)`);
+    const suffix = probeFailed > 0 ? ` (${probeFailed} failed)` : "";
+    lines.push(`◇ Consortium deliberation — 0/${result.probes.length} probes contributed (nothing to add${suffix})`);
   } else {
-    const contributions = result.probes.filter((p) => !p.text.trim().startsWith("NO_CONTRIBUTION")).length;
-    lines.push(`◇ Consortium deliberation — ${contributions}/${result.probes.length} probes contributed`);
+    const suffix = probeFailed > 0 ? ` (${probeFailed} failed)` : "";
+    lines.push(`◇ Consortium deliberation — ${contributed}/${result.probes.length} probes contributed${suffix}`);
   }
 
   // Extracted 9 Strategic Context Vectors (Compact & High-Signal for TUI)
@@ -156,7 +168,10 @@ export function formatVisibleMessage(result: DeliberationResult): string {
     for (const role of CANONICAL_PROBE_ORDER) {
       const probe = probeMap.get(role);
       if (!probe) continue;
-      if (probe.text.trim().startsWith("NO_CONTRIBUTION")) {
+      if (probe.text.startsWith("[error:")) {
+        const msg = probe.text.slice(8, 88).replace(/\]$/, "");
+        lines.push(`   ${role}: ERROR — ${msg}`);
+      } else if (probe.text.trim().startsWith("NO_CONTRIBUTION")) {
         lines.push(`   ${role}: NO_CONTRIBUTION`);
       } else {
         const text = probe.text.trim();

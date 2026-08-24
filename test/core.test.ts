@@ -569,4 +569,27 @@ describe("ConsortiumCore", () => {
     expect(secondExtractionUser).toContain("Persistent requirement");
     expect(res2.extractedContext?.userRequirements).toContain("Turn 2 requirement");
   });
+
+  it("extraction failure skips probes and returns errors", async () => {
+    let probeExecuted = false;
+
+    const callFn: ModelCallFn = async (modelKey) => {
+      if (modelKey === "extraction") {
+        throw new Error("Empty response from google/gemini-3.7-flash");
+      }
+      probeExecuted = true;
+      return "WARN Probe output";
+    };
+
+    const core = new ConsortiumCore(baseConfig, callFn);
+    const messages = [{ role: "user" as const, content: "Hello", timestamp: Date.now() }];
+    const result = await core.deliberate(messages);
+
+    expect(result.probes).toEqual([]);
+    expect(result.synthesis).toBe("NO_CONTRIBUTION");
+    expect(result.extractedContext).toBeUndefined();
+    expect(result.errors).toContain("Extraction: Empty response from google/gemini-3.7-flash");
+    expect(probeExecuted).toBe(false);
+  });
+
 });
