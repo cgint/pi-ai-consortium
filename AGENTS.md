@@ -70,3 +70,7 @@ When auditing any session or evaluating Consortium behavior on any turn, we **AL
 4. **Full-History Parity Invariant (`pi-ai-consortium`):**
    - Pass 1 extraction (`src/extraction.ts`) and Pass 2 probes (`src/context.ts`) must process the exact same full history (`messages`) without arbitrary truncation (`.slice(-10)`).
 
+5. **Unambiguous-Prefix Argument Convention:**
+   - Commands that take mode/option arguments use unambiguous-prefix matching (`resolveCadenceMode` pattern in `index.ts`) instead of strict exact match, so `p 5` == `periodic 5`.
+   - Guardrail: `test/cadence-mode.test.ts` "cadence mode naming invariant" fails if any two modes share a first character or one name is a prefix of another. If a future mode collides, update the resolver, handler, and usage string together.
+
