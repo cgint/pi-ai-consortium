@@ -15,7 +15,7 @@ vi.mock("../src/core.js", async (importOriginal) => {
 });
 vi.mock("../src/config.js", () => ({
   DEFAULT_CONFIG: { probes: [], synthesis: {}, reasoning: "medium" as const },
-  reasoningSource: "default" as const,
+  reasoningSource: "CONSORTIUM_REASONING" as const,
   parseModelRef: () => undefined,
 }));
 vi.mock("../src/context.js", async (importOriginal) => {
@@ -154,9 +154,9 @@ describe("consortium enabled/disabled toggle", () => {
       "info",
     );
 
-    // Reasoning level shown in status, with source hint (default when env unset)
+    // Reasoning level shown in status with source hint
     const calls = (ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls;
     const statusInfo = calls[0]?.[0] as string;
-    expect(statusInfo).toMatch(/Reasoning: (minimal|low|medium|high|xhigh|max) \((CONSORTIUM_REASONING|default)\)/);
+    expect(statusInfo).toContain("Reasoning: medium (CONSORTIUM_REASONING)");
   });
 });
