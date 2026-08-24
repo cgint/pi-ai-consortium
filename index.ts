@@ -17,7 +17,7 @@ import type {
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import { ConsortiumCore, getCurrentHumanUserTurn, type ModelCallFn } from "./src/core.js";
 import { callModelWithAuth } from "./src/model.js";
-import { DEFAULT_CONFIG, parseModelRef } from "./src/config.js";
+import { DEFAULT_CONFIG, parseModelRef, reasoningSource } from "./src/config.js";
 import { buildUserContext, buildUserContextFromMessages } from "./src/context.js";
 import { ConsortiumLogger, createProgressCallback, formatVisibleMessage } from "./src/ui.js";
 import type { ConsortiumConfig, TurnState, DeliberationResult, DeliberationModelInfo, GovernorMode, TelemetryEvent } from "./src/types.js";
@@ -293,7 +293,7 @@ export default function (pi: ExtensionAPI): void {
       const info = [
         `Consortium: ${enabled ? "enabled" : "disabled"}`,
         `Deliberation Model: ${deliberationModel.provider}/${deliberationModel.id} (${deliberationModel.source})`,
-        `Reasoning: ${DEFAULT_CONFIG.reasoning} (${process.env.CONSORTIUM_REASONING ? "CONSORTIUM_REASONING" : "default"})`,
+        `Reasoning: ${DEFAULT_CONFIG.reasoning} (${reasoningSource})`,
         `Governor Mode: ${governorMode}`,
         `Max Turn Gap (Safety Net): ${maxTurnGap}`,
         `Periodic Interval: ${periodicInterval}`,

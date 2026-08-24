@@ -71,6 +71,11 @@ export function parseReasoningLevel(
   return "medium";
 }
 
+/** Whether the reasoning level came from an explicit CONSORTIUM_REASONING env var
+ * or from the built-in default. Evaluated once at module load. */
+export const reasoningSource: "CONSORTIUM_REASONING" | "default" =
+  process.env.CONSORTIUM_REASONING?.trim() ? "CONSORTIUM_REASONING" : "default";
+
 export const DEFAULT_CONFIG: Omit<ConsortiumConfig, "probes" | "synthesis" | "extraction"> & {
   probes: Array<Omit<ConsortiumConfig["probes"][number], "provider" | "modelId">>;
   synthesis: Omit<ConsortiumConfig["synthesis"], "provider" | "modelId">;

@@ -15,6 +15,7 @@ vi.mock("../src/core.js", async (importOriginal) => {
 });
 vi.mock("../src/config.js", () => ({
   DEFAULT_CONFIG: { probes: [], synthesis: {}, reasoning: "medium" as const },
+  reasoningSource: "default" as const,
   parseModelRef: () => undefined,
 }));
 vi.mock("../src/context.js", async (importOriginal) => {
