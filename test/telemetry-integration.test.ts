@@ -375,19 +375,12 @@ describe("production-path integration (real runDeliberation)", () => {
       sessionManager: { getSessionId: () => "test-session" },
     };
 
-    // Isolate from ambient CONSORTIUM_MODEL so the fallback to ctx.model is deterministic
-    const prevEnv = process.env.CONSORTIUM_MODEL;
-    delete process.env.CONSORTIUM_MODEL;
-
+    // CONSORTIUM_MODEL is already deleted by test/setup-env.ts (setupFiles),
+    // so the fallback to ctx.model is deterministic here.
     const logger = new ConsortiumLogger(tmpDir, "test-session");
     const messages: AgentMessage[] = [{ role: "user", content: "Test", timestamp: Date.now() }];
 
-    let result;
-    try {
-      result = await runDeliberation(DEFAULT_CONFIG, messages, ctx, logger, () => {}, 0, false);
-    } finally {
-      if (prevEnv !== undefined) process.env.CONSORTIUM_MODEL = prevEnv;
-    }
+    const result = await runDeliberation(DEFAULT_CONFIG, messages, ctx, logger, () => {}, 0, false);
     logger.close();
 
     // Model must be stamped with provider/id, source=ctx.model, and reasoning (default "medium")
