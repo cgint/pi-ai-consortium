@@ -452,9 +452,17 @@ If `gemini-3.7-flash` rejects that config, the provider returns
 `stopReason: "error"` and no text — which is exactly what the session log
 showed (45 calls, 0 bytes, ~300ms, no usage).
 
-**Confidence:** Strong hypothesis. The decisive proof (the provider's actual
-`errorMessage`) was never logged because the old code swallowed it. The loud
-boundary now in `model.ts` will capture it on the next real run.
+**CONFIRMED (2026-07-25, live test against the provider).**
+`.tmp/confirm-e2e.mjs` reproduced the exact pi-ai `streamSimple` call path
+with `GEMINI_API_KEY`:
+
+| Request shape (what pi-ai sends) | `gemini-3.7-flash` response |
+|---|---|
+| no `reasoning` → `thinking: {enabled: false}` → `thinkingLevel: "MINIMAL"` | **`stopReason: "error"`**, empty text — provider error: `"Thinking level MINIMAL is not supported for this model. Please retry with other thinking level."` (HTTP 400) |
+| `reasoning: "medium"` → `thinkingLevel: "MEDIUM"` | `stopReason: "stop"`, normal text |
+
+Raw-REST cross-check (`confirm-minimal.mjs`) showed the same split: no
+`thinkingConfig` → OK, explicit `MINIMAL` → HTTP 400, `MEDIUM` → OK.
 
 ### Fix: `CONSORTIUM_REASONING` env var
 
@@ -463,18 +471,20 @@ Pass an explicit `reasoning` level to `streamSimple`, bypassing the
 
 | Env value | `ThinkingLevel` | Gemini 3 Flash maps to |
 |---|---|---|
-| *(unset)* | `"medium"` (default) | `HIGH` |
-| `minimal` | `"minimal"` | `MINIMAL` |
-| `low` | `"low"` | `LOW`* |
-| `medium` | `"medium"` | `HIGH` |
+| *(unset)* | `"medium"` (default) | `MEDIUM` |
+| `minimal` | `"minimal"` | `MINIMAL` (rejected by provider) |
+| `low` | `"low"` | `LOW` |
+| `medium` | `"medium"` | `MEDIUM` |
 | `high` | `"high"` | `HIGH` |
 | `xhigh` | `"xhigh"` | `HIGH`* |
 | `max` | `"max"` | `HIGH`* |
 
-\* `getThinkingLevel` in `pi-ai` clamps unknown levels for Gemini 3 models.
+\* `getThinkingLevel` in `pi-ai` clamps unknown levels for Gemini 3 models
+(`xhigh`/`max` are not in the flash level set, so they fall back to the
+nearest supported level — `HIGH`).
 
 Default is `"medium"` because:
-- It avoids the broken `MINIMAL` default path entirely.
+- It avoids the broken `MINIMAL` default path entirely (confirmed: `gemini-3.7-flash` rejects `MINIMAL` with HTTP 400).
 - It's provider-agnostic — `"medium"` is a valid `ThinkingLevel` for all
   providers (OpenAI maps it to `reasoning_effort`, Anthropic to extended
   thinking, etc.).
@@ -482,11 +492,13 @@ Default is `"medium"` because:
 
 ### Changes
 
+Implemented in `54d8ce7` (479/479 tests green, precommit clean):
+
 | File | Change |
 |---|---|
-| `src/types.ts` | Add `reasoning?: ThinkingLevel` to `ConsortiumConfig` |
-| `src/config.ts` | Read `CONSORTIUM_REASONING` env var, validate against `ThinkingLevel`, default `"medium"` |
-| `src/model.ts` | Accept `reasoning?: ThinkingLevel` param, pass to `streamSimple` options |
-| `index.ts` | Pass `config.reasoning` to `callModelWithAuth` |
-| `test/config.test.ts` | Test env var parsing (valid, invalid, unset) |
-| `test/model.test.ts` | Test reasoning is forwarded to `streamSimple` |
+| `src/types.ts` | Added `reasoning?: ThinkingLevel` to `ConsortiumConfig` |
+| `src/config.ts` | `parseReasoningLevel()` reads/validates `CONSORTIUM_REASONING`, defaults `"medium"` (invalid value → warning + `"medium"`) |
+| `src/model.ts` | `callModelWithAuth` accepts `reasoning?` and forwards to `streamSimple` options |
+| `index.ts` | `callModel` closure passes `config.reasoning` |
+| `test/config.test.ts` | 7 tests for `parseReasoningLevel` (valid levels, case/whitespace normalization, unset, invalid fallback) |
+| `test/model.test.ts` | 2 tests: reasoning forwarded to `streamSimple` when set, absent when unset |
