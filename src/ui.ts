@@ -130,20 +130,25 @@ export function formatVisibleMessage(result: DeliberationResult): string {
     (p) => !p.text.trim().startsWith("NO_CONTRIBUTION") && !p.text.startsWith("[error:"),
   ).length;
 
+  // Model label: "by provider/modelId:reasoning" — omitted when model is not set
+  const modelLabel = result.model
+    ? ` (by ${result.model.provider}/${result.model.modelId}${result.model.reasoning ? `:${result.model.reasoning}` : ""})`
+    : "";
+
   // Header
   if (result.skippedByGovernor) {
-    lines.push(`◇ Consortium deliberation — skipped (${result.governorReason || "governor gate"})`);
+    lines.push(`◇ Consortium deliberation${modelLabel} — skipped (${result.governorReason || "governor gate"})`);
   } else if (extractionError && result.probes.length === 0) {
-    lines.push(`⚠ Consortium deliberation — extraction failed, probes skipped`);
+    lines.push(`⚠ Consortium deliberation${modelLabel} — extraction failed, probes skipped`);
     lines.push(`  ${extractionError.replace("Extraction: ", "").slice(0, 120)}`);
   } else if (probeFailed > 0 && contributed === 0) {
-    lines.push(`⚠ Consortium deliberation — ${probeFailed}/${result.probes.length} probes FAILED`);
+    lines.push(`⚠ Consortium deliberation${modelLabel} — ${probeFailed}/${result.probes.length} probes FAILED`);
   } else if (result.synthesis.trim().startsWith("NO_CONTRIBUTION")) {
     const suffix = probeFailed > 0 ? ` (${probeFailed} failed)` : "";
-    lines.push(`◇ Consortium deliberation — 0/${result.probes.length} probes contributed (nothing to add${suffix})`);
+    lines.push(`◇ Consortium deliberation${modelLabel} — 0/${result.probes.length} probes contributed (nothing to add${suffix})`);
   } else {
     const suffix = probeFailed > 0 ? ` (${probeFailed} failed)` : "";
-    lines.push(`◇ Consortium deliberation — ${contributed}/${result.probes.length} probes contributed${suffix}`);
+    lines.push(`◇ Consortium deliberation${modelLabel} — ${contributed}/${result.probes.length} probes contributed${suffix}`);
   }
 
   // Extracted 9 Strategic Context Vectors (Compact & High-Signal for TUI)

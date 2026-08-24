@@ -122,4 +122,40 @@ describe("formatVisibleMessage", () => {
     const output = formatVisibleMessage(result);
     expect(output).toContain("skipped (Max turn gap (3) not reached (1/3))");
   });
+
+  it("includes resolved model and reasoning in the header when model is set", () => {
+    const result = makeResult({
+      probes: [
+        { role: "architect", text: "NO_CONTRIBUTION" },
+        { role: "clarifier", text: "WARN something to flag" },
+      ],
+      synthesis: "Synthesized result",
+      model: { provider: "google", modelId: "gemini-3.7-flash", reasoning: "medium", source: "CONSORTIUM_MODEL" },
+    });
+    const output = formatVisibleMessage(result);
+    expect(output).toContain("◇ Consortium deliberation (by google/gemini-3.7-flash:medium) — 1/2 probes contributed");
+  });
+
+  it("omits model label when model is not set (backward compat)", () => {
+    const result = makeResult({
+      probes: [
+        { role: "architect", text: "NO_CONTRIBUTION" },
+        { role: "clarifier", text: "WARN something to flag" },
+      ],
+      synthesis: "Synthesized result",
+    });
+    const output = formatVisibleMessage(result);
+    expect(output).toContain("◇ Consortium deliberation — 1/2 probes contributed");
+    expect(output).not.toContain(" (by ");
+  });
+
+  it("shows model label on governor-skip header too", () => {
+    const result = makeResult({
+      skippedByGovernor: true,
+      governorReason: "Routine status report",
+      model: { provider: "google", modelId: "gemini-3.7-flash", reasoning: "high", source: "ctx.model" },
+    });
+    const output = formatVisibleMessage(result);
+    expect(output).toContain("◇ Consortium deliberation (by google/gemini-3.7-flash:high) — skipped (Routine status report)");
+  });
 });

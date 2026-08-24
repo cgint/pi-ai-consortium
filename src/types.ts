@@ -162,6 +162,18 @@ export type TelemetryEvent =
 /** Optional telemetry callback. Exceptions must never affect deliberation. */
 export type TelemetryCallback = (event: TelemetryEvent) => void;
 
+/** Resolved deliberation model metadata. */
+export interface DeliberationModelInfo {
+  /** Model provider. */
+  provider: string;
+  /** Model ID. */
+  modelId: string;
+  /** Reasoning level (e.g. "medium"). */
+  reasoning?: string;
+  /** Where the model was resolved from (e.g. "CONSORTIUM_MODEL", "ctx.model"). */
+  source: string;
+}
+
 /** Full deliberation result. */
 export interface DeliberationResult {
   /** Individual probe outputs. */
@@ -176,4 +188,6 @@ export interface DeliberationResult {
   skippedByGovernor?: boolean;
   /** Explanation of why governor skipped or triggered deliberation. */
   governorReason?: string;
+  /** Resolved deliberation model metadata (set by runDeliberation, read by UI). */
+  model?: DeliberationModelInfo;
 }

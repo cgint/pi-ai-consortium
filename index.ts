@@ -20,7 +20,7 @@ import { callModelWithAuth } from "./src/model.js";
 import { DEFAULT_CONFIG, parseModelRef } from "./src/config.js";
 import { buildUserContext, buildUserContextFromMessages } from "./src/context.js";
 import { ConsortiumLogger, createProgressCallback, formatVisibleMessage } from "./src/ui.js";
-import type { ConsortiumConfig, TurnState, DeliberationResult, GovernorMode, TelemetryEvent } from "./src/types.js";
+import type { ConsortiumConfig, TurnState, DeliberationResult, DeliberationModelInfo, GovernorMode, TelemetryEvent } from "./src/types.js";
 import { createUsageAccumulator, buildDeliberationTelemetry, safeLog } from "./src/telemetry.js";
 import { join, dirname } from "node:path";
 import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
@@ -511,7 +511,14 @@ export async function runDeliberation(
   const finalEvent = buildDeliberationTelemetry(baselineAvailable, baselineSupplied, acc);
   safeLog(telemetryLog, finalEvent);
 
-  return result;
+  const modelInfo: DeliberationModelInfo = {
+    provider: deliberationModel.provider,
+    modelId: deliberationModel.id,
+    reasoning: config.reasoning,
+    source: deliberationModel.source,
+  };
+
+  return { ...result, model: modelInfo };
 }
 
 export const CADENCE_MODES: GovernorMode[] = ["smart_extractor", "always", "periodic", "manual"];

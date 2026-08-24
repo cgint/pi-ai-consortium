@@ -350,6 +350,55 @@ describe("production-path integration (real runDeliberation)", () => {
     expect(delibEvents[0].usage_status).toBe("not_applicable");
   });
 
+  // ── Model propagation: runDeliberation stamps the resolved model on the result ──
+
+  it("stamps resolved model (ctx.model fallback) on the DeliberationResult", async () => {
+    const { callModelWithAuth } = await import("../src/model.js");
+    vi.spyOn(await import("../src/model.js"), "callModelWithAuth").mockImplementation(async (_provider, _modelId, _system, _user, _registry, _signal) => {
+      return { text: extractionJson(), usage: makeUsage(10, 20) };
+    });
+
+    const { runDeliberation } = await import("../index.js");
+    const { DEFAULT_CONFIG } = await import("../src/config.js");
+    const { ConsortiumLogger } = await import("../src/ui.js");
+
+    const ctx: any = {
+      model: { provider: "openai", id: "gpt-4o-mini" },
+      modelRegistry: {
+        find: vi.fn().mockReturnValue({ provider: "openai", id: "gpt-4o-mini" }),
+        getApiKeyAndHeaders: vi.fn().mockResolvedValue({ ok: true, apiKey: "test-key" }),
+      },
+      signal: undefined,
+      hasUI: false,
+      ui: {},
+      cwd: tmpDir,
+      sessionManager: { getSessionId: () => "test-session" },
+    };
+
+    // Isolate from ambient CONSORTIUM_MODEL so the fallback to ctx.model is deterministic
+    const prevEnv = process.env.CONSORTIUM_MODEL;
+    delete process.env.CONSORTIUM_MODEL;
+
+    const logger = new ConsortiumLogger(tmpDir, "test-session");
+    const messages: AgentMessage[] = [{ role: "user", content: "Test", timestamp: Date.now() }];
+
+    let result;
+    try {
+      result = await runDeliberation(DEFAULT_CONFIG, messages, ctx, logger, () => {}, 0, false);
+    } finally {
+      if (prevEnv !== undefined) process.env.CONSORTIUM_MODEL = prevEnv;
+    }
+    logger.close();
+
+    // Model must be stamped with provider/id, source=ctx.model, and reasoning (default "medium")
+    expect(result.model).toEqual({
+      provider: "openai",
+      modelId: "gpt-4o-mini",
+      reasoning: "medium",
+      source: "ctx.model",
+    });
+  });
+
   // ── R6: Structural failure guarantee ──
 
   it("structurally fails if runDeliberation omits baseline callback or final telemetry", async () => {
