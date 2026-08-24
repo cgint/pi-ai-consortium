@@ -330,12 +330,18 @@ export default function (pi: ExtensionAPI): void {
     description: "Set governor cadence mode: smart_extractor | always | periodic [N] | manual",
     handler: async (args, ctx) => {
       const parts = args.trim().split(/\s+/);
-      const mode = parts[0]?.toLowerCase() as GovernorMode | undefined;
+      const resolved = resolveCadenceMode(parts[0]?.toLowerCase() ?? "");
 
-      if (!mode || !["smart_extractor", "always", "periodic", "manual"].includes(mode)) {
-        ctx.ui.notify("Usage: /ai-consortium-cadence <smart_extractor | always | periodic [N] | manual>", "warning");
+      if (!resolved.ok) {
+        ctx.ui.notify(
+          resolved.candidates.length > 1
+            ? `Ambiguous prefix "${parts[0]}". Did you mean: ${resolved.candidates.join(" | ")}?`
+            : "Usage: /ai-consortium-cadence <smart_extractor | always | periodic [N] | manual> (unambiguous prefix ok, e.g. p 5)",
+          "warning",
+        );
         return;
       }
+      const mode = resolved.mode;
 
       governorMode = mode;
       let newInterval = periodicInterval;
@@ -506,6 +512,19 @@ export async function runDeliberation(
   safeLog(telemetryLog, finalEvent);
 
   return result;
+}
+
+export const CADENCE_MODES: GovernorMode[] = ["smart_extractor", "always", "periodic", "manual"];
+
+/** Resolve a (possibly abbreviated) cadence mode from unambiguous prefix matching. */
+export function resolveCadenceMode(
+  input: string,
+  modes: GovernorMode[] = CADENCE_MODES,
+): { ok: true; mode: GovernorMode } | { ok: false; candidates: GovernorMode[] } {
+  const candidates = modes.filter((m) => m.startsWith(input));
+  if (candidates.length === 0) return { ok: false, candidates: [] };
+  if (candidates.length > 1) return { ok: false, candidates };
+  return { ok: true, mode: candidates[0] };
 }
 
 /** Resolve provider + modelId from a modelKey string. */
