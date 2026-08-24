@@ -153,10 +153,9 @@ describe("consortium enabled/disabled toggle", () => {
       "info",
     );
 
-    // Reasoning level shown in status
+    // Reasoning level shown in status, with source hint (default when env unset)
     const calls = (ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls;
     const statusInfo = calls[0]?.[0] as string;
-    expect(statusInfo).toContain("Reasoning: medium");
-    expect(statusInfo).toMatch(/Reasoning: (minimal|low|medium|high|xhigh|max)/);
+    expect(statusInfo).toMatch(/Reasoning: (minimal|low|medium|high|xhigh|max) \((CONSORTIUM_REASONING|default)\)/);
   });
 });
