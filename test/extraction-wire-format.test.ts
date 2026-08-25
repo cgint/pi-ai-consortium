@@ -23,7 +23,8 @@
  */
 import { describe, expect, it } from "vitest";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
-import type { ModelCallFn } from "../src/core.js";
+import { ConsortiumCore, type ModelCallFn } from "../src/core.js";
+import type { ConsortiumConfig } from "../src/types.js";
 import { extractContextFromMessages } from "../src/extraction.js";
 import { extractionLabeled } from "./extraction-mock.js";
 
@@ -145,5 +146,77 @@ describe("Ax extraction label contract (wire key vs display name)", () => {
     // Invariant: a wire-key-only response must never silently produce an
     // empty extraction on a single call.
     expect(callCount).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe("Ax extraction transport parity (adapter → ModelCallFn)", () => {
+  const PIPELINE_CONFIG: ConsortiumConfig = {
+    probes: [
+      { role: "clarifier", provider: "openai", modelId: "gpt-4o-mini", systemPrompt: "Clarify", roleLens: "## Lens: clarify" },
+      { role: "contrarian", provider: "openai", modelId: "gpt-4o-mini", systemPrompt: "Challenge", roleLens: "## Lens: challenge" },
+    ],
+    synthesis: { provider: "openai", modelId: "gpt-4o-mini", systemPrompt: "Synthesize" },
+    maxProbeTokens: 256,
+    maxSynthesisTokens: 256,
+    probeTemperature: 0.7,
+    synthesisTemperature: 0.3,
+    probeTimeoutMs: 5000,
+    totalTimeoutMs: 10000,
+    executionMode: "serial",
+    governorMode: "smart_extractor",
+  };
+
+  it("passes the caller's AbortSignal through to the transport", async () => {
+    const controller = new AbortController();
+    let receivedSignal: AbortSignal | undefined;
+    const mockCallFn: ModelCallFn = async (_key, _system, _user, _max, _temp, sig) => {
+      receivedSignal = sig;
+      return extractionLabeled({ userRequirements: ["ok"], deliberationNeeded: false });
+    };
+
+    await extractContextFromMessages(MESSAGES, mockCallFn, undefined, controller.signal);
+
+    expect(receivedSignal, "a signal must reach ModelCallFn").toBeDefined();
+    // Ax wraps the signal in an AbortSignal.any() composite; propagation
+    // (not identity) is the contract that matters for cancellation.
+    controller.abort();
+    expect(receivedSignal!.aborted, "aborting the caller's signal must abort the transport signal").toBe(true);
+  });
+
+  it("passes maxTokens=1024 and temperature=0.2 through to the transport", async () => {
+    let receivedMax: number | undefined;
+    let receivedTemp: number | undefined;
+    const mockCallFn: ModelCallFn = async (_key, _system, _user, max, temp) => {
+      receivedMax = max;
+      receivedTemp = temp;
+      return extractionLabeled({ userRequirements: ["ok"], deliberationNeeded: false });
+    };
+
+    await extractContextFromMessages(MESSAGES, mockCallFn);
+
+    expect(receivedMax).toBe(1024);
+    expect(receivedTemp).toBe(0.2);
+  });
+
+  it("makes exactly one extraction call through the full deliberate() pipeline", async () => {
+    const callKeys: string[] = [];
+    const mockCallFn: ModelCallFn = async (modelKey) => {
+      callKeys.push(modelKey);
+      if (modelKey === "extraction") {
+        return extractionLabeled({
+          userRequirements: ["one call"],
+          controlBoundaries: ["read-only"],
+          observedWork: ["done"],
+          deliberationNeeded: false,
+          deliberationReason: "no gap",
+        });
+      }
+      return "NO_CONTRIBUTION";
+    };
+
+    const core = new ConsortiumCore(PIPELINE_CONFIG, mockCallFn);
+    await core.deliberate(MESSAGES);
+
+    expect(callKeys.filter((k) => k === "extraction")).toHaveLength(1);
   });
 });
