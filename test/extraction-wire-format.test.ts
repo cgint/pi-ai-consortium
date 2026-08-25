@@ -111,7 +111,10 @@ describe("AX extraction transport parity", () => {
     const callModel: ModelCallFn = async (modelKey) => {
       callKeys.push(modelKey);
       if (modelKey === "extraction") {
-        return extractionStructured({ userRequirements: ["one call"], deliberationNeeded: false });
+        return {
+          ...extractionStructured({ userRequirements: ["one call"], deliberationNeeded: false }),
+          usage: { input: 2215, output: 126, cacheRead: 0, cacheWrite: 0, totalTokens: 2341, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } },
+        };
       }
       return "NO_CONTRIBUTION";
     };
@@ -122,5 +125,6 @@ describe("AX extraction transport parity", () => {
     expect(result.extractionAttempts).toBe(1);
     expect(result.extractionDurationMs).toEqual(expect.any(Number));
     expect(result.extractionDurationMs).toBeGreaterThanOrEqual(0);
+    expect(result.extractionTokenUsage).toEqual({ input: 2215, output: 126 });
   });
 });

@@ -12,10 +12,17 @@ function formatArrayText(items: string[] | undefined): string {
   return items.join("; ");
 }
 
-function formatExtractionAttempts(attempts: number, durationMs?: number): string {
+function formatExtractionAttempts(
+  attempts: number,
+  durationMs?: number,
+  tokenUsage?: DeliberationResult["extractionTokenUsage"],
+): string {
   const retries = Math.max(0, attempts - 1);
   const duration = durationMs === undefined ? "" : ` · ${durationMs.toLocaleString("en-US")} ms`;
-  return `${attempts} ${attempts === 1 ? "attempt" : "attempts"} · ${retries} ${retries === 1 ? "retry" : "retries"}${duration}`;
+  const tokens = tokenUsage === undefined
+    ? ""
+    : ` · ${tokenUsage.input.toLocaleString("en-US")} token-in · ${tokenUsage.output.toLocaleString("en-US")} token-out`;
+  return `${attempts} ${attempts === 1 ? "attempt" : "attempts"} · ${retries} ${retries === 1 ? "retry" : "retries"}${duration}${tokens}`;
 }
 
 /** JSONL & sidecar Markdown logger for consortium actions. */
@@ -146,7 +153,7 @@ export function formatVisibleMessage(result: DeliberationResult): string {
     lines.push(`◇ Consortium deliberation${modelLabel} — skipped (${result.governorReason || "governor gate"})`);
   } else if (extractionError && result.probes.length === 0) {
     const attempts = result.extractionAttempts;
-    const attemptSuffix = attempts === undefined ? "" : ` after ${formatExtractionAttempts(attempts, result.extractionDurationMs)}`;
+    const attemptSuffix = attempts === undefined ? "" : ` after ${formatExtractionAttempts(attempts, result.extractionDurationMs, result.extractionTokenUsage)}`;
     lines.push(`⚠ Consortium deliberation${modelLabel} — extraction failed${attemptSuffix}, probes skipped`);
     lines.push(`  ${extractionError.replace("Extraction: ", "").slice(0, 120)}`);
   } else if (probeFailed > 0 && contributed === 0) {
@@ -164,7 +171,7 @@ export function formatVisibleMessage(result: DeliberationResult): string {
     const ec = result.extractedContext;
     lines.push(`  Extracted Strategic Context:`);
     if (result.extractionAttempts !== undefined) {
-      lines.push(`   • Extraction: ${formatExtractionAttempts(result.extractionAttempts, result.extractionDurationMs)}`);
+      lines.push(`   • Extraction: ${formatExtractionAttempts(result.extractionAttempts, result.extractionDurationMs, result.extractionTokenUsage)}`);
     }
     lines.push(`   • Requirements: ${formatArrayText(ec.userRequirements)}`);
     lines.push(`   • Deliverables: ${formatArrayText(ec.deliverables)}`);

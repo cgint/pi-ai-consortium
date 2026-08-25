@@ -534,7 +534,7 @@ export async function runDeliberation(
       logger.log(logEntry);
 
       return options?.tools?.length
-        ? { text: result.text, ...(result.functionCalls ? { functionCalls: result.functionCalls } : {}) }
+        ? { text: result.text, ...(result.functionCalls ? { functionCalls: result.functionCalls } : {}), usage: result.usage }
         : result.text;
     } catch (err) {
       const duration = Date.now() - start;

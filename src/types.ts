@@ -190,6 +190,8 @@ export interface DeliberationResult {
   extractionAttempts?: number;
   /** Wall-clock duration of the C1 extraction pass in milliseconds. */
   extractionDurationMs?: number;
+  /** Aggregate input/output tokens reported by C1/C2 extraction calls only; provider-internal retry usage is unavailable. */
+  extractionTokenUsage?: Pick<Usage, "input" | "output">;
   /** Errors encountered during deliberation (if any). */
   errors?: string[];
   /** True if probe deliberation was skipped by the governor gate. */

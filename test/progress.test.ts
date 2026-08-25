@@ -101,6 +101,7 @@ describe("formatVisibleMessage", () => {
       governorReason: "Routine status report",
       extractionAttempts: 3,
       extractionDurationMs: 1126,
+      extractionTokenUsage: { input: 2215, output: 126 },
       extractedContext: {
         userRequirements: ["Check git status"],
         deliverables: [],
@@ -116,11 +117,29 @@ describe("formatVisibleMessage", () => {
 
     expect(msg).toContain("◇ Consortium deliberation — skipped (Routine status report)");
     expect(msg).toContain("Extracted Strategic Context:");
-    expect(msg).toContain("• Extraction: 3 attempts · 2 retries · 1,126 ms");
+    expect(msg).toContain("• Extraction: 3 attempts · 2 retries · 1,126 ms · 2,215 token-in · 126 token-out");
     expect(msg).toContain("• Requirements: Check git status");
     expect(msg).toContain("• Control Boundaries: Read-only mode");
     expect(msg).toContain("• Observed Work: Clean working tree");
     expect(msg).toContain("• Critical Facts: Fresh");
+  });
+
+  it("omits token usage when C1/C2 did not report it", () => {
+    const msg = formatVisibleMessage({
+      probes: [],
+      synthesis: "NO_CONTRIBUTION",
+      skippedByGovernor: true,
+      extractionAttempts: 1,
+      extractionDurationMs: 0,
+      extractedContext: {
+        userRequirements: [], deliverables: [], revisedOrSupersededDirection: [], userDecisions: [],
+        questionsAndInformationGaps: [], controlBoundaries: [], observedWork: [],
+        observedCriticalFacts: [], relevantLearnings: [],
+      },
+    });
+
+    expect(msg).toContain("• Extraction: 1 attempt · 0 retries · 0 ms");
+    expect(msg).not.toContain("token-in");
   });
 
   it("includes extraction attempts in an extraction-failure summary", () => {

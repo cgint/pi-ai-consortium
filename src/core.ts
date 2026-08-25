@@ -3,6 +3,7 @@
 
 import type { ConsortiumConfig, DeliberationResult, ProbeResult, ProgressCallback, ExtractedContext } from "./types.js";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
+import type { Usage } from "@earendil-works/pi-ai";
 import { extractContextFromMessages } from "./extraction.js";
 import { buildActiveUserDirectionPack, buildProbeInputXml, formatAgentMessageContent } from "./context.js";
 import { shouldDeliberate } from "./governor.js";
@@ -31,6 +32,8 @@ export interface ModelCallResponse {
     name: string;
     arguments: Record<string, unknown>;
   }[];
+  /** Pi-reported usage, retained for structured C1 transport telemetry. */
+  usage?: Usage | null;
 }
 
 /** Injectable model call function (mockable for tests). */
@@ -139,6 +142,7 @@ export class ConsortiumCore {
     let extractedContext: ExtractedContext | undefined;
     let extractionAttempts: number | undefined;
     let extractionDurationMs: number | undefined;
+    let extractionTokenUsage: Pick<Usage, "input" | "output"> | undefined;
 
     if (Array.isArray(input)) {
       // Phase 0: Extraction pass
@@ -147,7 +151,14 @@ export class ConsortiumCore {
       const extractionStartedAt = Date.now();
       const extractionCallModel: ModelCallFn = async (modelKey, system, user, maxTokens, temperature, signal, options) => {
         extractionAttempts!++;
-        return this.callModel(modelKey, system, user, maxTokens, temperature, signal, options);
+        const response = await this.callModel(modelKey, system, user, maxTokens, temperature, signal, options);
+        if (typeof response !== "string" && response.usage) {
+          extractionTokenUsage = {
+            input: (extractionTokenUsage?.input ?? 0) + response.usage.input,
+            output: (extractionTokenUsage?.output ?? 0) + response.usage.output,
+          };
+        }
+        return response;
       };
       try {
         const priorContext = previousContext ?? this.lastExtractedContext;
@@ -169,6 +180,7 @@ export class ConsortiumCore {
           extractedContext: undefined,
           extractionAttempts,
           extractionDurationMs,
+          extractionTokenUsage,
           governorReason: this.config.governorMode ?? "smart_extractor",
           errors,
         };
@@ -193,6 +205,7 @@ export class ConsortiumCore {
         extractedContext,
         extractionAttempts,
         extractionDurationMs,
+        extractionTokenUsage,
         skippedByGovernor: true,
         governorReason: governorDecision.reason,
         errors: errors.length > 0 ? errors : undefined,
@@ -218,6 +231,7 @@ export class ConsortiumCore {
         extractedContext,
         extractionAttempts,
         extractionDurationMs,
+        extractionTokenUsage,
         governorReason: governorDecision.reason,
         probePayloadChars,
         errors: errors.length > 0 ? errors : undefined,
@@ -236,6 +250,7 @@ export class ConsortiumCore {
       extractedContext,
       extractionAttempts,
       extractionDurationMs,
+      extractionTokenUsage,
       governorReason: governorDecision.reason,
       probePayloadChars,
       errors: errors.length > 0 ? errors : undefined,
