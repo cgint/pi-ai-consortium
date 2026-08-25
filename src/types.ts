@@ -188,6 +188,8 @@ export interface DeliberationResult {
   extractedContext?: ExtractedContext;
   /** Number of AX/application extraction transport invocations, including repair attempts. */
   extractionAttempts?: number;
+  /** Wall-clock duration of the C1 extraction pass in milliseconds. */
+  extractionDurationMs?: number;
   /** Errors encountered during deliberation (if any). */
   errors?: string[];
   /** True if probe deliberation was skipped by the governor gate. */

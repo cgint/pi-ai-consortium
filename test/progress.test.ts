@@ -100,6 +100,7 @@ describe("formatVisibleMessage", () => {
       skippedByGovernor: true,
       governorReason: "Routine status report",
       extractionAttempts: 3,
+      extractionDurationMs: 1126,
       extractedContext: {
         userRequirements: ["Check git status"],
         deliverables: [],
@@ -115,7 +116,7 @@ describe("formatVisibleMessage", () => {
 
     expect(msg).toContain("◇ Consortium deliberation — skipped (Routine status report)");
     expect(msg).toContain("Extracted Strategic Context:");
-    expect(msg).toContain("• Extraction: 3 attempts · 2 retries");
+    expect(msg).toContain("• Extraction: 3 attempts · 2 retries · 1,126 ms");
     expect(msg).toContain("• Requirements: Check git status");
     expect(msg).toContain("• Control Boundaries: Read-only mode");
     expect(msg).toContain("• Observed Work: Clean working tree");
@@ -127,10 +128,11 @@ describe("formatVisibleMessage", () => {
       probes: [],
       synthesis: "NO_CONTRIBUTION",
       extractionAttempts: 3,
+      extractionDurationMs: 1126,
       errors: ["Extraction: required output function call missing"],
     });
 
-    expect(msg).toContain("extraction failed after 3 attempts · 2 retries, probes skipped");
+    expect(msg).toContain("extraction failed after 3 attempts · 2 retries · 1,126 ms, probes skipped");
   });
 
   it("formats full deliberation message with extracted context, probes, and synthesis", () => {
@@ -155,6 +157,7 @@ describe("formatVisibleMessage", () => {
 
     expect(msg).toContain("◇ Consortium deliberation — 1/2 probes contributed");
     expect(msg).toContain("Extracted Strategic Context:");
+    expect(msg).not.toContain("• Extraction:");
     expect(msg).toContain("• Requirements: Security audit fix");
     expect(msg).toContain("• Questions & Gaps: Target environment version");
     expect(msg).toContain("Probes:");

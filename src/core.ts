@@ -138,11 +138,13 @@ export class ConsortiumCore {
     let directionPack = "";
     let extractedContext: ExtractedContext | undefined;
     let extractionAttempts: number | undefined;
+    let extractionDurationMs: number | undefined;
 
     if (Array.isArray(input)) {
       // Phase 0: Extraction pass
       onProgress?.("extraction", 0, 1);
       extractionAttempts = 0;
+      const extractionStartedAt = Date.now();
       const extractionCallModel: ModelCallFn = async (modelKey, system, user, maxTokens, temperature, signal, options) => {
         extractionAttempts!++;
         return this.callModel(modelKey, system, user, maxTokens, temperature, signal, options);
@@ -152,8 +154,10 @@ export class ConsortiumCore {
         const baselineSupplied = priorContext !== undefined;
         try { this.onBaselineCheck?.(baselineSupplied); } catch { /* isolated */ }
         extractedContext = await extractContextFromMessages(input, extractionCallModel, priorContext, masterController.signal);
+        extractionDurationMs = Date.now() - extractionStartedAt;
         this.lastExtractedContext = extractedContext;
       } catch (err) {
+        extractionDurationMs = Date.now() - extractionStartedAt;
         const msg = err instanceof Error ? err.message : String(err);
         errors.push(`Extraction: ${msg}`);
         // Extraction failed — probes would get no meaningful input.
@@ -164,6 +168,7 @@ export class ConsortiumCore {
           synthesis: "NO_CONTRIBUTION",
           extractedContext: undefined,
           extractionAttempts,
+          extractionDurationMs,
           governorReason: this.config.governorMode ?? "smart_extractor",
           errors,
         };
@@ -187,6 +192,7 @@ export class ConsortiumCore {
         synthesis: "NO_CONTRIBUTION",
         extractedContext,
         extractionAttempts,
+        extractionDurationMs,
         skippedByGovernor: true,
         governorReason: governorDecision.reason,
         errors: errors.length > 0 ? errors : undefined,
@@ -211,6 +217,7 @@ export class ConsortiumCore {
         synthesis: "NO_CONTRIBUTION",
         extractedContext,
         extractionAttempts,
+        extractionDurationMs,
         governorReason: governorDecision.reason,
         probePayloadChars,
         errors: errors.length > 0 ? errors : undefined,
@@ -228,6 +235,7 @@ export class ConsortiumCore {
       synthesis,
       extractedContext,
       extractionAttempts,
+      extractionDurationMs,
       governorReason: governorDecision.reason,
       probePayloadChars,
       errors: errors.length > 0 ? errors : undefined,

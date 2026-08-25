@@ -120,5 +120,7 @@ describe("AX extraction transport parity", () => {
 
     expect(callKeys.filter((key) => key === "extraction")).toHaveLength(1);
     expect(result.extractionAttempts).toBe(1);
+    expect(result.extractionDurationMs).toEqual(expect.any(Number));
+    expect(result.extractionDurationMs).toBeGreaterThanOrEqual(0);
   });
 });
