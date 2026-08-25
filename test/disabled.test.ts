@@ -37,6 +37,7 @@ type ContextHandler = (
 ) => Promise<{ messages: unknown[] } | undefined>;
 
 let contextHandler: ContextHandler;
+let inputHandler: Function;
 let commands: Map<string, { description: string; handler: Function }> = new Map();
 
 beforeEach(async () => {
@@ -57,6 +58,7 @@ beforeEach(async () => {
   const { default: register } = await import("../index.ts");
   register(pi as any);
   contextHandler = handlers.get("context") as ContextHandler;
+  inputHandler = handlers.get("input")!;
 });
 
 describe("consortium enabled/disabled toggle", () => {
@@ -107,6 +109,7 @@ describe("consortium enabled/disabled toggle", () => {
     const onHandler = commands.get("ai-consortium-on")!.handler;
     await onHandler("", ctx);
 
+    await inputHandler({ text: "What files are here?", source: "interactive" }, ctx);
     const result = await contextHandler({ messages: original }, ctx);
 
     expect(result).toBeDefined();

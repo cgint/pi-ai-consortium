@@ -1,6 +1,6 @@
 # AGENTS.md — pi-ai-consortium Primary Memory Anchor
 
-> **Last updated:** 2026-08-24
+> **Last updated:** 2026-08-25
 > **Status:** Active Session Memory & Standing Pairing DNA
 
 ---
@@ -49,6 +49,7 @@ When auditing any session or evaluating Consortium behavior on any turn, we **AL
 * All session evaluations must be recorded in the concept repository's `docs/` using the 2-Step Evaluation Matrix format.
 * High-value learnings and system tuning parameters are persisted in `docs/adaptation-plan-learnings.md`.
 * Methodology guidelines are anchored in `docs/consortium-evaluation-methodology.md`.
+* Trigger-requirement design (user-input as additional deliberation trigger on top of cadence; counter resets on any fired audit; `manual` never auto-triggers; **C2 never bypassed, C1–C4 internals unchanged**) is anchored in `docs/user-input-trigger-requirement.md` (as of 2026-08-25, pre-implementation).
 
 ---
 

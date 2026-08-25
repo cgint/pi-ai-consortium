@@ -36,6 +36,7 @@ type ContextHandler = (event: { messages: unknown[] }, ctx: any) => Promise<{ me
 type SessionStartHandler = (event: unknown, ctx: any) => Promise<void>;
 
 let contextHandler: ContextHandler;
+let inputHandler: Function;
 let sessionStartHandler: SessionStartHandler;
 
 beforeEach(async () => {
@@ -54,6 +55,7 @@ beforeEach(async () => {
   const { default: register } = await import("../index.ts");
   register(pi as any);
   contextHandler = handlers.get("context") as ContextHandler;
+  inputHandler = handlers.get("input")!;
   sessionStartHandler = handlers.get("session_start") as SessionStartHandler;
 });
 
@@ -79,6 +81,7 @@ describe("consortium context injection", () => {
       };
 
       await sessionStartHandler({}, ctx);
+      await inputHandler({ text: "structured input", source: "interactive" }, ctx);
       await contextHandler({
         messages: [{ role: "user", content: [{ type: "text", text: "structured input" }], timestamp: 1 }],
       }, ctx);
@@ -128,6 +131,7 @@ describe("consortium context injection", () => {
       ui: { setStatus: vi.fn(), notify: vi.fn() },
     };
 
+    await inputHandler({ text: "Investigate cache behavior.", source: "interactive" }, ctx);
     const result = await contextHandler({ messages: original }, ctx);
 
     expect(result?.messages).toHaveLength(3);

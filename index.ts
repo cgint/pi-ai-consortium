@@ -34,6 +34,7 @@ export default function (pi: ExtensionAPI): void {
   let stateSupersessionGuard = false;
   let stateSupersessionGuardSource = "default";
   let turnsSinceLastAudit = 0;
+  let pendingUserTurn = false;
 
   let turnState: TurnState = { deliberation: null };
   let lastExtractedContext: DeliberationResult["extractedContext"] | null = null;
@@ -131,13 +132,15 @@ export default function (pi: ExtensionAPI): void {
       logger = new ConsortiumLogger(ctx.cwd, ctx.sessionManager.getSessionId());
     }
     logger.log({ type: "turn_start", input: userContext });
+    pendingUserTurn = true;
 
     return { action: "continue" };
   });
 
-  // On first LLM call of the turn, await deliberation and inject.
+  // On a fresh user input or a due cadence backstop, await deliberation and inject.
   pi.on("context", async (event: ContextEvent, ctx: ExtensionContext) => {
     if (!enabled) {
+      pendingUserTurn = false;
       if (ctx.hasUI) {
         ctx.ui.setStatus("consortium", "consortium: disabled");
       }
@@ -150,6 +153,23 @@ export default function (pi: ExtensionAPI): void {
     if (event.messages.length === 0) {
       return;
     }
+
+    const schedule = scheduleDeliberation({
+      governorMode,
+      turnsSinceLastAudit,
+      pendingUserTurn,
+      maxTurnGap,
+      periodicInterval,
+    });
+    if (!schedule.shouldRun) {
+      if (schedule.consumePendingUserTurn) pendingUserTurn = false;
+      turnsSinceLastAudit = schedule.nextTurnsSinceLastAudit;
+      return;
+    }
+
+    if (schedule.consumePendingUserTurn) pendingUserTurn = false;
+    const turnsBeforeScheduledRun = turnsSinceLastAudit;
+    turnsSinceLastAudit = schedule.nextTurnsSinceLastAudit;
 
     if (!logger) {
       logger = new ConsortiumLogger(ctx.cwd, ctx.sessionManager.getSessionId());
@@ -171,7 +191,7 @@ export default function (pi: ExtensionAPI): void {
       current_human_turn_length: getCurrentHumanUserTurn(event.messages).length,
     });
 
-    turnState.deliberation = runDeliberation(runtimeConfig, event.messages, ctx, logger, onProgress, turnsSinceLastAudit, lastExtractedContext !== null);
+    turnState.deliberation = runDeliberation(runtimeConfig, event.messages, ctx, logger, onProgress, schedule.governorTurnsSinceLastAudit, lastExtractedContext !== null);
 
     try {
       const result = await turnState.deliberation;
@@ -179,7 +199,6 @@ export default function (pi: ExtensionAPI): void {
       if (result.skippedByGovernor) {
         turnState.deliberation = null;
         lastExtractedContext = result.extractedContext ?? null;
-        turnsSinceLastAudit++;
         if (result.extractedContext) {
           logger?.logExtraction(result.extractedContext);
         }
@@ -195,9 +214,6 @@ export default function (pi: ExtensionAPI): void {
         }
         return;
       }
-
-      // Full probe audit ran — reset turn counter gap
-      turnsSinceLastAudit = 0;
 
       if (result.synthesis.trim().startsWith("NO_CONTRIBUTION")) {
         turnState.deliberation = null;
@@ -284,6 +300,7 @@ export default function (pi: ExtensionAPI): void {
         ctx.ui.setStatus("consortium", `consortium: ✖ failed: ${msg}`);
       }
       turnState.deliberation = null;
+      turnsSinceLastAudit = turnsBeforeScheduledRun;
       return;
     }
   });
@@ -525,6 +542,84 @@ export async function runDeliberation(
 }
 
 export const CADENCE_MODES: GovernorMode[] = ["smart_extractor", "always", "periodic", "manual"];
+
+export interface DeliberationScheduleInput {
+  governorMode: GovernorMode;
+  turnsSinceLastAudit: number;
+  pendingUserTurn: boolean;
+  maxTurnGap: number;
+  periodicInterval: number;
+}
+
+export interface DeliberationSchedule {
+  shouldRun: boolean;
+  userInputTrigger: boolean;
+  governorTurnsSinceLastAudit: number;
+  nextTurnsSinceLastAudit: number;
+  consumePendingUserTurn: boolean;
+}
+
+/**
+ * Decide whether this context call starts a deliberation. This is deliberately
+ * outside C1-C4: it only selects when the unchanged pipeline is entered.
+ */
+export function scheduleDeliberation(input: DeliberationScheduleInput): DeliberationSchedule {
+  const {
+    governorMode,
+    turnsSinceLastAudit,
+    pendingUserTurn,
+    maxTurnGap,
+    periodicInterval,
+  } = input;
+
+  if (governorMode === "manual") {
+    return {
+      shouldRun: false,
+      userInputTrigger: false,
+      governorTurnsSinceLastAudit: turnsSinceLastAudit,
+      nextTurnsSinceLastAudit: turnsSinceLastAudit,
+      consumePendingUserTurn: pendingUserTurn,
+    };
+  }
+
+  if (governorMode === "always") {
+    return {
+      shouldRun: true,
+      userInputTrigger: pendingUserTurn,
+      governorTurnsSinceLastAudit: turnsSinceLastAudit,
+      nextTurnsSinceLastAudit: 0,
+      consumePendingUserTurn: pendingUserTurn,
+    };
+  }
+
+  const interval = governorMode === "periodic" ? periodicInterval : maxTurnGap;
+  const nextTurnCount = turnsSinceLastAudit + 1;
+  const cadenceDue = nextTurnCount >= interval;
+  const userTriggered = pendingUserTurn;
+
+  if (userTriggered || cadenceDue) {
+    return {
+      shouldRun: true,
+      userInputTrigger: userTriggered,
+      // Preserve the existing governor by presenting the due interval for a
+      // user-triggered periodic run; smart_extractor receives its real count
+      // and therefore keeps C2 as its post-extraction gate.
+      governorTurnsSinceLastAudit: governorMode === "periodic" && userTriggered
+        ? interval
+        : nextTurnCount,
+      nextTurnsSinceLastAudit: 0,
+      consumePendingUserTurn: userTriggered,
+    };
+  }
+
+  return {
+    shouldRun: false,
+    userInputTrigger: false,
+    governorTurnsSinceLastAudit: turnsSinceLastAudit,
+    nextTurnsSinceLastAudit: nextTurnCount,
+    consumePendingUserTurn: false,
+  };
+}
 
 /** Resolve a (possibly abbreviated) cadence mode from unambiguous prefix matching. */
 export function resolveCadenceMode(
