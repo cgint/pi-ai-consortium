@@ -34,7 +34,7 @@ export default function (pi: ExtensionAPI): void {
   let stateSupersessionGuard = false;
   let stateSupersessionGuardSource = "default";
   let turnsSinceLastAudit = 0;
-  let pendingUserTurn = false;
+  let pendingPeriodicUserInput = false;
 
   let turnState: TurnState = { deliberation: null };
   let lastExtractedContext: DeliberationResult["extractedContext"] | null = null;
@@ -132,15 +132,17 @@ export default function (pi: ExtensionAPI): void {
       logger = new ConsortiumLogger(ctx.cwd, ctx.sessionManager.getSessionId());
     }
     logger.log({ type: "turn_start", input: userContext });
-    pendingUserTurn = true;
+    // The one new trigger: periodic mode audits immediately after user input.
+    if (governorMode === "periodic") pendingPeriodicUserInput = true;
 
     return { action: "continue" };
   });
 
-  // On a fresh user input or a due cadence backstop, await deliberation and inject.
+  // Before each LLM call, await deliberation and inject; periodic mode alone
+  // adds an immediate audit after genuine user input.
   pi.on("context", async (event: ContextEvent, ctx: ExtensionContext) => {
     if (!enabled) {
-      pendingUserTurn = false;
+      pendingPeriodicUserInput = false;
       if (ctx.hasUI) {
         ctx.ui.setStatus("consortium", "consortium: disabled");
       }
@@ -154,22 +156,24 @@ export default function (pi: ExtensionAPI): void {
       return;
     }
 
-    const schedule = scheduleDeliberation({
-      governorMode,
-      turnsSinceLastAudit,
-      pendingUserTurn,
-      maxTurnGap,
-      periodicInterval,
-    });
-    if (!schedule.shouldRun) {
-      if (schedule.consumePendingUserTurn) pendingUserTurn = false;
-      turnsSinceLastAudit = schedule.nextTurnsSinceLastAudit;
+    // Only periodic mode gets the user-input trigger. All other modes retain
+    // their original per-context path into the unchanged governor/C1-C4 flow.
+    const periodicSchedule = governorMode === "periodic"
+      ? schedulePeriodicAudit({ turnsSinceLastAudit, pendingPeriodicUserInput, periodicInterval })
+      : undefined;
+    if (periodicSchedule && !periodicSchedule.shouldRun) {
+      turnsSinceLastAudit = periodicSchedule.nextTurnsSinceLastAudit;
       return;
     }
 
-    if (schedule.consumePendingUserTurn) pendingUserTurn = false;
+    if (periodicSchedule?.consumePendingPeriodicUserInput) {
+      pendingPeriodicUserInput = false;
+    }
     const turnsBeforeScheduledRun = turnsSinceLastAudit;
-    turnsSinceLastAudit = schedule.nextTurnsSinceLastAudit;
+    if (periodicSchedule) {
+      // A periodic audit selected by cadence or user input starts a fresh N-call interval.
+      turnsSinceLastAudit = periodicSchedule.nextTurnsSinceLastAudit;
+    }
 
     if (!logger) {
       logger = new ConsortiumLogger(ctx.cwd, ctx.sessionManager.getSessionId());
@@ -191,7 +195,15 @@ export default function (pi: ExtensionAPI): void {
       current_human_turn_length: getCurrentHumanUserTurn(event.messages).length,
     });
 
-    turnState.deliberation = runDeliberation(runtimeConfig, event.messages, ctx, logger, onProgress, schedule.governorTurnsSinceLastAudit, lastExtractedContext !== null);
+    turnState.deliberation = runDeliberation(
+      runtimeConfig,
+      event.messages,
+      ctx,
+      logger,
+      onProgress,
+      periodicSchedule?.governorTurnsSinceLastAudit ?? turnsSinceLastAudit,
+      lastExtractedContext !== null,
+    );
 
     try {
       const result = await turnState.deliberation;
@@ -199,6 +211,7 @@ export default function (pi: ExtensionAPI): void {
       if (result.skippedByGovernor) {
         turnState.deliberation = null;
         lastExtractedContext = result.extractedContext ?? null;
+        if (!periodicSchedule) turnsSinceLastAudit++;
         if (result.extractedContext) {
           logger?.logExtraction(result.extractedContext);
         }
@@ -214,6 +227,10 @@ export default function (pi: ExtensionAPI): void {
         }
         return;
       }
+
+      // Periodic was reset when its audit was selected. Other modes retain
+      // their original completion-based counter reset.
+      if (!periodicSchedule) turnsSinceLastAudit = 0;
 
       if (result.synthesis.trim().startsWith("NO_CONTRIBUTION")) {
         turnState.deliberation = null;
@@ -364,6 +381,7 @@ export default function (pi: ExtensionAPI): void {
       const mode = resolved.mode;
 
       governorMode = mode;
+      if (governorMode !== "periodic") pendingPeriodicUserInput = false;
       let newInterval = periodicInterval;
       if (mode === "periodic" && parts[1] && !isNaN(parseInt(parts[1], 10))) {
         newInterval = parseInt(parts[1], 10);
@@ -543,81 +561,44 @@ export async function runDeliberation(
 
 export const CADENCE_MODES: GovernorMode[] = ["smart_extractor", "always", "periodic", "manual"];
 
-export interface DeliberationScheduleInput {
-  governorMode: GovernorMode;
+export interface PeriodicAuditScheduleInput {
   turnsSinceLastAudit: number;
-  pendingUserTurn: boolean;
-  maxTurnGap: number;
+  pendingPeriodicUserInput: boolean;
   periodicInterval: number;
 }
 
-export interface DeliberationSchedule {
+export interface PeriodicAuditSchedule {
   shouldRun: boolean;
-  userInputTrigger: boolean;
   governorTurnsSinceLastAudit: number;
   nextTurnsSinceLastAudit: number;
-  consumePendingUserTurn: boolean;
+  consumePendingPeriodicUserInput: boolean;
 }
 
 /**
- * Decide whether this context call starts a deliberation. This is deliberately
- * outside C1-C4: it only selects when the unchanged pipeline is entered.
+ * The only user-input scheduling rule: in periodic mode, user input starts an
+ * audit now and starts a fresh N-call interval. The effective count is an
+ * adapter for the unchanged periodic governor; it does not change C1-C4.
  */
-export function scheduleDeliberation(input: DeliberationScheduleInput): DeliberationSchedule {
-  const {
-    governorMode,
-    turnsSinceLastAudit,
-    pendingUserTurn,
-    maxTurnGap,
-    periodicInterval,
-  } = input;
+export function schedulePeriodicAudit(input: PeriodicAuditScheduleInput): PeriodicAuditSchedule {
+  const { turnsSinceLastAudit, pendingPeriodicUserInput, periodicInterval } = input;
+  const nextPeriodicCount = turnsSinceLastAudit + 1;
+  const periodicCadenceIsDue = nextPeriodicCount >= periodicInterval;
+  const periodicAuditShouldRun = pendingPeriodicUserInput || periodicCadenceIsDue;
 
-  if (governorMode === "manual") {
-    return {
-      shouldRun: false,
-      userInputTrigger: false,
-      governorTurnsSinceLastAudit: turnsSinceLastAudit,
-      nextTurnsSinceLastAudit: turnsSinceLastAudit,
-      consumePendingUserTurn: pendingUserTurn,
-    };
-  }
-
-  if (governorMode === "always") {
+  if (periodicAuditShouldRun) {
     return {
       shouldRun: true,
-      userInputTrigger: pendingUserTurn,
-      governorTurnsSinceLastAudit: turnsSinceLastAudit,
+      governorTurnsSinceLastAudit: periodicInterval,
       nextTurnsSinceLastAudit: 0,
-      consumePendingUserTurn: pendingUserTurn,
-    };
-  }
-
-  const interval = governorMode === "periodic" ? periodicInterval : maxTurnGap;
-  const nextTurnCount = turnsSinceLastAudit + 1;
-  const cadenceDue = nextTurnCount >= interval;
-  const userTriggered = pendingUserTurn;
-
-  if (userTriggered || cadenceDue) {
-    return {
-      shouldRun: true,
-      userInputTrigger: userTriggered,
-      // Preserve the existing governor by presenting the due interval for a
-      // user-triggered periodic run; smart_extractor receives its real count
-      // and therefore keeps C2 as its post-extraction gate.
-      governorTurnsSinceLastAudit: governorMode === "periodic" && userTriggered
-        ? interval
-        : nextTurnCount,
-      nextTurnsSinceLastAudit: 0,
-      consumePendingUserTurn: userTriggered,
+      consumePendingPeriodicUserInput: pendingPeriodicUserInput,
     };
   }
 
   return {
     shouldRun: false,
-    userInputTrigger: false,
     governorTurnsSinceLastAudit: turnsSinceLastAudit,
-    nextTurnsSinceLastAudit: nextTurnCount,
-    consumePendingUserTurn: false,
+    nextTurnsSinceLastAudit: nextPeriodicCount,
+    consumePendingPeriodicUserInput: false,
   };
 }
 

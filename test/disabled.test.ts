@@ -117,6 +117,24 @@ describe("consortium enabled/disabled toggle", () => {
     expect(deliberate).toHaveBeenCalled();
   });
 
+  it("keeps smart_extractor on its original per-context path without new input", async () => {
+    const messages = [{ role: "user", content: "Continue the investigation.", timestamp: 1 }];
+    const ctx = {
+      cwd: process.cwd(),
+      sessionManager: { getSessionId: () => "test-session" },
+      model: { provider: "test", id: "model" },
+      modelRegistry: {},
+      signal: new AbortController().signal,
+      hasUI: false,
+      ui: { setStatus: vi.fn(), notify: vi.fn() },
+    };
+
+    await contextHandler({ messages }, ctx);
+    await contextHandler({ messages }, ctx);
+
+    expect(deliberate).toHaveBeenCalledTimes(2);
+  });
+
   it("provides status command", () => {
     const statusCmd = commands.get("ai-consortium");
     expect(statusCmd).toBeDefined();
