@@ -24,3 +24,5 @@ dist/
 # Ignore Code Giant output directory and result files
 .codegiant/
 cg-task-result-*.md
+
+.tmp
