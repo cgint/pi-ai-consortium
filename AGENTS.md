@@ -1,6 +1,6 @@
 # AGENTS.md — pi-ai-consortium Primary Memory Anchor
 
-> **Last updated:** 2026-07-25
+> **Last updated:** 2026-08-24
 > **Status:** Active Session Memory & Standing Pairing DNA
 
 ---
@@ -68,9 +68,15 @@ When auditing any session or evaluating Consortium behavior on any turn, we **AL
    - Keep chat responses short, direct, and scannable (<15 lines).
 
 4. **Full-History Parity Invariant (`pi-ai-consortium`):**
-   - Pass 1 extraction (`src/extraction.ts`) and Pass 2 probes (`src/context.ts`) must process the exact same full history (`messages`) without arbitrary truncation (`.slice(-10)`).
+   - One extraction call processes complete history (`messages`) without arbitrary message slicing or per-message content caps. Within that call, C1 extracts the lens and C2 reasons whether `deliberationNeeded` is `true` or `false`; C3 probes receive the same complete history. Any optional compaction outside these paths must identify itself as Consortium rendering, never tool state.
 
-5. **Unambiguous-Prefix Argument Convention:**
+5. **C1–C4 Contribution Contract:**
+   - C1 and C2 are distinct responsibilities within one extraction pass: C1 extracts a strategic lens; C2 reasons whether the returned `deliberationNeeded` boolean should be `true` or `false`. The later deterministic governor only routes execution using that result plus cadence/guard rules; it is not C2. Each C3 probe independently contributes or returns `NO_CONTRIBUTION`; C4 runs only for one or more contributions and cannot add claims absent from them. A valid C4 result is delivered automatically to the agent.
+
+6. **Genuine-Human Direction Invariant:**
+   - Keep exact original/current genuine-human input top of mind and let C1 select additional active source turns. Historic Consortium injections remain attributed as Consortium evidence and never enter the genuine-human direction pack.
+
+7. **Unambiguous-Prefix Argument Convention:**
    - Commands that take mode/option arguments use unambiguous-prefix matching (`resolveCadenceMode` pattern in `index.ts`) instead of strict exact match, so `p 5` == `periodic 5`.
    - Guardrail: `test/cadence-mode.test.ts` "cadence mode naming invariant" fails if any two modes share a first character or one name is a prefix of another. If a future mode collides, update the resolver, handler, and usage string together.
 
