@@ -1,0 +1,27 @@
+direction: down
+
+c05: "**c05 closed**\n0/56 behavioral cells\nall evidence immutable" {style.fill: "#FCE8E6"}
+rfc: "**c06 draft RFC**\nunchanged science\nstructured review transport" {style.fill: "#DDEBF7"}
+qualify: "**Transport qualification**\n1 synthetic PASS + 1 synthetic BLOCK\nexact model · no behavioral prompts" {style.fill: "#FFF3CD"}
+qualified: "Qualified?" {shape: diamond}
+freeze: "**Implement + freeze once**\nfresh c06 IDs · contract · ledger\nreview tool + validator" {style.fill: "#D9EAD3"}
+review: "**Post-freeze review**\nterminating schema-valid tool call\nmax 2 attempts only for invalid transport" {style.fill: "#DDEBF7"}
+verdict: "Valid verdict?" {shape: diamond}
+preflight: "**Zero-materialization preflight**\nidentity · schema · hashes · confinement" {style.fill: "#D9EAD3"}
+smoke: "**8 ON smoke cells**\n4/4 positive fires · 0/4 controls" {style.fill: "#DDEBF7"}
+smoke_gate: "Smoke passes?" {shape: diamond}
+matrix: "**48-cell matrix**\n3 repetitions · OFF then ON" {style.fill: "#DDEBF7"}
+result: "**Aggregate + independent audit**\nuplift · negative · mixed · invalid" {style.fill: "#D9EAD3"}
+stop: "**Honest protocol stop**\npreserve evidence · no uplift claim\nguard remains default-off" {style.fill: "#FCE8E6"}
+
+c05 -> rfc -> qualify -> qualified
+qualified -> stop: "no"
+qualified -> freeze: "yes"
+freeze -> review -> verdict
+verdict -> preflight: "PASS"
+verdict -> stop: "BLOCK or 2 invalid attempts"
+preflight -> smoke
+smoke -> smoke_gate
+smoke_gate -> matrix: "yes"
+smoke_gate -> stop: "no"
+matrix -> result
