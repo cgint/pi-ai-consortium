@@ -21,6 +21,7 @@ vi.mock("@earendil-works/pi-ai/compat", () => ({
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { TelemetryEvent } from "../src/types.js";
 import { extractionLabeled } from "./extraction-mock.js";
+import { extractionStructured } from "./extraction-structured-mock.js";
 
 /** Build a minimal valid extracted context in Ax labeled-field format. */
 function extractionJson(): string {
@@ -46,16 +47,17 @@ function makeUsage(input: number, output: number) {
 }
 
 /** Parse all JSONL lines from the consortium log directory. */
-function readJsonlEvents(tmpDir: string): TelemetryEvent[] {
+function readRawJsonlEntries(tmpDir: string): Array<Record<string, unknown>> {
   const logDir = path.join(tmpDir, ".pi", "consortium");
   if (!fs.existsSync(logDir)) return [];
   const jsonlFiles = fs.readdirSync(logDir).filter((f) => f.endsWith(".jsonl"));
   if (jsonlFiles.length === 0) return [];
   const lines = fs.readFileSync(path.join(logDir, jsonlFiles[0]), "utf-8");
-  return lines
-    .trim()
-    .split("\n")
-    .map((l) => JSON.parse(l))
+  return lines.trim().split("\n").map((line) => JSON.parse(line) as Record<string, unknown>);
+}
+
+function readJsonlEvents(tmpDir: string): TelemetryEvent[] {
+  return readRawJsonlEntries(tmpDir)
     .filter((e) => e.type === "baseline_check" || e.type === "probe_complete" || e.type === "deliberation_telemetry")
     .map((e) => e as TelemetryEvent);
 }
@@ -77,11 +79,11 @@ describe("production-path integration (real runDeliberation)", () => {
   it("imports and calls actual runDeliberation, reads real JSONL", async () => {
     // Mock callModelWithAuth so we control responses per modelKey
     const { callModelWithAuth } = await import("../src/model.js");
-    vi.spyOn(await import("../src/model.js"), "callModelWithAuth").mockImplementation(async (_provider, _modelId, _system, _user, _registry, _signal) => {
-      // We need to distinguish calls by their purpose. Since we can't easily
-      // track modelKey at this level, we respond based on call order:
-      // 1st = extraction, 2nd-6th = probes, 7th = synthesis
-      return { text: extractionJson(), usage: makeUsage(10, 20) };
+    vi.spyOn(await import("../src/model.js"), "callModelWithAuth").mockImplementation(async (_provider, _modelId, _system, _user, _registry, _signal, _retries, _reasoning, options) => {
+      if (options?.tools?.length) {
+        return { ...extractionStructured({ deliberationNeeded: true, deliberationReason: "test" }), usage: makeUsage(10, 20) };
+      }
+      return { text: "NO_CONTRIBUTION", usage: makeUsage(10, 20) };
     });
 
     // Now import runDeliberation (after mock is registered)
@@ -111,6 +113,30 @@ describe("production-path integration (real runDeliberation)", () => {
 
     // Read real JSONL
     const events = readJsonlEvents(tmpDir);
+    const rawEntries = readRawJsonlEntries(tmpDir);
+    const cacheRequests = rawEntries.filter((entry) => entry.type === "cache_request");
+    const completions = rawEntries.filter((entry) => entry.type === "probe_complete");
+
+    expect(cacheRequests).toHaveLength(DEFAULT_CONFIG.probes.length + 1);
+    expect(cacheRequests.filter((entry) => entry.stage === "C1")).toHaveLength(1);
+    const c1Request = cacheRequests.find((entry) => entry.stage === "C1");
+    const c3Requests = cacheRequests.filter((entry) => entry.stage === "C3");
+    expect(c3Requests).toHaveLength(DEFAULT_CONFIG.probes.length);
+    expect([...new Set(cacheRequests.map((entry) => entry.cache_run_id))]).toHaveLength(1);
+    // Shared AX framing makes every C3 prefix equal to C1 through complete history.
+    // This is Pi-bound parity evidence, not a provider-cache-hit claim.
+    expect(c3Requests.every((entry) => entry.prefixSha256 === c1Request?.prefixSha256)).toBe(true);
+    for (const entry of cacheRequests) {
+      expect(entry.historyComplete).toBe(true);
+      expect(entry.prefixSha256).toMatch(/^[a-f0-9]{64}$/);
+      expect(entry.requestSha256).toMatch(/^[a-f0-9]{64}$/);
+      expect(entry.prefixBytes).toEqual(expect.any(Number));
+      expect(entry.requestBytes).toEqual(expect.any(Number));
+      expect(JSON.stringify(entry)).not.toContain("Test input");
+    }
+    expect(new Set(completions.map((entry) => entry.cache_call_id))).toEqual(
+      new Set(cacheRequests.map((entry) => entry.cache_call_id)),
+    );
 
     // R4 assertions: baseline_check, probe_complete, deliberation_telemetry
     const baselineEvents = events.filter((e) => e.type === "baseline_check");

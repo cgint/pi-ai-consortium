@@ -171,7 +171,9 @@ describe("baseline callback throw isolation", () => {
 
     const callFn: ModelCallFn = async (modelKey) => {
       if (modelKey === "extraction") return extractionJson();
-      if (modelKey.startsWith("probe:")) return "WARN Probe finding";
+      if (modelKey.startsWith("probe:")) {
+        return extractionStructured({ deliberationNeeded: false, probeContribution: "WARN Probe finding" });
+      }
       return "Synthesized result";
     };
 
@@ -192,7 +194,9 @@ describe("baseline callback throw isolation", () => {
 
     const callFn: ModelCallFn = async (modelKey) => {
       if (modelKey === "extraction") return extractionJson();
-      if (modelKey.startsWith("probe:")) return exactText;
+      if (modelKey.startsWith("probe:")) {
+        return extractionStructured({ deliberationNeeded: false, probeContribution: exactText });
+      }
       return "Synthesized result";
     };
 

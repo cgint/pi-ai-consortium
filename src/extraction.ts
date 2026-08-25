@@ -34,6 +34,7 @@ export const EXTRACTION_INSTRUCTION = [
 /** Ax signature for extraction — single source of truth for the 13 output fields. */
 const extractionSignature = f()
   .input("history", f.string("Complete session history in XML format."))
+  .input("stageTail", f.string("Stage-specific instructions and context appended after the complete history."))
   .output("userRequirements", f.string().array("Macro goals, acceptance criteria, quality expectations, and technical bounds"))
   .output("deliverables", f.string().array("Explicit required architectural artifacts, files, documentation, or reports expected"))
   .output("revisedOrSupersededDirection", f.string().array("Directions, goals, or constraints that were canceled, updated, or superseded"))
@@ -47,12 +48,33 @@ const extractionSignature = f()
   .output("deliberationReason", f.string("Short reason explaining why full probe deliberation is or is not needed").optional())
   .output("activeHumanInputSourceIds", f.string().array("source_id values for genuine human inputs whose exact wording should be emphasized to probes").optional())
   .output("supersededHumanInputSourceIds", f.string().array("source_id values for genuine human inputs superseded by later directions").optional())
+  .output("probeContribution", f.string("For C3: exact NO_CONTRIBUTION or one tagged observation. For C1: an empty string.").optional())
   .useStructured()
   .build();
 
-/** Ax program for extraction, configured with the policy instruction. */
+/**
+ * Shared AX program for C1 extraction and C3 probes. Stage semantics belong in
+ * `stageTail`, which follows the identical complete-history input.
+ */
 const extractionProgram = ax(extractionSignature, { maxRetries: 2 });
-extractionProgram.setInstruction(EXTRACTION_INSTRUCTION);
+extractionProgram.setInstruction([
+  "You are a Consortium deliberation stage.",
+  "The complete observed history appears first. Follow only the stage-specific instructions that follow it.",
+  "Return exactly one __axOutput function call matching the declared schema.",
+].join("\n"));
+
+export async function runStructuredDeliberationStage(
+  callModel: ModelCallFn,
+  modelKey: string,
+  maxTokens: number,
+  temperature: number,
+  history: string,
+  stageTail: string,
+  signal?: AbortSignal,
+) {
+  const adapter = new AxPiService(callModel, modelKey, maxTokens, temperature);
+  return extractionProgram.forward(adapter, { history, stageTail }, { abortSignal: signal });
+}
 
 /**
  * Default context for the legitimate empty-history case (messages.length === 0).
@@ -105,26 +127,36 @@ export async function extractContextFromMessages(
     return getDefaultExtractedContext(messages);
   }
 
-  // Build the history input (same construction as before)
-  let history = buildObservedPastXml(messages);
+  const history = buildObservedPastXml(messages);
+  const baseline = previousContext
+    ? (() => {
+        const {
+          activeHumanInputSourceIds: _active,
+          supersededHumanInputSourceIds: _superseded,
+          ...durable
+        } = previousContext;
+        return `<previous_extracted_context_baseline>\n${JSON.stringify(durable, null, 2)}\n</previous_extracted_context_baseline>`;
+      })()
+    : "";
+  const stageTail = [
+    "<c1_extraction_stage>",
+    EXTRACTION_INSTRUCTION,
+    baseline,
+    buildHumanInputFocus(messages),
+    "Set probeContribution to an empty string; it is used only by C3.",
+    "</c1_extraction_stage>",
+  ].filter((part) => part.length > 0).join("\n\n");
 
-  if (previousContext) {
-    const {
-      activeHumanInputSourceIds: _active,
-      supersededHumanInputSourceIds: _superseded,
-      ...durable
-    } = previousContext;
-    history = `${history}\n\n<previous_extracted_context_baseline>\n${JSON.stringify(durable, null, 2)}\n</previous_extracted_context_baseline>`;
-  }
-  history = `${history}\n\n${buildHumanInputFocus(messages)}`;
-
-  // Build the Ax adapter over Pi's transport
-  const adapter = new AxPiService(callModel, "extraction", 1024, 0.2);
-
-  // Run extraction through Ax: prompt rendering → model call → parse → validate
-  const result = await extractionProgram.forward(adapter, { history }, {
-    abortSignal: signal,
-  });
+  // Run extraction through the shared AX transport: common history prefix → C1 tail → strict parse.
+  const result = await runStructuredDeliberationStage(
+    callModel,
+    "extraction",
+    1024,
+    0.2,
+    history,
+    stageTail,
+    signal,
+  );
 
   return {
     userRequirements: cleanStringArray(result.userRequirements),

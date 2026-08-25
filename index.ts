@@ -23,6 +23,8 @@ import { ConsortiumLogger, createProgressCallback, formatVisibleMessage } from "
 import type { ConsortiumConfig, TurnState, DeliberationResult, DeliberationModelInfo, GovernorMode, TelemetryEvent } from "./src/types.js";
 import { createUsageAccumulator, buildDeliberationTelemetry, safeLog } from "./src/telemetry.js";
 import { join, dirname } from "node:path";
+import { randomUUID } from "node:crypto";
+import { fingerprintCacheRequest } from "./src/cache-evidence.js";
 import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 
@@ -482,6 +484,8 @@ export async function runDeliberation(
 
   // ── Telemetry state (local to this runDeliberation call) ──
   const acc = createUsageAccumulator();
+  const cacheRunId = randomUUID();
+  let callOrdinal = 0;
   let baselineSupplied: boolean | undefined;
   const telemetryLog = (event: TelemetryEvent): void => {
     logger.log(event);
@@ -494,10 +498,26 @@ export async function runDeliberation(
 
   const callModel: ModelCallFn = async (modelKey, system, user, _maxTokens, _temperature, signal, options) => {
     const start = Date.now();
+    const callId = `${cacheRunId}:${++callOrdinal}`;
     const { provider, modelId, role } = resolveModelKey(modelKey, config);
+    const cacheEvidence = fingerprintCacheRequest(system, user, options);
+
+    logger.log({
+      type: "cache_request",
+      cache_run_id: cacheRunId,
+      cache_call_id: callId,
+      stage: modelKey === "extraction" ? "C1" : modelKey.startsWith("probe:") ? "C3" : "C4",
+      modelKey,
+      role: role ?? undefined,
+      provider,
+      modelId,
+      ...cacheEvidence,
+    });
 
     logger.log({
       type: "probe_start",
+      cache_run_id: cacheRunId,
+      cache_call_id: callId,
       modelKey,
       role: role ?? undefined,
       provider,
@@ -521,6 +541,8 @@ export async function runDeliberation(
       // Log probe_complete with usage_reported flag
       const logEntry: Record<string, unknown> = {
         type: "probe_complete",
+        cache_run_id: cacheRunId,
+        cache_call_id: callId,
         modelKey,
         role: role ?? undefined,
         duration_ms: duration,
@@ -539,7 +561,7 @@ export async function runDeliberation(
     } catch (err) {
       const duration = Date.now() - start;
       const msg = err instanceof Error ? err.message : String(err);
-      logger.log({ type: "probe_error", modelKey, duration_ms: duration, error: msg });
+      logger.log({ type: "probe_error", cache_run_id: cacheRunId, cache_call_id: callId, modelKey, duration_ms: duration, error: msg });
       throw err;
     }
   };

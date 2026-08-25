@@ -4,8 +4,8 @@
 import type { ConsortiumConfig, DeliberationResult, ProbeResult, ProgressCallback, ExtractedContext } from "./types.js";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { Usage } from "@earendil-works/pi-ai";
-import { extractContextFromMessages } from "./extraction.js";
-import { buildActiveUserDirectionPack, buildProbeInputXml, formatAgentMessageContent } from "./context.js";
+import { extractContextFromMessages, runStructuredDeliberationStage } from "./extraction.js";
+import { buildActiveUserDirectionPack, buildObservedPastXml, buildProbeInputXml, formatAgentMessageContent } from "./context.js";
 import { shouldDeliberate } from "./governor.js";
 
 /** Schema-constrained model tool requested by a caller such as AX. */
@@ -138,6 +138,7 @@ export class ConsortiumCore {
     }
 
     let userContext: string;
+    let sharedHistory: string | undefined;
     let directionPack = "";
     let extractedContext: ExtractedContext | undefined;
     let extractionAttempts: number | undefined;
@@ -185,6 +186,7 @@ export class ConsortiumCore {
           errors,
         };
       }
+      sharedHistory = buildObservedPastXml(input);
       userContext = buildProbeInputXml(input, extractedContext, false);
       directionPack = buildActiveUserDirectionPack(input, extractedContext);
     } else {
@@ -217,7 +219,7 @@ export class ConsortiumCore {
       0,
       ...this.config.probes.map((probe) => this.formatProbeUser(userContext, probe.roleLens, directionPack).length),
     );
-    const probeResults = await this.runProbes(userContext, directionPack, masterController.signal, errors, onProgress, probeTotal);
+    const probeResults = await this.runProbes(userContext, directionPack, sharedHistory, masterController.signal, errors, onProgress, probeTotal);
 
     // Skip synthesis if all probes had nothing to contribute
     const allNoContribution = probeResults.every(
@@ -263,9 +265,53 @@ export class ConsortiumCore {
       .join("\n\n---\n\n");
   }
 
+  private async runProbeStage(
+    modelKey: string,
+    probeSystemPrompt: string,
+    userContext: string,
+    roleLens: string,
+    directionPack: string,
+    sharedHistory: string | undefined,
+    signal: AbortSignal,
+  ): Promise<string> {
+    if (sharedHistory === undefined) {
+      const probeUser = this.formatProbeUser(userContext, roleLens, directionPack);
+      return validateProbeOutput(modelText(await this.callModel(
+        modelKey,
+        probeSystemPrompt,
+        probeUser,
+        this.config.maxProbeTokens,
+        this.config.probeTemperature,
+        signal,
+      )));
+    }
+
+    const legacyTail = userContext.slice(sharedHistory.length);
+    const stageTail = [
+      "<c3_probe_stage>",
+      probeSystemPrompt,
+      legacyTail,
+      roleLens,
+      directionPack,
+      "Set all extraction-vector arrays to []; set deliberationNeeded to false; set probeContribution to exactly NO_CONTRIBUTION or one valid tagged probe observation.",
+      "</c3_probe_stage>",
+    ].filter((part) => part.length > 0).join("\n\n---\n\n");
+    const result = await runStructuredDeliberationStage(
+      this.callModel,
+      modelKey,
+      this.config.maxProbeTokens,
+      this.config.probeTemperature,
+      sharedHistory,
+      stageTail,
+      signal,
+    );
+    return validateProbeOutput(result.probeContribution ?? "");
+  }
+
   private async runProbes(
     userContext: string,
     directionPack: string,
+    sharedHistory: string | undefined,
     signal: AbortSignal,
     errors: string[],
     onProgress?: ProgressCallback,
@@ -274,15 +320,16 @@ export class ConsortiumCore {
     const mode = this.config.executionMode ?? "serial";
 
     if (mode === "serial") {
-      return this.runProbesSerial(userContext, directionPack, signal, errors, onProgress, probeTotal);
+      return this.runProbesSerial(userContext, directionPack, sharedHistory, signal, errors, onProgress, probeTotal);
     }
 
-    return this.runProbesParallel(userContext, directionPack, signal, errors, onProgress, probeTotal);
+    return this.runProbesParallel(userContext, directionPack, sharedHistory, signal, errors, onProgress, probeTotal);
   }
 
   private async runProbesParallel(
     userContext: string,
     directionPack: string,
+    sharedHistory: string | undefined,
     signal: AbortSignal,
     errors: string[],
     onProgress?: ProgressCallback,
@@ -298,16 +345,15 @@ export class ConsortiumCore {
       const timeoutId = setTimeout(() => probeController.abort(), this.config.probeTimeoutMs);
 
       try {
-        const probeUser = this.formatProbeUser(userContext, probe.roleLens, directionPack);
-        const result = await this.callModel(
+        const validated = await this.runProbeStage(
           `probe:${i}:${probe.role}`,
           probe.systemPrompt,
-          probeUser,
-          this.config.maxProbeTokens,
-          this.config.probeTemperature,
+          userContext,
+          probe.roleLens,
+          directionPack,
+          sharedHistory,
           probeController.signal,
         );
-        const validated = validateProbeOutput(modelText(result));
         return { role: probe.role, text: validated };
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -327,6 +373,7 @@ export class ConsortiumCore {
   private async runProbesSerial(
     userContext: string,
     directionPack: string,
+    sharedHistory: string | undefined,
     signal: AbortSignal,
     errors: string[],
     onProgress?: ProgressCallback,
@@ -342,16 +389,15 @@ export class ConsortiumCore {
       const timeoutId = setTimeout(() => probeController.abort(), this.config.probeTimeoutMs);
 
       try {
-        const probeUser = this.formatProbeUser(userContext, probe.roleLens, directionPack);
-        const result = await this.callModel(
+        const validated = await this.runProbeStage(
           `probe:${i}:${probe.role}`,
           probe.systemPrompt,
-          probeUser,
-          this.config.maxProbeTokens,
-          this.config.probeTemperature,
+          userContext,
+          probe.roleLens,
+          directionPack,
+          sharedHistory,
           probeController.signal,
         );
-        const validated = validateProbeOutput(modelText(result));
         results.push({ role: probe.role, text: validated });
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);

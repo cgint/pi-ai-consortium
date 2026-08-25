@@ -45,9 +45,11 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     };
 
     let receivedSystem = "";
-    const mockCallFn: ModelCallFn = async (key, system, _user) => {
+    let receivedUser = "";
+    const mockCallFn: ModelCallFn = async (key, system, user) => {
       expect(key).toBe("extraction");
       receivedSystem = system;
+      receivedUser = user;
       return extractionStructured(ctxObj);
     };
 
@@ -68,10 +70,11 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     expect(ctx.relevantLearnings).toEqual(["Operational friction pollutes probe context"]);
     expect(ctx.deliberationNeeded).toBe(true);
     expect(ctx.deliberationReason).toBe("Unverified TUI implementation code edits");
-    // Ax renders the prompt; verify it carries our policy + the field labels.
-    expect(receivedSystem).toContain("ACCUMULATION RULE:");
-    expect(receivedSystem).toContain("CRITICAL FILTER RULE");
+    // AX owns the shared system/schema; C1 policy is deliberately post-history.
     expect(receivedSystem).toContain("User Requirements");
+    expect(receivedSystem).toContain("Stage Tail");
+    expect(receivedUser).toContain("ACCUMULATION RULE:");
+    expect(receivedUser).toContain("CRITICAL FILTER RULE");
   });
 
   it("includes ACCUMULATION RULE in EXTRACTION_INSTRUCTION", () => {
@@ -169,7 +172,8 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     expect(focus).toContain("Original mandate");
     expect(focus).toContain("Current direction");
     expect(focus).not.toContain("synthetic note");
-    expect(receivedUserPrompt.trim().endsWith("</human_input_focus>")).toBe(true);
+    expect(receivedUserPrompt).toContain("</human_input_focus>");
+    expect(receivedUserPrompt.trim().endsWith("</c1_extraction_stage>")).toBe(true);
   });
 
   it("propagates errors on LLM call failure (no silent fallback)", async () => {

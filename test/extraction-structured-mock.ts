@@ -2,7 +2,7 @@ import type { ModelCallResponse } from "../src/core.js";
 import type { ExtractedContext } from "../src/types.js";
 
 /** Build the strict AX output-function response used by extraction tests. */
-export function extractionStructured(ctx: Partial<ExtractedContext> = {}): ModelCallResponse {
+export function extractionStructured(ctx: Partial<ExtractedContext> & { probeContribution?: string } = {}): ModelCallResponse {
   return {
     text: "",
     functionCalls: [{
@@ -22,6 +22,7 @@ export function extractionStructured(ctx: Partial<ExtractedContext> = {}): Model
         ...(ctx.deliberationReason !== undefined ? { deliberationReason: ctx.deliberationReason } : {}),
         ...(ctx.activeHumanInputSourceIds !== undefined ? { activeHumanInputSourceIds: ctx.activeHumanInputSourceIds } : {}),
         ...(ctx.supersededHumanInputSourceIds !== undefined ? { supersededHumanInputSourceIds: ctx.supersededHumanInputSourceIds } : {}),
+        probeContribution: ctx.probeContribution ?? "",
       },
     }],
   };
