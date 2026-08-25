@@ -26,6 +26,10 @@ export interface ExtractedContext {
   deliberationNeeded?: boolean;
   /** Reason explaining why deliberation is needed or skipped. */
   deliberationReason?: string;
+  /** Genuine-human history source IDs whose exact wording should be emphasized for probes. */
+  activeHumanInputSourceIds?: string[];
+  /** Genuine-human history source IDs that remain relevant only as superseded context. */
+  supersededHumanInputSourceIds?: string[];
 }
 
 /** Structured probe payload formatted for auditing. */
@@ -188,6 +192,8 @@ export interface DeliberationResult {
   skippedByGovernor?: boolean;
   /** Explanation of why governor skipped or triggered deliberation. */
   governorReason?: string;
+  /** Largest rendered C3 user payload in characters for this deliberation. */
+  probePayloadChars?: number;
   /** Resolved deliberation model metadata (set by runDeliberation, read by UI). */
   model?: DeliberationModelInfo;
 }

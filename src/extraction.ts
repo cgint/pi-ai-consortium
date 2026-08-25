@@ -3,7 +3,7 @@
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { ExtractedContext } from "./types.js";
 import type { ModelCallFn } from "./core.js";
-import { buildObservedPastXml } from "./context.js";
+import { buildHumanInputFocus, buildObservedPastXml, getGenuineHumanInputs } from "./context.js";
 
 export const EXTRACTION_SYSTEM_PROMPT = [
   "You are a high-level strategic context extraction engine for a software development agent.",
@@ -29,11 +29,15 @@ export const EXTRACTION_SYSTEM_PROMPT = [
   '  "observedCriticalFacts": ["Verified domain truths, system behaviors, and test outcomes observed in logs"],',
   '  "relevantLearnings": ["Systemic insights, structural architecture patterns, or project rules learned"],',
   '  "deliberationNeeded": true or false,',
-  '  "deliberationReason": "Short reason explaining why full probe deliberation is or is not needed"',
+  '  "deliberationReason": "Short reason explaining why full probe deliberation is or is not needed",',
+  '  "activeHumanInputSourceIds": ["source_id values for genuine human inputs whose exact wording should be emphasized to probes"],',
+  '  "supersededHumanInputSourceIds": ["source_id values for genuine human inputs superseded by later directions"]',
   "}",
   "",
-  "Set deliberationNeeded to true if code/files were modified without test verification, if requirements are AMBIGUOUS, if tools failed critically, or if the user asked a complex architectural question.",
-  "Set deliberationNeeded to false if the user input is a simple acknowledgment, status check, routine question, or clear step in progress with fresh evidence.",
+  "Set deliberationNeeded to true only when the complete observed history contains a concrete, potentially helpful gap or risk that merits independent probes. A complex question alone is not sufficient.",
+  "Set deliberationNeeded to false when no such signal exists; this means probes will not run, not merely that they should be brief.",
+  "Human messages include source_id labels. The tail <human_input_focus> repeats the original and current genuine-human inputs for emphasis; the complete history remains the source of truth.",
+  "Preserve the original mandate and current direction in the strategic vectors; select only active, genuinely useful source IDs for activeHumanInputSourceIds and mark replaced directions in supersededHumanInputSourceIds.",
   "",
   "Output raw JSON ONLY. No conversational prefix or markdown wrapper.",
 ].join("\n");
@@ -45,10 +49,8 @@ export const EXTRACTION_SYSTEM_PROMPT = [
 export function getDefaultExtractedContext(messages?: AgentMessage[]): ExtractedContext {
   let initialGoal = "General task execution";
   if (messages && messages.length > 0) {
-    const firstUserMsg = messages.find((m) => m.role === "user");
-    if (firstUserMsg && "content" in firstUserMsg && typeof firstUserMsg.content === "string") {
-      initialGoal = firstUserMsg.content.slice(0, 200);
-    }
+    const firstHumanInput = getGenuineHumanInputs(messages)[0];
+    if (firstHumanInput) initialGoal = firstHumanInput.content.slice(0, 200);
   }
 
   return {
@@ -63,6 +65,8 @@ export function getDefaultExtractedContext(messages?: AgentMessage[]): Extracted
     relevantLearnings: [],
     deliberationNeeded: true,
     deliberationReason: "Default fallback context — full audit enabled by default",
+    activeHumanInputSourceIds: [],
+    supersededHumanInputSourceIds: [],
   };
 }
 
@@ -96,8 +100,14 @@ export async function extractContextFromMessages(
   let userPrompt = buildObservedPastXml(messages);
 
   if (previousContext) {
-    userPrompt = `${userPrompt}\n\n<previous_extracted_context_baseline>\n${JSON.stringify(previousContext, null, 2)}\n</previous_extracted_context_baseline>`;
+    const {
+      activeHumanInputSourceIds: _activeHumanInputSourceIds,
+      supersededHumanInputSourceIds: _supersededHumanInputSourceIds,
+      ...durablePreviousContext
+    } = previousContext;
+    userPrompt = `${userPrompt}\n\n<previous_extracted_context_baseline>\n${JSON.stringify(durablePreviousContext, null, 2)}\n</previous_extracted_context_baseline>`;
   }
+  userPrompt = `${userPrompt}\n\n${buildHumanInputFocus(messages)}`;
 
   const raw = await callModel(
     "extraction",
@@ -124,5 +134,7 @@ export async function extractContextFromMessages(
     relevantLearnings: ensureStringArray(parsed.relevantLearnings, defaults.relevantLearnings),
     deliberationNeeded: typeof parsed.deliberationNeeded === "boolean" ? parsed.deliberationNeeded : true,
     deliberationReason: parsed.deliberationReason ? String(parsed.deliberationReason) : undefined,
+    activeHumanInputSourceIds: ensureStringArray(parsed.activeHumanInputSourceIds),
+    supersededHumanInputSourceIds: ensureStringArray(parsed.supersededHumanInputSourceIds),
   };
 }

@@ -55,7 +55,7 @@ LLM history + new input
 | `/ai-consortium-on` | Enable deliberation |
 | `/ai-consortium-off` | Disable deliberation |
 | `/ai-consortium-cadence <mode>` | Set governor mode: `smart_extractor`, `always`, `periodic [N]`, `manual` |
-| `/ai-consortium-context` | Inspect last turn's 5 context vectors + governor signal |
+| `/ai-consortium-context` | Inspect the last extracted strategic context + governor signal |
 
 State persists in `.pi/settings.json` under the `consortium` key and survives reloads. Defaults to **enabled** with `smart_extractor` governor mode.
 
@@ -63,7 +63,7 @@ State persists in `.pi/settings.json` under the `consortium` key and survives re
 
 To prevent high token consumption and latency on simple or routine turns, `pi-ai-consortium` includes a **Deliberation Governor**:
 
-1. **`smart_extractor` (Default):** The fast Phase 0 Context Extraction pass inspects transcript history and outputs a `deliberationNeeded` signal. On routine turns (e.g. conversational acknowledgments, status checks), it skips the 5 probes and synthesis pass entirely, saving ~85% of token/API calls.
+1. **`smart_extractor` (Default):** One full-history extraction pass performs C1 (strategic-lens extraction) and C2 (reason whether `deliberationNeeded` should be `true` or `false`). The deterministic governor then routes execution from that result plus cadence/guard rules; it is not C2. On routine turns (e.g. conversational acknowledgments, status checks), it skips the 5 probes and synthesis pass entirely, saving ~85% of token/API calls.
 2. **Max Turn Gap (Safety Net):** Every 20 turns (`maxTurnGap: 20`), the governor forces a full 5-probe deliberation pass regardless of the extraction signal to guarantee periodic safety auditing over long sessions.
 3. **Modes:**
    - `smart_extractor`: Semantic extraction gate + 20-turn safety net.
@@ -73,7 +73,9 @@ To prevent high token consumption and latency on simple or routine turns, `pi-ai
 
 ## Key design
 
-- **Internal deliberation, not delegation.** Probes analyze; they don't spawn work. The final decision belongs to the synthesis stage.
+- **C1–C4 contribution pipeline.** One full-history extraction call contains two responsibilities: C1 extracts a strategic lens; C2 reasons whether the returned `deliberationNeeded` boolean is `true` or `false`. Each C3 probe independently contributes or stays silent; C4 consolidates only when contributions exist.
+- **Full-history parity.** C1 and C3 receive the same complete message history. C1's exact original/current human focus and C3's source-backed direction pack sharpen attention without replacing evidence.
+- **Internal deliberation, not delegation.** Probes analyze; they don't spawn work. A valid C4 result is delivered automatically into the agent's context.
 - **NO_CONTRIBUTION protocol.** If a probe has nothing useful to add, it returns `NO_CONTRIBUTION`. If all probes return this, synthesis is skipped entirely.
 - **Per-turn JSONL logging.** Every deliberation is logged immutably under `.pi/consortium/`. Timestamped filenames, append-only, never rotated, never deleted.
 - **Blocking on `context` event.** Runs synchronously before each LLM call (including tool-call loops).
@@ -106,7 +108,7 @@ If all probes return `NO_CONTRIBUTION`, the status bar shows `consortium: ✓ co
 index.ts           — extension entry point (Pi hooks, ~170 lines)
 src/
   config.ts        — DEFAULT_CONFIG, PROBE_SYSTEM_PROMPT, probe definitions
-  context.ts       — buildUserContext, buildUserContextFromMessages
+  context.ts       — full-history rendering, Consortium attribution, human-direction focus
   core.ts          — ConsortiumCore: probe orchestration, synthesis, validation
   model.ts         — model invocation with auth forwarding
   types.ts         — ProbeConfig, TurnState, DeliberationResult, ProgressCallback

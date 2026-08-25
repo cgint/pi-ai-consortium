@@ -4,7 +4,7 @@
 import type { ConsortiumConfig, DeliberationResult, ProbeResult, ProgressCallback, ExtractedContext } from "./types.js";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import { extractContextFromMessages } from "./extraction.js";
-import { buildProbeInputXml, formatAgentMessageContent } from "./context.js";
+import { buildActiveUserDirectionPack, buildProbeInputXml, formatAgentMessageContent } from "./context.js";
 import { shouldDeliberate } from "./governor.js";
 
 /** Injectable model call function (mockable for tests). */
@@ -103,6 +103,7 @@ export class ConsortiumCore {
     }
 
     let userContext: string;
+    let directionPack = "";
     let extractedContext: ExtractedContext | undefined;
 
     if (Array.isArray(input)) {
@@ -128,7 +129,8 @@ export class ConsortiumCore {
           errors,
         };
       }
-      userContext = buildProbeInputXml(input, extractedContext);
+      userContext = buildProbeInputXml(input, extractedContext, false);
+      directionPack = buildActiveUserDirectionPack(input, extractedContext);
     } else {
       userContext = input;
     }
@@ -152,7 +154,11 @@ export class ConsortiumCore {
     }
 
     // Phase 1: Divergence — parallel or serial probes
-    const probeResults = await this.runProbes(userContext, masterController.signal, errors, onProgress, probeTotal);
+    const probePayloadChars = Math.max(
+      0,
+      ...this.config.probes.map((probe) => this.formatProbeUser(userContext, probe.roleLens, directionPack).length),
+    );
+    const probeResults = await this.runProbes(userContext, directionPack, masterController.signal, errors, onProgress, probeTotal);
 
     // Skip synthesis if all probes had nothing to contribute
     const allNoContribution = probeResults.every(
@@ -165,6 +171,7 @@ export class ConsortiumCore {
         synthesis: "NO_CONTRIBUTION",
         extractedContext,
         governorReason: governorDecision.reason,
+        probePayloadChars,
         errors: errors.length > 0 ? errors : undefined,
       };
     }
@@ -180,12 +187,20 @@ export class ConsortiumCore {
       synthesis,
       extractedContext,
       governorReason: governorDecision.reason,
+      probePayloadChars,
       errors: errors.length > 0 ? errors : undefined,
     };
   }
 
+  private formatProbeUser(userContext: string, roleLens: string, directionPack: string): string {
+    return [userContext, roleLens, directionPack]
+      .filter((part) => part.length > 0)
+      .join("\n\n---\n\n");
+  }
+
   private async runProbes(
     userContext: string,
+    directionPack: string,
     signal: AbortSignal,
     errors: string[],
     onProgress?: ProgressCallback,
@@ -194,14 +209,15 @@ export class ConsortiumCore {
     const mode = this.config.executionMode ?? "serial";
 
     if (mode === "serial") {
-      return this.runProbesSerial(userContext, signal, errors, onProgress, probeTotal);
+      return this.runProbesSerial(userContext, directionPack, signal, errors, onProgress, probeTotal);
     }
 
-    return this.runProbesParallel(userContext, signal, errors, onProgress, probeTotal);
+    return this.runProbesParallel(userContext, directionPack, signal, errors, onProgress, probeTotal);
   }
 
   private async runProbesParallel(
     userContext: string,
+    directionPack: string,
     signal: AbortSignal,
     errors: string[],
     onProgress?: ProgressCallback,
@@ -217,9 +233,7 @@ export class ConsortiumCore {
       const timeoutId = setTimeout(() => probeController.abort(), this.config.probeTimeoutMs);
 
       try {
-        const probeUser = probe.roleLens
-          ? `${userContext}\n\n---\n\n${probe.roleLens}`
-          : userContext;
+        const probeUser = this.formatProbeUser(userContext, probe.roleLens, directionPack);
         const result = await this.callModel(
           `probe:${i}:${probe.role}`,
           probe.systemPrompt,
@@ -247,6 +261,7 @@ export class ConsortiumCore {
 
   private async runProbesSerial(
     userContext: string,
+    directionPack: string,
     signal: AbortSignal,
     errors: string[],
     onProgress?: ProgressCallback,
@@ -262,9 +277,7 @@ export class ConsortiumCore {
       const timeoutId = setTimeout(() => probeController.abort(), this.config.probeTimeoutMs);
 
       try {
-        const probeUser = probe.roleLens
-          ? `${userContext}\n\n---\n\n${probe.roleLens}`
-          : userContext;
+        const probeUser = this.formatProbeUser(userContext, probe.roleLens, directionPack);
         const result = await this.callModel(
           `probe:${i}:${probe.role}`,
           probe.systemPrompt,

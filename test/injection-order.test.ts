@@ -4,7 +4,6 @@ import * as path from "node:path";
 
 const deliberate = vi.fn();
 const loggerLog = vi.fn();
-const buildUserContextFromMessages = vi.fn(() => "current agent context");
 
 vi.mock("../src/core.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../src/core.js")>();
@@ -24,7 +23,6 @@ vi.mock("../src/context.js", async (importOriginal) => {
   return {
     ...actual,
     buildUserContext: vi.fn(),
-    buildUserContextFromMessages,
   };
 });
 vi.mock("../src/model.js", () => ({ callModelWithAuth: vi.fn() }));
@@ -44,7 +42,6 @@ beforeEach(async () => {
   vi.resetModules();
   deliberate.mockReset();
   deliberate.mockResolvedValue({ synthesis: "Keep the answer concise.", probes: [], errors: [] });
-  buildUserContextFromMessages.mockClear();
   loggerLog.mockClear();
 
   const handlers = new Map<string, Function>();
@@ -97,6 +94,23 @@ describe("consortium context injection", () => {
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
+  });
+
+  it("skips deliberation when the context event has no messages", async () => {
+    const ctx = {
+      cwd: process.cwd(),
+      sessionManager: { getSessionId: () => "test-session" },
+      model: { provider: "test", id: "model" },
+      modelRegistry: {},
+      signal: new AbortController().signal,
+      hasUI: false,
+      ui: { setStatus: vi.fn(), notify: vi.fn() },
+    };
+
+    const result = await contextHandler({ messages: [] }, ctx);
+
+    expect(result).toBeUndefined();
+    expect(deliberate).not.toHaveBeenCalled();
   });
 
   it("appends the synthetic deliberation after existing messages to preserve their prefix", async () => {

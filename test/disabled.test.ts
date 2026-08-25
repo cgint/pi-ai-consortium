@@ -2,7 +2,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const deliberate = vi.fn();
-const buildUserContextFromMessages = vi.fn(() => "current agent context");
 
 vi.mock("../src/core.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../src/core.js")>();
@@ -23,7 +22,6 @@ vi.mock("../src/context.js", async (importOriginal) => {
   return {
     ...actual,
     buildUserContext: vi.fn(),
-    buildUserContextFromMessages,
   };
 });
 vi.mock("../src/model.js", () => ({ callModelWithAuth: vi.fn() }));
@@ -45,7 +43,6 @@ beforeEach(async () => {
   vi.resetModules();
   deliberate.mockReset();
   deliberate.mockResolvedValue({ synthesis: "Keep the answer concise.", probes: [], errors: [] });
-  buildUserContextFromMessages.mockClear();
   commands = new Map();
 
   const handlers = new Map<string, Function>();

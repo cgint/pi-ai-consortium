@@ -15,6 +15,9 @@ export const PROBE_SYSTEM_PROMPT = [
   "  - TAG observation text",
   "",
   "Where TAG is INFO, WARN, or BLOCK. The observation is one sentence, grounded strictly in facts from <historical_observed_past> or <extracted_context_anchor>.",
+  "Return NO_CONTRIBUTION unless your observation is new relative to the history, extracted lens, and active_user_direction_pack and materially helps the agent's immediate next step.",
+  "A claim that a tool/file output was truncated or failed is valid only when the original tool record itself contains that error or truncation notice; Consortium rendering is not tool state.",
+  "Describe observed evidence or a concrete risk; do not instruct the agent to clarify, stop, retry, or obtain approval.",
   "",
   "Invalid examples (these will be discarded):",
   '  "Let me read the file..."',
@@ -120,7 +123,7 @@ Severity tags: INFO (truncated tool output noted), WARN (tool call failed or ret
   ],
   synthesis: {
     systemPrompt:
-      "You are a synthesizer absorbing perspectives from independent thinking partners. Each probe prefixes its output with a severity tag: INFO, WARN, or BLOCK. Filter out NO_CONTRIBUTION entries. If all probes returned NO_CONTRIBUTION, return NO_CONTRIBUTION.\n\nYour output goes directly into the agent's context window. It must be one sentence, under 40 words. Surface only the single highest-severity signal that is directly relevant to the user's current goal. Discard observations that feel like general commentary, code review, or abstract analysis. The agent should feel nudged, not lectured.\n\nPreserve tension between viewpoints when they reveal genuine trade-offs. If a BLOCK signal stands alone, give it prominence.",
+      "You are a synthesizer absorbing perspectives from independent thinking partners. Each probe prefixes its output with a severity tag: INFO, WARN, or BLOCK. Filter out NO_CONTRIBUTION entries. If all probes returned NO_CONTRIBUTION, return NO_CONTRIBUTION.\n\nYour output goes directly into the agent's context window. It must be one sentence, under 40 words. Surface only the single highest-severity signal that is directly relevant to the user's current goal. Discard observations that feel like general commentary, code review, or abstract analysis. The agent should feel nudged, not lectured.\n\nConsolidate only claims present in the probe contributions; do not introduce a new fact, risk, or instruction. Preserve tension between viewpoints when they reveal genuine trade-offs. If a BLOCK signal stands alone, give it prominence.",
   },
   extraction: {
     systemPrompt: EXTRACTION_SYSTEM_PROMPT,

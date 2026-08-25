@@ -570,6 +570,39 @@ describe("ConsortiumCore", () => {
     expect(res2.extractedContext?.userRequirements).toContain("Turn 2 requirement");
   });
 
+  it("puts the genuine-human direction pack after each C3 role lens", async () => {
+    const receivedProbeUsers: string[] = [];
+    const callFn: ModelCallFn = async (modelKey, _system, user) => {
+      if (modelKey === "extraction") {
+        return JSON.stringify({
+          userRequirements: ["Original mandate", "Current direction"],
+          deliverables: [], revisedOrSupersededDirection: [], userDecisions: [],
+          questionsAndInformationGaps: [], controlBoundaries: [], observedWork: [], observedCriticalFacts: [], relevantLearnings: [],
+          deliberationNeeded: true,
+          activeHumanInputSourceIds: [],
+        });
+      }
+      if (modelKey.startsWith("probe:")) receivedProbeUsers.push(user);
+      return "NO_CONTRIBUTION";
+    };
+    const core = new ConsortiumCore(baseConfig, callFn);
+    const result = await core.deliberate([
+      { role: "user" as const, content: "Original mandate", timestamp: Date.now() },
+      { role: "user" as const, content: "[CONSORTIUM DELIBERATION] ignored synthetic text", timestamp: Date.now() },
+      { role: "user" as const, content: "Current direction", timestamp: Date.now() },
+    ]);
+
+    expect(receivedProbeUsers).toHaveLength(2);
+    expect(result.probePayloadChars).toBe(Math.max(...receivedProbeUsers.map((user) => user.length)));
+    for (const user of receivedProbeUsers) {
+      const pack = user.slice(user.lastIndexOf("<active_user_direction_pack>"));
+      expect(user.lastIndexOf("<active_user_direction_pack>")).toBeGreaterThan(user.lastIndexOf("## Lens:"));
+      expect(pack).toContain("Original mandate");
+      expect(pack).toContain("Current direction");
+      expect(pack).not.toContain("ignored synthetic text");
+    }
+  });
+
   it("extraction failure skips probes and returns errors", async () => {
     let probeExecuted = false;
 

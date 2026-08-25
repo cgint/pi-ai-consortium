@@ -18,7 +18,7 @@ import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import { ConsortiumCore, getCurrentHumanUserTurn, type ModelCallFn } from "./src/core.js";
 import { callModelWithAuth } from "./src/model.js";
 import { DEFAULT_CONFIG, parseModelRef, reasoningSource } from "./src/config.js";
-import { buildUserContext, buildUserContextFromMessages } from "./src/context.js";
+import { buildUserContext } from "./src/context.js";
 import { ConsortiumLogger, createProgressCallback, formatVisibleMessage } from "./src/ui.js";
 import type { ConsortiumConfig, TurnState, DeliberationResult, DeliberationModelInfo, GovernorMode, TelemetryEvent } from "./src/types.js";
 import { createUsageAccumulator, buildDeliberationTelemetry, safeLog } from "./src/telemetry.js";
@@ -147,8 +147,7 @@ export default function (pi: ExtensionAPI): void {
       return;
     }
 
-    const userContext = buildUserContextFromMessages(event.messages);
-    if (!userContext) {
+    if (event.messages.length === 0) {
       return;
     }
 
@@ -211,6 +210,7 @@ export default function (pi: ExtensionAPI): void {
           reason: "NO_CONTRIBUTION",
           governor_reason: result.governorReason,
           probe_count: result.probes.length,
+          probe_payload_chars: result.probePayloadChars,
           extractedContext: result.extractedContext,
         });
         if (ctx.hasUI) {
@@ -238,6 +238,7 @@ export default function (pi: ExtensionAPI): void {
         type: "injection_complete",
         synthesis_length: result.synthesis.length,
         probe_count: result.probes.length,
+        probe_payload_chars: result.probePayloadChars,
         errors: result.errors,
         governor_reason: result.governorReason,
         probes: result.probes,
@@ -252,6 +253,7 @@ export default function (pi: ExtensionAPI): void {
           kind: "deliberation",
           synthesis: result.synthesis,
           probe_count: result.probes.length,
+          probe_payload_chars: result.probePayloadChars,
           extractedContext: result.extractedContext,
           errors: result.errors,
         });

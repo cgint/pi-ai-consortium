@@ -1,7 +1,7 @@
 // Tests for XML payload formatting and context builders in src/context.ts.
 
 import { describe, expect, it } from "vitest";
-import { buildProbeInputXml, buildUserContextFromMessages, formatAgentMessageContent, truncateHeadTail } from "../src/context.js";
+import { buildObservedPastXml, buildProbeInputXml, buildUserContextFromMessages, formatAgentMessageContent, truncateHeadTail } from "../src/context.js";
 import type { ExtractedContext } from "../src/types.js";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 
@@ -34,7 +34,7 @@ describe("src/context.ts", () => {
     expect(xml).toContain("</meta_directive>");
 
     expect(xml).toContain("<historical_observed_past>");
-    expect(xml).toContain("[USER] Implement XML probe payload protocol.");
+    expect(xml).toContain("[USER] [source_id=human-0] Implement XML probe payload protocol.");
     expect(xml).toContain("</historical_observed_past>");
 
     expect(xml).toContain("<extracted_context_anchor>");
@@ -75,6 +75,62 @@ describe("src/context.ts", () => {
     expect(formatted).toContain("[image: image/png]");
   });
 
+  it("preserves a complete 9,690-character tool result in both C1 and C3 history", () => {
+    const completeRead = `READ_START\n${"x".repeat(9_670)}\nREAD_END`;
+    const messages = [{
+      role: "toolResult",
+      toolName: "read",
+      content: completeRead,
+      timestamp: Date.now(),
+    }] as AgentMessage[];
+
+    const c1History = buildObservedPastXml(messages);
+    const c3Input = buildProbeInputXml(messages, sampleContext);
+
+    expect(c1History).toContain(completeRead);
+    expect(c3Input).toContain(completeRead);
+    expect(c1History).not.toContain("[truncated");
+    expect(c3Input).not.toContain("[truncated");
+  });
+
+  it("ends C3 input with selected genuine human direction, not synthetic deliberation", () => {
+    const messages = [
+      { role: "user", content: "Original mandate: preserve customer data.", timestamp: Date.now() },
+      { role: "user", content: "[CONSORTIUM DELIBERATION]\n\nWARN Synthetic internal note.", timestamp: Date.now() },
+      { role: "assistant", content: "I inspected the migration.", timestamp: Date.now() },
+      { role: "user", content: "Current direction: prioritize rollback safety.", timestamp: Date.now() },
+    ] as AgentMessage[];
+    const context: ExtractedContext = {
+      ...sampleContext,
+      activeHumanInputSourceIds: ["human-1"],
+    };
+
+    const xml = buildProbeInputXml(messages, context);
+    const history = xml.slice(0, xml.indexOf("</historical_observed_past>"));
+    const pack = xml.slice(xml.lastIndexOf("<active_user_direction_pack>"));
+
+    expect(history).toContain("[CONSORTIUM] [CONSORTIUM DELIBERATION]");
+    expect(history).not.toContain("[USER] [CONSORTIUM DELIBERATION]");
+    expect(pack).toContain("Original mandate: preserve customer data.");
+    expect(pack).toContain("Current direction: prioritize rollback safety.");
+    expect(pack).not.toContain("Synthetic internal note.");
+    expect(xml.indexOf("<active_user_direction_pack>")).toBeGreaterThan(xml.indexOf("<extracted_context_anchor>"));
+  });
+
+  it("marks a single genuine-human input as both original and current without stale supersession", () => {
+    const messages = [{ role: "user", content: "Only current mandate", timestamp: Date.now() }] as AgentMessage[];
+    const context: ExtractedContext = {
+      ...sampleContext,
+      supersededHumanInputSourceIds: ["human-0"],
+    };
+
+    const xml = buildProbeInputXml(messages, context);
+    const pack = xml.slice(xml.lastIndexOf("<active_user_direction_pack>"));
+
+    expect(pack).toContain('<original_and_current_human_input source_id="human-0">Only current mandate</original_and_current_human_input>');
+    expect(pack).not.toContain('status="superseded"');
+  });
+
   it("truncateHeadTail preserves both head and tail while capping total length", () => {
     const headText = "HEAD_START: Initial setup log line.";
     const tailText = "TAIL_END: Final exit code 1 build error.";
@@ -85,7 +141,9 @@ describe("src/context.ts", () => {
 
     expect(truncated).toContain("HEAD_START");
     expect(truncated).toContain("TAIL_END");
-    expect(truncated).toContain("... [truncated");
+    expect(truncated).toContain("[consortium-internal omission:");
+    expect(truncated).toContain("NOT a tool truncation");
+    expect(truncated).not.toContain("... [truncated");
     expect(truncated.length).toBeLessThanOrEqual(250);
   });
 });

@@ -97,6 +97,8 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
       observedWork: ["Work step 1"],
       observedCriticalFacts: ["Fact 1"],
       relevantLearnings: [],
+      activeHumanInputSourceIds: ["human-4"],
+      supersededHumanInputSourceIds: ["human-1"],
     };
 
     const messages: AgentMessage[] = [
@@ -107,6 +109,12 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
 
     expect(receivedUserPrompt).toContain("<previous_extracted_context_baseline>");
     expect(receivedUserPrompt).toContain("Accumulated requirement");
+    const baseline = receivedUserPrompt.slice(
+      receivedUserPrompt.indexOf("<previous_extracted_context_baseline>"),
+      receivedUserPrompt.indexOf("</previous_extracted_context_baseline>"),
+    );
+    expect(baseline).not.toContain("activeHumanInputSourceIds");
+    expect(baseline).not.toContain("supersededHumanInputSourceIds");
     expect(ctx.userRequirements).toContain("Accumulated requirement");
     expect(ctx.userRequirements).toContain("New requirement");
   });
@@ -139,6 +147,33 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
 
     expect(receivedUserPrompt).toContain("Message 1: Turn detail for item 1");
     expect(receivedUserPrompt).toContain("Message 15: Turn detail for item 15");
+  });
+
+  it("ends C1 input with original and current genuine-human focus", async () => {
+    let receivedUserPrompt = "";
+    const mockCallFn: ModelCallFn = async (_key, _system, user) => {
+      receivedUserPrompt = user;
+      return JSON.stringify({
+        userRequirements: ["Original mandate", "Current direction"],
+        deliverables: [], revisedOrSupersededDirection: [], userDecisions: [],
+        questionsAndInformationGaps: [], controlBoundaries: [], observedWork: [], observedCriticalFacts: [], relevantLearnings: [],
+        deliberationNeeded: false,
+      });
+    };
+    const previousContext = getDefaultExtractedContext();
+    await extractContextFromMessages([
+      { role: "user", content: "Original mandate", timestamp: Date.now() },
+      { role: "user", content: "[CONSORTIUM DELIBERATION] synthetic note", timestamp: Date.now() },
+      { role: "assistant", content: "Work in progress", timestamp: Date.now() },
+      { role: "user", content: "Current direction", timestamp: Date.now() },
+    ], mockCallFn, previousContext);
+
+    const focus = receivedUserPrompt.slice(receivedUserPrompt.lastIndexOf("<human_input_focus>"));
+    expect(receivedUserPrompt.lastIndexOf("<human_input_focus>")).toBeGreaterThan(receivedUserPrompt.lastIndexOf("<previous_extracted_context_baseline>"));
+    expect(focus).toContain("Original mandate");
+    expect(focus).toContain("Current direction");
+    expect(focus).not.toContain("synthetic note");
+    expect(receivedUserPrompt.trim().endsWith("</human_input_focus>")).toBe(true);
   });
 
   it("propagates errors on LLM call failure (no silent fallback)", async () => {
