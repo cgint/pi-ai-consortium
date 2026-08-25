@@ -43,5 +43,8 @@
   },
   "overrides": {
     "protobufjs": "^7.6.5"
+  },
+  "dependencies": {
+    "@ax-llm/ax": "^24.0.8"
   }
 }

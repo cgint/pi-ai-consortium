@@ -1,13 +1,17 @@
 // Tests for high-level 9-slot strategic context vector extraction.
+// Extraction now runs through @ax-llm/ax: a typed signature renders the prompt,
+// and Ax parses/validates the model's labeled-field response.
 
 import { describe, expect, it } from "vitest";
 import {
   extractContextFromMessages,
-  EXTRACTION_SYSTEM_PROMPT,
+  EXTRACTION_INSTRUCTION,
   getDefaultExtractedContext,
 } from "../src/extraction.js";
 import type { ModelCallFn } from "../src/core.js";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
+import type { ExtractedContext } from "../src/types.js";
+import { extractionLabeled } from "./extraction-mock.js";
 
 describe("src/extraction.ts — 9-slot strategic context", () => {
   it("provides default safe extracted context with 9 slots on empty or invalid input", () => {
@@ -25,8 +29,8 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     expect(defaultCtx.deliberationNeeded).toBe(true);
   });
 
-  it("extracts 9 strategic context vector arrays from valid LLM JSON response", async () => {
-    const mockJson = JSON.stringify({
+  it("extracts 9 strategic context vector arrays from a valid LLM response", async () => {
+    const ctxObj: ExtractedContext = {
       userRequirements: ["Implement 9-slot strategic extraction", "Preserve KV-cache prefix"],
       deliverables: ["Updated src/types.ts", "Updated TUI notifications in src/ui.ts"],
       revisedOrSupersededDirection: ["Filter out edit tool line-mismatch errors"],
@@ -38,12 +42,13 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
       relevantLearnings: ["Operational friction pollutes probe context"],
       deliberationNeeded: true,
       deliberationReason: "Unverified TUI implementation code edits",
-    });
+    };
 
+    let receivedSystem = "";
     const mockCallFn: ModelCallFn = async (key, system, _user) => {
       expect(key).toBe("extraction");
-      expect(system).toBe(EXTRACTION_SYSTEM_PROMPT);
-      return mockJson;
+      receivedSystem = system;
+      return extractionLabeled(ctxObj);
     };
 
     const messages: AgentMessage[] = [
@@ -62,27 +67,28 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     expect(ctx.observedCriticalFacts).toEqual(["Pass 1 Pass 2 Pass 3 serial pipeline active"]);
     expect(ctx.relevantLearnings).toEqual(["Operational friction pollutes probe context"]);
     expect(ctx.deliberationNeeded).toBe(true);
+    expect(ctx.deliberationReason).toBe("Unverified TUI implementation code edits");
+    // Ax renders the prompt; verify it carries our policy + the field labels.
+    expect(receivedSystem).toContain("ACCUMULATION RULE:");
+    expect(receivedSystem).toContain("CRITICAL FILTER RULE");
+    expect(receivedSystem).toContain("User Requirements");
   });
 
-  it("includes ACCUMULATION RULE in EXTRACTION_SYSTEM_PROMPT", () => {
-    expect(EXTRACTION_SYSTEM_PROMPT).toContain("ACCUMULATION RULE:");
-    expect(EXTRACTION_SYSTEM_PROMPT).toContain("PRESERVE and ACCUMULATE durable user intent");
+  it("includes ACCUMULATION RULE in EXTRACTION_INSTRUCTION", () => {
+    expect(EXTRACTION_INSTRUCTION).toContain("ACCUMULATION RULE:");
+    expect(EXTRACTION_INSTRUCTION).toContain("PRESERVE and ACCUMULATE durable user intent");
   });
 
   it("passes Previous Extracted Context Baseline to LLM when previousContext is provided", async () => {
     let receivedUserPrompt = "";
     const mockCallFn: ModelCallFn = async (_key, _system, user) => {
       receivedUserPrompt = user;
-      return JSON.stringify({
+      return extractionLabeled({
         userRequirements: ["Accumulated requirement", "New requirement"],
         deliverables: ["Deliverable 1"],
-        revisedOrSupersededDirection: [],
-        userDecisions: [],
-        questionsAndInformationGaps: [],
         controlBoundaries: ["Control 1"],
         observedWork: ["Work step 2"],
         observedCriticalFacts: ["Fact 2"],
-        relevantLearnings: [],
         deliberationNeeded: true,
       });
     };
@@ -123,16 +129,8 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     let receivedUserPrompt = "";
     const mockCallFn: ModelCallFn = async (_key, _system, user) => {
       receivedUserPrompt = user;
-      return JSON.stringify({
+      return extractionLabeled({
         userRequirements: ["Earliest Turn 1 Goal", "Latest Turn 15 Goal"],
-        deliverables: [],
-        revisedOrSupersededDirection: [],
-        userDecisions: [],
-        questionsAndInformationGaps: [],
-        controlBoundaries: [],
-        observedWork: [],
-        observedCriticalFacts: [],
-        relevantLearnings: [],
         deliberationNeeded: true,
       });
     };
@@ -153,10 +151,8 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     let receivedUserPrompt = "";
     const mockCallFn: ModelCallFn = async (_key, _system, user) => {
       receivedUserPrompt = user;
-      return JSON.stringify({
+      return extractionLabeled({
         userRequirements: ["Original mandate", "Current direction"],
-        deliverables: [], revisedOrSupersededDirection: [], userDecisions: [],
-        questionsAndInformationGaps: [], controlBoundaries: [], observedWork: [], observedCriticalFacts: [], relevantLearnings: [],
         deliberationNeeded: false,
       });
     };
@@ -189,16 +185,16 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
       .rejects.toThrow("API network failure");
   });
 
-  it("propagates errors on invalid JSON from model", async () => {
-    const badJsonCallFn: ModelCallFn = async () => {
-      return "not valid json {{{";
+  it("propagates errors on unparseable model output (no silent fallback)", async () => {
+    const badOutputCallFn: ModelCallFn = async () => {
+      return "not a labeled field response {{{";
     };
 
     const messages: AgentMessage[] = [
       { role: "user", content: "Build a feature", timestamp: Date.now() },
     ];
 
-    await expect(extractContextFromMessages(messages, badJsonCallFn))
-      .rejects.toThrow("JSON");
+    await expect(extractContextFromMessages(messages, badOutputCallFn))
+      .rejects.toThrow(/validation error|Required field not found/i);
   });
 });

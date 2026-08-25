@@ -3,6 +3,7 @@
 import { describe, expect, it } from "vitest";
 import { ConsortiumCore, type ModelCallFn } from "../src/core.js";
 import type { ConsortiumConfig } from "../src/types.js";
+import { extractionLabeled } from "./extraction-mock.js";
 
 /** Mock model call function that returns predetermined responses. */
 function createMockCallFn(responses: Record<string, string>): ModelCallFn {
@@ -63,16 +64,11 @@ describe("ConsortiumCore", () => {
     const callFn: ModelCallFn = async (modelKey) => {
       if (modelKey === "extraction") {
         extractionExecuted = true;
-        return JSON.stringify({
+        return extractionLabeled({
           userRequirements: ["Periodic trigger"],
-          deliverables: [],
-          revisedOrSupersededDirection: [],
-          userDecisions: [],
-          questionsAndInformationGaps: [],
           controlBoundaries: ["None"],
           observedWork: ["Facts"],
           observedCriticalFacts: ["Fresh"],
-          relevantLearnings: [],
         });
       }
       probeExecuted = true;
@@ -98,16 +94,11 @@ describe("ConsortiumCore", () => {
     let probeExecuted = false;
     const callFn: ModelCallFn = async (modelKey) => {
       if (modelKey === "extraction") {
-        return JSON.stringify({
+        return extractionLabeled({
           userRequirements: ["Test"],
-          deliverables: [],
-          revisedOrSupersededDirection: [],
-          userDecisions: [],
-          questionsAndInformationGaps: [],
           controlBoundaries: ["None"],
           observedWork: ["Facts"],
           observedCriticalFacts: ["Fresh"],
-          relevantLearnings: [],
           deliberationNeeded: false,
           deliberationReason: "Routine status query",
         });
@@ -131,9 +122,8 @@ describe("ConsortiumCore", () => {
     const callFn: ModelCallFn = async (modelKey) => {
       callKeys.push(modelKey);
       if (modelKey === "extraction") {
-        return JSON.stringify({
-          userRequirements: ["Replace state requirement"], deliverables: [], revisedOrSupersededDirection: [], userDecisions: [],
-          questionsAndInformationGaps: [], controlBoundaries: [], observedWork: [], observedCriticalFacts: [], relevantLearnings: [],
+        return extractionLabeled({
+          userRequirements: ["Replace state requirement"],
           deliberationNeeded: false, deliberationReason: "Routine status query",
         });
       }
@@ -152,9 +142,8 @@ describe("ConsortiumCore", () => {
     const callFn: ModelCallFn = async (modelKey) => {
       callKeys.push(modelKey);
       if (modelKey === "extraction") {
-        return JSON.stringify({
-          userRequirements: ["Replace state requirement"], deliverables: [], revisedOrSupersededDirection: [], userDecisions: [],
-          questionsAndInformationGaps: [], controlBoundaries: [], observedWork: [], observedCriticalFacts: [], relevantLearnings: [],
+        return extractionLabeled({
+          userRequirements: ["Replace state requirement"],
           deliberationNeeded: false, deliberationReason: "Routine status query",
         });
       }
@@ -178,9 +167,8 @@ describe("ConsortiumCore", () => {
     const callFn: ModelCallFn = async (modelKey) => {
       callKeys.push(modelKey);
       if (modelKey === "extraction") {
-        return JSON.stringify({
-          userRequirements: ["Replace state requirement"], deliverables: [], revisedOrSupersededDirection: [], userDecisions: [],
-          questionsAndInformationGaps: [], controlBoundaries: [], observedWork: [], observedCriticalFacts: [], relevantLearnings: [],
+        return extractionLabeled({
+          userRequirements: ["Replace state requirement"],
           deliberationNeeded: false, deliberationReason: "Routine status query",
         });
       }
@@ -495,22 +483,17 @@ describe("ConsortiumCore", () => {
 
   it("runs extraction pass and passes XML payload to probes when messages array is provided", async () => {
     const receivedUsers: Record<string, string> = {};
-    const mockExtractionJson = JSON.stringify({
+    const mockExtractionLabeled = extractionLabeled({
       userRequirements: ["Test extraction integration"],
-      deliverables: [],
-      revisedOrSupersededDirection: [],
-      userDecisions: [],
-      questionsAndInformationGaps: [],
       controlBoundaries: ["read-only"],
       observedWork: ["facts clean"],
       observedCriticalFacts: ["no delta"],
-      relevantLearnings: [],
     });
 
     const callFn: ModelCallFn = async (modelKey, _system, user) => {
       receivedUsers[modelKey] = user;
       if (modelKey === "extraction") {
-        return mockExtractionJson;
+        return mockExtractionLabeled;
       }
       return "WARN Reality check passed.";
     };
@@ -538,16 +521,10 @@ describe("ConsortiumCore", () => {
         if (user.includes("<previous_extracted_context_baseline>")) {
           secondExtractionUser = user;
         }
-        return JSON.stringify({
+        return extractionLabeled({
           userRequirements: ["Persistent requirement", "Turn 2 requirement"],
-          deliverables: [],
-          revisedOrSupersededDirection: [],
-          userDecisions: [],
-          questionsAndInformationGaps: [],
           controlBoundaries: ["read-only"],
           observedWork: ["Turn 2 work"],
-          observedCriticalFacts: [],
-          relevantLearnings: [],
         });
       }
       return "NO_CONTRIBUTION";
@@ -574,10 +551,8 @@ describe("ConsortiumCore", () => {
     const receivedProbeUsers: string[] = [];
     const callFn: ModelCallFn = async (modelKey, _system, user) => {
       if (modelKey === "extraction") {
-        return JSON.stringify({
+        return extractionLabeled({
           userRequirements: ["Original mandate", "Current direction"],
-          deliverables: [], revisedOrSupersededDirection: [], userDecisions: [],
-          questionsAndInformationGaps: [], controlBoundaries: [], observedWork: [], observedCriticalFacts: [], relevantLearnings: [],
           deliberationNeeded: true,
           activeHumanInputSourceIds: [],
         });
@@ -621,7 +596,7 @@ describe("ConsortiumCore", () => {
     expect(result.probes).toEqual([]);
     expect(result.synthesis).toBe("NO_CONTRIBUTION");
     expect(result.extractedContext).toBeUndefined();
-    expect(result.errors).toContain("Extraction: Empty response from google/gemini-3.7-flash");
+    expect(result.errors?.some((e) => e.startsWith("Extraction:") && e.includes("Empty response from google/gemini-3.7-flash"))).toBe(true);
     expect(probeExecuted).toBe(false);
   });
 

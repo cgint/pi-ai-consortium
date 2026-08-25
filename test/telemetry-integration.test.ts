@@ -20,19 +20,14 @@ vi.mock("@earendil-works/pi-ai/compat", () => ({
 
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { TelemetryEvent } from "../src/types.js";
+import { extractionLabeled } from "./extraction-mock.js";
 
-/** Build a minimal valid extracted context JSON string. */
+/** Build a minimal valid extracted context in Ax labeled-field format. */
 function extractionJson(): string {
-  return JSON.stringify({
+  return extractionLabeled({
     userRequirements: ["Test requirement"],
-    deliverables: [],
-    revisedOrSupersededDirection: [],
-    userDecisions: [],
-    questionsAndInformationGaps: [],
     controlBoundaries: ["read-only"],
     observedWork: ["facts"],
-    observedCriticalFacts: [],
-    relevantLearnings: [],
     deliberationNeeded: true,
     deliberationReason: "test",
   });

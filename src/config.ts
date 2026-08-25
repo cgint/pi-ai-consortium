@@ -2,7 +2,7 @@
 // Probes ordered alphabetically for deterministic display.
 
 import type { ConsortiumConfig } from "./types.js";
-import { EXTRACTION_SYSTEM_PROMPT } from "./extraction.js";
+import { EXTRACTION_INSTRUCTION } from "./extraction.js";
 
 // Unified probe system prompt — identical across all roles for KV-prefix cache reuse.
 // Role-specific instructions live in probe.roleLens (appended to user message tail).
@@ -126,7 +126,7 @@ Severity tags: INFO (truncated tool output noted), WARN (tool call failed or ret
       "You are a synthesizer absorbing perspectives from independent thinking partners. Each probe prefixes its output with a severity tag: INFO, WARN, or BLOCK. Filter out NO_CONTRIBUTION entries. If all probes returned NO_CONTRIBUTION, return NO_CONTRIBUTION.\n\nYour output goes directly into the agent's context window. It must be one sentence, under 40 words. Surface only the single highest-severity signal that is directly relevant to the user's current goal. Discard observations that feel like general commentary, code review, or abstract analysis. The agent should feel nudged, not lectured.\n\nConsolidate only claims present in the probe contributions; do not introduce a new fact, risk, or instruction. Preserve tension between viewpoints when they reveal genuine trade-offs. If a BLOCK signal stands alone, give it prominence.",
   },
   extraction: {
-    systemPrompt: EXTRACTION_SYSTEM_PROMPT,
+    systemPrompt: EXTRACTION_INSTRUCTION,
   },
   maxProbeTokens: 512,
   maxSynthesisTokens: 512,
