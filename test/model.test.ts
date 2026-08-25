@@ -379,4 +379,33 @@ describe("callModelWithAuth", () => {
     const call = mockStreamSimple.mock.calls[0];
     expect(call[2]).not.toHaveProperty("reasoning");
   });
+
+  it("forwards a strict output tool and returns Pi tool-call arguments", async () => {
+    const { callModelWithAuth } = await import("../src/model.js");
+    const modelRegistry = {
+      find: vi.fn().mockReturnValue({ provider: "test", id: "gemini-3.7-flash" }),
+      getApiKeyAndHeaders: vi.fn().mockResolvedValue({ ok: true, apiKey: "key" }),
+    };
+    const tool = {
+      name: "__axOutput",
+      description: "Emit structured output",
+      parameters: { type: "object", properties: { answer: { type: "string" } }, required: ["answer"] },
+    };
+    mockStreamSimple.mockReturnValue({
+      result: vi.fn().mockResolvedValue({
+        role: "assistant",
+        stopReason: "toolUse",
+        content: [{ type: "toolCall", id: "call-1", name: "__axOutput", arguments: { answer: "ok" } }],
+        usage: { input: 1, output: 1, cacheRead: 0, cacheWrite: 0, totalTokens: 2, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } },
+      }),
+    } as any);
+
+    const result = await callModelWithAuth(
+      "test", "gemini-3.7-flash", "", "", modelRegistry as any, undefined, 0, undefined, { tools: [tool] },
+    );
+
+    expect(result.text).toBe("");
+    expect(result.functionCalls).toEqual([{ id: "call-1", name: "__axOutput", arguments: { answer: "ok" } }]);
+    expect(mockStreamSimple.mock.calls[0][1].tools).toEqual([tool]);
+  });
 });

@@ -1,6 +1,6 @@
 // Tests for high-level 9-slot strategic context vector extraction.
-// Extraction now runs through @ax-llm/ax: a typed signature renders the prompt,
-// and Ax parses/validates the model's labeled-field response.
+// Extraction runs through @ax-llm/ax: a typed signature requires an output
+// function, whose schema-constrained arguments AX validates.
 
 import { describe, expect, it } from "vitest";
 import {
@@ -11,7 +11,7 @@ import {
 import type { ModelCallFn } from "../src/core.js";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { ExtractedContext } from "../src/types.js";
-import { extractionLabeled } from "./extraction-mock.js";
+import { extractionStructured } from "./extraction-structured-mock.js";
 
 describe("src/extraction.ts — 9-slot strategic context", () => {
   it("provides default safe extracted context with 9 slots on empty or invalid input", () => {
@@ -48,7 +48,7 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     const mockCallFn: ModelCallFn = async (key, system, _user) => {
       expect(key).toBe("extraction");
       receivedSystem = system;
-      return extractionLabeled(ctxObj);
+      return extractionStructured(ctxObj);
     };
 
     const messages: AgentMessage[] = [
@@ -83,7 +83,7 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     let receivedUserPrompt = "";
     const mockCallFn: ModelCallFn = async (_key, _system, user) => {
       receivedUserPrompt = user;
-      return extractionLabeled({
+      return extractionStructured({
         userRequirements: ["Accumulated requirement", "New requirement"],
         deliverables: ["Deliverable 1"],
         controlBoundaries: ["Control 1"],
@@ -129,7 +129,7 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     let receivedUserPrompt = "";
     const mockCallFn: ModelCallFn = async (_key, _system, user) => {
       receivedUserPrompt = user;
-      return extractionLabeled({
+      return extractionStructured({
         userRequirements: ["Earliest Turn 1 Goal", "Latest Turn 15 Goal"],
         deliberationNeeded: true,
       });
@@ -151,7 +151,7 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     let receivedUserPrompt = "";
     const mockCallFn: ModelCallFn = async (_key, _system, user) => {
       receivedUserPrompt = user;
-      return extractionLabeled({
+      return extractionStructured({
         userRequirements: ["Original mandate", "Current direction"],
         deliberationNeeded: false,
       });
@@ -185,7 +185,7 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
       .rejects.toThrow("API network failure");
   });
 
-  it("propagates errors on unparseable model output (no silent fallback)", async () => {
+  it("rejects text-only model output without a parser fallback", async () => {
     const badOutputCallFn: ModelCallFn = async () => {
       return "not a labeled field response {{{";
     };
@@ -195,6 +195,6 @@ describe("src/extraction.ts — 9-slot strategic context", () => {
     ];
 
     await expect(extractContextFromMessages(messages, badOutputCallFn))
-      .rejects.toThrow(/validation error|Required field not found/i);
+      .rejects.toThrow('Structured AX extraction response must contain exactly one "__axOutput" output function call');
   });
 });

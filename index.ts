@@ -492,7 +492,7 @@ export async function runDeliberation(
     safeLog(telemetryLog, { type: "baseline_check", baseline_available: baselineAvailable, baseline_supplied: bs });
   };
 
-  const callModel: ModelCallFn = async (modelKey, system, user, _maxTokens, _temperature, signal) => {
+  const callModel: ModelCallFn = async (modelKey, system, user, _maxTokens, _temperature, signal, options) => {
     const start = Date.now();
     const { provider, modelId, role } = resolveModelKey(modelKey, config);
 
@@ -507,7 +507,7 @@ export async function runDeliberation(
     });
 
     try {
-      const result = await callModelWithAuth(provider, modelId, system, user, modelRegistry, signal, undefined, config.reasoning);
+      const result = await callModelWithAuth(provider, modelId, system, user, modelRegistry, signal, undefined, config.reasoning, options);
       const duration = Date.now() - start;
       const usageReported = result.usage !== null;
 
@@ -533,7 +533,9 @@ export async function runDeliberation(
       }
       logger.log(logEntry);
 
-      return result.text;
+      return options?.tools?.length
+        ? { text: result.text, ...(result.functionCalls ? { functionCalls: result.functionCalls } : {}) }
+        : result.text;
     } catch (err) {
       const duration = Date.now() - start;
       const msg = err instanceof Error ? err.message : String(err);

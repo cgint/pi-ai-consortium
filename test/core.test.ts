@@ -3,7 +3,7 @@
 import { describe, expect, it } from "vitest";
 import { ConsortiumCore, type ModelCallFn } from "../src/core.js";
 import type { ConsortiumConfig } from "../src/types.js";
-import { extractionLabeled } from "./extraction-mock.js";
+import { extractionStructured } from "./extraction-structured-mock.js";
 
 /** Mock model call function that returns predetermined responses. */
 function createMockCallFn(responses: Record<string, string>): ModelCallFn {
@@ -64,7 +64,7 @@ describe("ConsortiumCore", () => {
     const callFn: ModelCallFn = async (modelKey) => {
       if (modelKey === "extraction") {
         extractionExecuted = true;
-        return extractionLabeled({
+        return extractionStructured({
           userRequirements: ["Periodic trigger"],
           controlBoundaries: ["None"],
           observedWork: ["Facts"],
@@ -94,7 +94,7 @@ describe("ConsortiumCore", () => {
     let probeExecuted = false;
     const callFn: ModelCallFn = async (modelKey) => {
       if (modelKey === "extraction") {
-        return extractionLabeled({
+        return extractionStructured({
           userRequirements: ["Test"],
           controlBoundaries: ["None"],
           observedWork: ["Facts"],
@@ -122,7 +122,7 @@ describe("ConsortiumCore", () => {
     const callFn: ModelCallFn = async (modelKey) => {
       callKeys.push(modelKey);
       if (modelKey === "extraction") {
-        return extractionLabeled({
+        return extractionStructured({
           userRequirements: ["Replace state requirement"],
           deliberationNeeded: false, deliberationReason: "Routine status query",
         });
@@ -142,7 +142,7 @@ describe("ConsortiumCore", () => {
     const callFn: ModelCallFn = async (modelKey) => {
       callKeys.push(modelKey);
       if (modelKey === "extraction") {
-        return extractionLabeled({
+        return extractionStructured({
           userRequirements: ["Replace state requirement"],
           deliberationNeeded: false, deliberationReason: "Routine status query",
         });
@@ -167,7 +167,7 @@ describe("ConsortiumCore", () => {
     const callFn: ModelCallFn = async (modelKey) => {
       callKeys.push(modelKey);
       if (modelKey === "extraction") {
-        return extractionLabeled({
+        return extractionStructured({
           userRequirements: ["Replace state requirement"],
           deliberationNeeded: false, deliberationReason: "Routine status query",
         });
@@ -483,7 +483,7 @@ describe("ConsortiumCore", () => {
 
   it("runs extraction pass and passes XML payload to probes when messages array is provided", async () => {
     const receivedUsers: Record<string, string> = {};
-    const mockExtractionLabeled = extractionLabeled({
+    const mockExtractionLabeled = extractionStructured({
       userRequirements: ["Test extraction integration"],
       controlBoundaries: ["read-only"],
       observedWork: ["facts clean"],
@@ -521,7 +521,7 @@ describe("ConsortiumCore", () => {
         if (user.includes("<previous_extracted_context_baseline>")) {
           secondExtractionUser = user;
         }
-        return extractionLabeled({
+        return extractionStructured({
           userRequirements: ["Persistent requirement", "Turn 2 requirement"],
           controlBoundaries: ["read-only"],
           observedWork: ["Turn 2 work"],
@@ -551,7 +551,7 @@ describe("ConsortiumCore", () => {
     const receivedProbeUsers: string[] = [];
     const callFn: ModelCallFn = async (modelKey, _system, user) => {
       if (modelKey === "extraction") {
-        return extractionLabeled({
+        return extractionStructured({
           userRequirements: ["Original mandate", "Current direction"],
           deliberationNeeded: true,
           activeHumanInputSourceIds: [],

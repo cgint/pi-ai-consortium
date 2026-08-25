@@ -47,6 +47,7 @@ const extractionSignature = f()
   .output("deliberationReason", f.string("Short reason explaining why full probe deliberation is or is not needed").optional())
   .output("activeHumanInputSourceIds", f.string().array("source_id values for genuine human inputs whose exact wording should be emphasized to probes").optional())
   .output("supersededHumanInputSourceIds", f.string().array("source_id values for genuine human inputs superseded by later directions").optional())
+  .useStructured()
   .build();
 
 /** Ax program for extraction, configured with the policy instruction. */

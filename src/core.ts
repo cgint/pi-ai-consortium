@@ -7,6 +7,32 @@ import { extractContextFromMessages } from "./extraction.js";
 import { buildActiveUserDirectionPack, buildProbeInputXml, formatAgentMessageContent } from "./context.js";
 import { shouldDeliberate } from "./governor.js";
 
+/** Schema-constrained model tool requested by a caller such as AX. */
+export interface ModelCallTool {
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
+  constrainedSampling?: false | {
+    type: "json_schema";
+    strict: "prefer" | "require";
+  };
+}
+
+/** Optional structured-output request carried to the model transport. */
+export interface ModelCallOptions {
+  tools?: readonly ModelCallTool[];
+}
+
+/** Typed model output returned when a caller requested structured tool output. */
+export interface ModelCallResponse {
+  text: string;
+  functionCalls?: readonly {
+    id: string;
+    name: string;
+    arguments: Record<string, unknown>;
+  }[];
+}
+
 /** Injectable model call function (mockable for tests). */
 export type ModelCallFn = (
   modelKey: string,
@@ -15,7 +41,13 @@ export type ModelCallFn = (
   maxTokens: number,
   temperature: number,
   signal: AbortSignal | undefined,
-) => Promise<string>;
+  options?: ModelCallOptions,
+) => Promise<string | ModelCallResponse>;
+
+/** Preserve the text contract for probes and synthesis. */
+function modelText(response: string | ModelCallResponse): string {
+  return typeof response === "string" ? response : response.text;
+}
 
 /** Validate probe output — must start with NO_CONTRIBUTION or severity tag.
  * If the model ignored instructions and answered the user's question,
@@ -242,7 +274,7 @@ export class ConsortiumCore {
           this.config.probeTemperature,
           probeController.signal,
         );
-        const validated = validateProbeOutput(result);
+        const validated = validateProbeOutput(modelText(result));
         return { role: probe.role, text: validated };
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -286,7 +318,7 @@ export class ConsortiumCore {
           this.config.probeTemperature,
           probeController.signal,
         );
-        const validated = validateProbeOutput(result);
+        const validated = validateProbeOutput(modelText(result));
         results.push({ role: probe.role, text: validated });
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -307,14 +339,14 @@ export class ConsortiumCore {
     errors: string[],
   ): Promise<string> {
     try {
-      return await this.callModel(
+      return modelText(await this.callModel(
         "synthesis",
         this.config.synthesis.systemPrompt,
         synthesisUser,
         this.config.maxSynthesisTokens,
         this.config.synthesisTemperature,
         signal,
-      );
+      ));
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       errors.push(`Synthesis: ${msg}`);

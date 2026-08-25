@@ -4,11 +4,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { ConsortiumCore, type ModelCallFn } from "../src/core.js";
 import type { ConsortiumConfig, ExtractedContext, TelemetryEvent } from "../src/types.js";
-import { extractionLabeled } from "./extraction-mock.js";
+import { extractionStructured } from "./extraction-structured-mock.js";
 
-/** Build a minimal valid extracted context in Ax labeled-field format. */
-function extractionJson(overrides: Partial<ExtractedContext> = {}): string {
-  return extractionLabeled({
+/** Build a minimal valid extracted context as an AX output-function call. */
+function extractionJson(overrides: Partial<ExtractedContext> = {}) {
+  return extractionStructured({
     userRequirements: ["Test requirement"],
     controlBoundaries: ["read-only"],
     observedWork: ["facts"],

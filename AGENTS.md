@@ -81,3 +81,8 @@ When auditing any session or evaluating Consortium behavior on any turn, we **AL
    - Commands that take mode/option arguments use unambiguous-prefix matching (`resolveCadenceMode` pattern in `index.ts`) instead of strict exact match, so `p 5` == `periodic 5`.
    - Guardrail: `test/cadence-mode.test.ts` "cadence mode naming invariant" fails if any two modes share a first character or one name is a prefix of another. If a future mode collides, update the resolver, handler, and usage string together.
 
+8. **C1 Structured Extraction Transport Invariant:**
+   - C1 uses AX `.useStructured()` and its single required `__axOutput` function; `AxPiService` maps it to a Pi `Context.tools` JSON-schema tool with `strict: "require"`.
+   - Pi/Gemini tool-call arguments return to AX as function calls. Text-only output is rejected; never restore the labeled-text parser/template workaround.
+   - `structuredOutputs` remains false because AX `responseFormat` is not transported; `functions: true` is the truthful supported AX capability. Verify real behavior with `./scripts/manual-extraction-smoke.sh`, which requires exactly one extraction call.
+

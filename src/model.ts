@@ -10,6 +10,7 @@
 
 import { streamSimple } from "@earendil-works/pi-ai/compat";
 import type { Context, Usage, ThinkingLevel } from "@earendil-works/pi-ai";
+import type { ModelCallOptions } from "./core.js";
 
 /**
  * Minimal model registry interface matching pi-coding-agent's ModelRegistry.
@@ -27,6 +28,22 @@ export interface ModelRegistry {
 }
 
 /** Extract text content from an AssistantMessage. */
+function functionCallsFromMessage(msg: { content: unknown }): Array<{ id: string; name: string; arguments: Record<string, unknown> }> {
+  if (!Array.isArray(msg.content)) return [];
+  return msg.content
+    .filter(
+      (part): part is { type: "toolCall"; id: string; name: string; arguments: Record<string, unknown> } =>
+        Boolean(part) &&
+        typeof part === "object" &&
+        (part as { type?: unknown }).type === "toolCall" &&
+        typeof (part as { id?: unknown }).id === "string" &&
+        typeof (part as { name?: unknown }).name === "string" &&
+        typeof (part as { arguments?: unknown }).arguments === "object" &&
+        (part as { arguments?: unknown }).arguments !== null,
+    )
+    .map((part) => ({ id: part.id, name: part.name, arguments: part.arguments }));
+}
+
 function textFromMessage(msg: { content: unknown }): string {
   if (typeof msg.content === "string") return msg.content.trim();
   if (!Array.isArray(msg.content)) return "";
@@ -51,6 +68,7 @@ function textFromMessage(msg: { content: unknown }): string {
  */
 export interface CallModelResult {
   text: string;
+  functionCalls?: readonly { id: string; name: string; arguments: Record<string, unknown> }[];
   usage: Usage | null;
 }
 
@@ -66,6 +84,7 @@ export async function callModelWithAuth(
   signal?: AbortSignal,
   retries: number = DEFAULT_RETRIES,
   reasoning?: ThinkingLevel,
+  options?: ModelCallOptions,
 ): Promise<CallModelResult> {
   const model = modelRegistry.find(provider, modelId);
   if (!model) {
@@ -103,7 +122,7 @@ export async function callModelWithAuth(
         timestamp: Date.now(),
       },
     ],
-    tools: [],
+    tools: options?.tools as Context["tools"],
   };
 
   let lastError: Error | undefined;
@@ -130,10 +149,11 @@ export async function callModelWithAuth(
 
       // Extract text from the AssistantMessage response
       const text = textFromMessage(result);
+      const functionCalls = functionCallsFromMessage(result);
 
-      // Loud boundary 2: no text content at all — provider anomaly
-      // (e.g. thinking-only response, safety-filtered with no content).
-      if (text.length === 0) {
+      // Loud boundary 2: no usable content at all — provider anomaly.
+      // Structured extraction is valid with a tool call and no text response.
+      if (text.length === 0 && functionCalls.length === 0) {
         throw new Error(
           `Empty response from ${provider}/${modelId} ` +
           `(stopReason=${result.stopReason}, totalTokens=${result.usage?.totalTokens ?? 0})`,
@@ -142,7 +162,7 @@ export async function callModelWithAuth(
 
       // Retain usage if totalTokens > 0; all-zero means unreported → null
       const usage = result.usage && result.usage.totalTokens > 0 ? result.usage : null;
-      return { text, usage };
+      return { text, ...(functionCalls.length > 0 ? { functionCalls } : {}), usage };
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
       if (attempt >= retries || signal?.aborted) throw lastError;

@@ -45,21 +45,44 @@ export class AxPiService implements AxAIService<string, string, string> {
         ? this.contentToString(nonSystem[0].content)
         : nonSystem.map((m) => `[${m.role}]\n${this.contentToString(m.content)}`).join("\n\n---\n\n");
 
-    const text = await this.callModel(
+    const tools = this.toStructuredOutputTools(req);
+    const response = await this.callModel(
       this.modelKey,
       system,
       user,
       this.maxTokens,
       this.temperature,
       _opts?.abortSignal,
+      tools.length > 0 ? { tools } : undefined,
     );
+    const text = typeof response === "string" ? response : response.text;
+    const functionCalls = typeof response === "string" ? undefined : response.functionCalls?.map((call) => ({
+      id: call.id,
+      type: "function" as const,
+      function: { name: call.name, params: JSON.stringify(call.arguments) },
+    }));
+    if (tools.length > 0 && (
+      !functionCalls ||
+      functionCalls.length !== 1 ||
+      functionCalls[0].function.name !== tools[0].name
+    )) {
+      throw new Error(`Structured AX extraction response must contain exactly one "${tools[0].name}" output function call`);
+    }
 
-    return { results: [{ index: 0, content: text, finishReason: "stop" }] };
+    return {
+      results: [{
+        index: 0,
+        content: text,
+        ...(functionCalls ? { functionCalls, finishReason: "function_call" as const } : { finishReason: "stop" as const }),
+      }],
+    };
   }
 
   getFeatures(_model?: string): AxAIFeatures {
     return {
-      functions: false,
+      // AX uses `functions` plus `.useStructured()` for the validated output
+      // function path. Pi does not forward AX's native `responseFormat`.
+      functions: true,
       streaming: false,
       structuredOutputs: false,
       media: {
@@ -137,6 +160,22 @@ export class AxPiService implements AxAIService<string, string, string> {
 
   getOptions(): Readonly<AxAIServiceOptions> {
     return this.options;
+  }
+
+  private toStructuredOutputTools(req: Readonly<AxChatRequest<string>>) {
+    if (!req.functions?.length) return [];
+    if (!req.functionCall || req.functionCall === "none") return [];
+    if (req.functions.length !== 1 || typeof req.functionCall === "string" || req.functionCall.function.name !== req.functions[0].name) {
+      throw new Error("Pi transport supports one required AX structured-output function per request");
+    }
+
+    const output = req.functions[0];
+    return [{
+      name: output.name,
+      description: output.description,
+      parameters: output.parameters ?? { type: "object", properties: {} },
+      constrainedSampling: { type: "json_schema" as const, strict: "require" as const },
+    }];
   }
 
   private contentToString(content: unknown): string {
