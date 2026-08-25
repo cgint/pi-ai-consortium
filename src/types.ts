@@ -186,6 +186,8 @@ export interface DeliberationResult {
   synthesis: string;
   /** Extracted context vectors (if extraction pass was performed). */
   extractedContext?: ExtractedContext;
+  /** Number of AX/application extraction transport invocations, including repair attempts. */
+  extractionAttempts?: number;
   /** Errors encountered during deliberation (if any). */
   errors?: string[];
   /** True if probe deliberation was skipped by the governor gate. */

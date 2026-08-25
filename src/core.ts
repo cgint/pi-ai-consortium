@@ -137,15 +137,21 @@ export class ConsortiumCore {
     let userContext: string;
     let directionPack = "";
     let extractedContext: ExtractedContext | undefined;
+    let extractionAttempts: number | undefined;
 
     if (Array.isArray(input)) {
       // Phase 0: Extraction pass
       onProgress?.("extraction", 0, 1);
+      extractionAttempts = 0;
+      const extractionCallModel: ModelCallFn = async (modelKey, system, user, maxTokens, temperature, signal, options) => {
+        extractionAttempts!++;
+        return this.callModel(modelKey, system, user, maxTokens, temperature, signal, options);
+      };
       try {
         const priorContext = previousContext ?? this.lastExtractedContext;
         const baselineSupplied = priorContext !== undefined;
         try { this.onBaselineCheck?.(baselineSupplied); } catch { /* isolated */ }
-        extractedContext = await extractContextFromMessages(input, this.callModel, priorContext, masterController.signal);
+        extractedContext = await extractContextFromMessages(input, extractionCallModel, priorContext, masterController.signal);
         this.lastExtractedContext = extractedContext;
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -157,6 +163,7 @@ export class ConsortiumCore {
           probes: [],
           synthesis: "NO_CONTRIBUTION",
           extractedContext: undefined,
+          extractionAttempts,
           governorReason: this.config.governorMode ?? "smart_extractor",
           errors,
         };
@@ -179,6 +186,7 @@ export class ConsortiumCore {
         probes: [],
         synthesis: "NO_CONTRIBUTION",
         extractedContext,
+        extractionAttempts,
         skippedByGovernor: true,
         governorReason: governorDecision.reason,
         errors: errors.length > 0 ? errors : undefined,
@@ -202,6 +210,7 @@ export class ConsortiumCore {
         probes: probeResults,
         synthesis: "NO_CONTRIBUTION",
         extractedContext,
+        extractionAttempts,
         governorReason: governorDecision.reason,
         probePayloadChars,
         errors: errors.length > 0 ? errors : undefined,
@@ -218,6 +227,7 @@ export class ConsortiumCore {
       probes: probeResults,
       synthesis,
       extractedContext,
+      extractionAttempts,
       governorReason: governorDecision.reason,
       probePayloadChars,
       errors: errors.length > 0 ? errors : undefined,

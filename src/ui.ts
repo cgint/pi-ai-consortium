@@ -12,6 +12,11 @@ function formatArrayText(items: string[] | undefined): string {
   return items.join("; ");
 }
 
+function formatExtractionAttempts(attempts: number): string {
+  const retries = Math.max(0, attempts - 1);
+  return `${attempts} ${attempts === 1 ? "attempt" : "attempts"} · ${retries} ${retries === 1 ? "retry" : "retries"}`;
+}
+
 /** JSONL & sidecar Markdown logger for consortium actions. */
 export class ConsortiumLogger {
   private logPath: string;
@@ -139,7 +144,9 @@ export function formatVisibleMessage(result: DeliberationResult): string {
   if (result.skippedByGovernor) {
     lines.push(`◇ Consortium deliberation${modelLabel} — skipped (${result.governorReason || "governor gate"})`);
   } else if (extractionError && result.probes.length === 0) {
-    lines.push(`⚠ Consortium deliberation${modelLabel} — extraction failed, probes skipped`);
+    const attempts = result.extractionAttempts;
+    const attemptSuffix = attempts === undefined ? "" : ` after ${formatExtractionAttempts(attempts)}`;
+    lines.push(`⚠ Consortium deliberation${modelLabel} — extraction failed${attemptSuffix}, probes skipped`);
     lines.push(`  ${extractionError.replace("Extraction: ", "").slice(0, 120)}`);
   } else if (probeFailed > 0 && contributed === 0) {
     lines.push(`⚠ Consortium deliberation${modelLabel} — ${probeFailed}/${result.probes.length} probes FAILED`);
@@ -155,6 +162,9 @@ export function formatVisibleMessage(result: DeliberationResult): string {
   if (result.extractedContext) {
     const ec = result.extractedContext;
     lines.push(`  Extracted Strategic Context:`);
+    if (result.extractionAttempts !== undefined) {
+      lines.push(`   • Extraction: ${formatExtractionAttempts(result.extractionAttempts)}`);
+    }
     lines.push(`   • Requirements: ${formatArrayText(ec.userRequirements)}`);
     lines.push(`   • Deliverables: ${formatArrayText(ec.deliverables)}`);
     lines.push(`   • Revised/Superseded: ${formatArrayText(ec.revisedOrSupersededDirection)}`);
